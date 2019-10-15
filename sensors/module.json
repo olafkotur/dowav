@@ -1,0 +1,12 @@
+{
+  "name": "sensors",
+  "version": "0.0.0",
+  "bin": "./source",
+  "private": true,
+  "description": "Sensors used to build a smart lab system",
+  "author": "Pythones",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "microbit": "^2.1.1"
+  }
+}

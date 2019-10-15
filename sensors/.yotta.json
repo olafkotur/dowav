@@ -1,0 +1,8 @@
+{
+  "build": {
+    "target": "bbc-microbit-classic-gcc,*",
+    "targetSetExplicitly": true,
+    "targetDependencies": {},
+    "bin": "./source"
+  }
+}
