@@ -39,6 +39,7 @@ int main() {
   int maxWorkers = 5;
   int workerNumber = 0;
   while(true) {
+
     // Set worker number value
     if (uBit.buttonAB.isPressed()) {
       workerNumber = 0;
@@ -60,14 +61,19 @@ int main() {
       uBit.display.print("-");
     }
 
-    uBit.serial.printf("%d", workerNumber);
-    // int x = getAccelorometerX();
-    // int y = getAccelorometerY();
-    // int z = getAccelorometerZ();
-    // int temp = getTemperature();
-	  // int ambLight = getLightLevel();
-    // int moisture = getHumidityLevel();
-    // uBit.serial.printf("X: %d, Y: %d, Z: %d, Temp: %d, Light: %d, Moisture: %d\r", x, y, z, temp, ambLight, moisture);;
+    // Worker tasks
+    if (workerNumber == 1) {
+      int value = getTemperature();
+      uBit.serial.printf("Temperature: %d\r\n", value);
+    }
+    else if (workerNumber == 2) {
+      int value = getHumidityLevel();
+      uBit.serial.printf("Humidity: %d\r\n", value);
+    }
+    else if (workerNumber == 3) {
+      int value = getLightLevel();
+      uBit.serial.printf("Light: %d\r\n", value);
+    }
 
     uBit.sleep(100);
   }
