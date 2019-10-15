@@ -1,6 +1,14 @@
 #include "MicroBit.h"
 MicroBit uBit;
 
+class LightSensor {
+  // Returns ambient light sensor
+  public: int getLight() {
+    return uBit.display.readLightLevel();
+  }
+
+};
+
 class Thermometer {
   // Returns temperature in celcius
   public: int getTemperature() {
@@ -34,14 +42,16 @@ int main() {
   uBit.init();
   Thermometer therm;
   Accelorometer acc; 
+  LightSensor lightSen;
 
   while(1) {
     int x = acc.getAccelorometerX();
     int y = acc.getAccelorometerY();
     int z = acc.getAccelorometerZ();
     int temp = therm.getTemperature();
+	int ambLight = lightSen.getLight();
 
-    uBit.serial.printf("X: %d, Y: %d, Z: %d, Temp: %d\r", x, y, z, temp);
+    uBit.serial.printf("X: %d, Y: %d, Z: %d, Temp: %d, Light: %d\r", x, y, z, temp, ambLight);
   }
 
   release_fiber();
