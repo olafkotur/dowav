@@ -12,6 +12,17 @@ int getLightLevel() {
   return uBit.display.readLightLevel();
 }
 
+// Returns humidity level as percentage
+int getHumidityLevel() {
+  int tempC = getTemperature();
+  int satVapour = 6.11 * (10 * ((7.5 * tempC) / 237.3 + tempC));
+  // TODO: Can't caclulate actual vapour without dew point, unsure how to get dew
+  // int actVapour = 6.11 * (10 * ((7.5 * dewPoint) / 237.3 + dewPoint));
+  // int humidity = (actVapour / satVapour) * 100;
+  return satVapour;
+
+}
+
 int getAccelorometerX() {
   uBit.accelerometer.setPeriod(500);
   return uBit.accelerometer.getX();
@@ -29,7 +40,8 @@ int getAccelorometerZ() {
   return uBit.accelerometer.getZ();
 }
 
-int getHumidityLevel() {
+// Returns moisture level
+int getMoistureLevel() {
   return uBit.io.P1.getAnalogValue();
 }
 
