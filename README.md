@@ -4,7 +4,6 @@
 * Go into the desired directory you would like the project to be in
 * `git clone git@github.com:olafkotur/pythones.git`
 
-*** 
 ## Sensors
 
 ### Setup
