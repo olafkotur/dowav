@@ -1,6 +1,7 @@
 #include "MicroBit.h"
 
 MicroBit uBit;
+int workerNumber = 0;
 
 // Returns temperature in celcius
 int getTemperature() {
@@ -10,6 +11,16 @@ int getTemperature() {
 // Returns light level from 0 - 255
 int getLightLevel() {
   return uBit.display.readLightLevel();
+}
+
+// Returns humidity level as percentage
+int getHumidityLevel() {
+  int tempC = getTemperature();
+  int satVapour = 6.11 * (10 * ((7.5 * tempC) / 237.3 + tempC));
+  // TODO: Can't caclulate actual vapour without dew point, unsure how to get this
+  // int actVapour = 6.11 * (10 * ((7.5 * dewPoint) / 237.3 + dewPoint));
+  // int humidity = (actVapour / satVapour) * 100;
+  return satVapour;
 }
 
 int getAccelorometerX() {
@@ -29,30 +40,32 @@ int getAccelorometerZ() {
   return uBit.accelerometer.getZ();
 }
 
-int getHumidityLevel() {
+// Returns moisture level
+int getMoistureLevel() {
   return uBit.io.P1.getAnalogValue();
+}
+
+void onButtonEvent(MicroBitEvent e) {
+  int maxWorkers = 5;
+  if (e.source == MICROBIT_ID_BUTTON_A && workerNumber > 1) {
+    workerNumber--;
+  }
+  else if (e.source == MICROBIT_ID_BUTTON_B && workerNumber < maxWorkers) {
+    workerNumber++;
+  }
+  else if (e.source == MICROBIT_ID_BUTTON_AB) {
+    workerNumber = 0;
+  }
 }
 
 int main() {
   uBit.init();
 
-  int maxWorkers = 5;
-  int workerNumber = 0;
+  uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
+  uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
+  uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
+
   while(true) {
-
-    // Set worker number value
-    if (uBit.buttonAB.isPressed()) {
-      workerNumber = 0;
-    }
-    else if (uBit.buttonB.isPressed() && workerNumber < maxWorkers) {
-      workerNumber++;
-      uBit.sleep(100);
-    }
-    else if (uBit.buttonA.isPressed() && workerNumber > 1) {
-      workerNumber--;
-      uBit.sleep(100);
-    }
-
     // Display worker number value
     if (workerNumber > 0) {
       uBit.display.print(workerNumber);
@@ -75,7 +88,7 @@ int main() {
       uBit.serial.printf("Light: %d\r\n", value);
     }
 
-    uBit.sleep(100);
+    uBit.sleep(250);
   }
 
   release_fiber();
