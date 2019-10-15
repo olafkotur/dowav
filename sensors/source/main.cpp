@@ -1,57 +1,81 @@
 #include "MicroBit.h"
+
 MicroBit uBit;
 
-class LightSensor {
-  // Returns ambient light sensor
-  public: int getLight() {
-    return uBit.display.readLightLevel();
-  }
+// Returns temperature in celcius
+int getTemperature() {
+  return uBit.thermometer.getTemperature();
+}
 
-};
+// Returns light level from 0 - 255
+int getLightLevel() {
+  return uBit.display.readLightLevel();
+}
 
-class Thermometer {
-  // Returns temperature in celcius
-  public: int getTemperature() {
-    return uBit.thermometer.getTemperature();
-  }
+int getAccelorometerX() {
+  uBit.accelerometer.setPeriod(500);
+  return uBit.accelerometer.getX();
+}
 
-};
+// Returns force measured in milli-g
+int getAccelorometerY() {
+  uBit.accelerometer.setPeriod(500);
+  return uBit.accelerometer.getY();
+}
 
-class Accelorometer {
-  // Returns force measured in milli-g
-  public: int getAccelorometerX() {
-    uBit.accelerometer.setPeriod(500);
-    return uBit.accelerometer.getX();
-  }
+// Returns force measured in milli-g
+int getAccelorometerZ() {
+  uBit.accelerometer.setPeriod(500);
+  return uBit.accelerometer.getZ();
+}
 
-  // Returns force measured in milli-g
-  public: int getAccelorometerY() {
-    uBit.accelerometer.setPeriod(500);
-    return uBit.accelerometer.getY();
-  }
-
-  // Returns force measured in milli-g
-  public: int getAccelorometerZ() {
-    uBit.accelerometer.setPeriod(500);
-    return uBit.accelerometer.getZ();
-  }
-};
-
+int getHumidityLevel() {
+  return uBit.io.P1.getAnalogValue();
+}
 
 int main() {
   uBit.init();
-  Thermometer therm;
-  Accelorometer acc; 
-  LightSensor lightSen;
 
-  while(1) {
-    int x = acc.getAccelorometerX();
-    int y = acc.getAccelorometerY();
-    int z = acc.getAccelorometerZ();
-    int temp = therm.getTemperature();
-	int ambLight = lightSen.getLight();
+  int maxWorkers = 5;
+  int workerNumber = 0;
+  while(true) {
 
-    uBit.serial.printf("X: %d, Y: %d, Z: %d, Temp: %d, Light: %d\r", x, y, z, temp, ambLight);
+    // Set worker number value
+    if (uBit.buttonAB.isPressed()) {
+      workerNumber = 0;
+    }
+    else if (uBit.buttonB.isPressed() && workerNumber < maxWorkers) {
+      workerNumber++;
+      uBit.sleep(100);
+    }
+    else if (uBit.buttonA.isPressed() && workerNumber > 1) {
+      workerNumber--;
+      uBit.sleep(100);
+    }
+
+    // Display worker number value
+    if (workerNumber > 0) {
+      uBit.display.print(workerNumber);
+    }
+    else {
+      uBit.display.print("-");
+    }
+
+    // Worker tasks
+    if (workerNumber == 1) {
+      int value = getTemperature();
+      uBit.serial.printf("Temperature: %d\r\n", value);
+    }
+    else if (workerNumber == 2) {
+      int value = getHumidityLevel();
+      uBit.serial.printf("Humidity: %d\r\n", value);
+    }
+    else if (workerNumber == 3) {
+      int value = getLightLevel();
+      uBit.serial.printf("Light: %d\r\n", value);
+    }
+
+    uBit.sleep(100);
   }
 
   release_fiber();
