@@ -33,8 +33,8 @@
 ### Screening (Windows)
 * Download, install and then run TeraTerm: https://osdn.net/projects/ttssh2/releases/
 * In the new connection pop-up (file->new connection, may open automaticly) if the serial radio button is greyed out aditionally download and install this driver: https://os.mbed.com/handbook/Windows-serial-configuration
-* In the new connection pop up tick the serial radio button and select 'mbed Serial Port'. You will need to close and re-open TeraTerm if you have just installed the aditional driver
-* Go to setup->terminal and change the recive dropdown to 'LF'
-* Go to setup->serial poirt and change speed to '115200'
+* In the new connection pop up tick the serial radio button and select `mbed Serial Port`. You will need to close and re-open TeraTerm if you have just installed the aditional driver
+* Go to setup->terminal and change the recive dropdown to `LF`
+* Go to setup->serial poirt and change speed to `115200`
 * You will need to do these last 2 each time TeraTerm is restarted, alterntivly you can change the deafult settings to match these by going settup->save setup and overwriting the promted file
 
