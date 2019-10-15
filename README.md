@@ -20,14 +20,21 @@
 * Mac: `cp ./build/bbc-microbit-classic-gcc/source/sensors-combined.hex /Volumes/"MICROBIT"`
 * Windows: `copy build\bbc-microbit-classic-gcc\source\sensors-combined.hex E:`
 
-### Screening (Mac)
-* Run `ls /dev/cu.*`
-* Get the number of the result that looks something like `/dev/cu.usbmodem1422`
-* Run `screen /dev/cu.usbmodem1422 115200` replacing the value `1422` with the number that you got from the previous command
-
 ### Screening (Linux)
 * Run `mesg | tail`
 * Get the number of the result that looks something like `/dev/ttyUSB0`
 * Run `screen /dev/ttyUSB0 115200` replacing the value `ttyUSB0` with the number that you got from the previous command
 
+### Screening (Mac)
+* Run `ls /dev/cu.*`
+* Get the number of the result that looks something like `/dev/cu.usbmodem1422`
+* Run `screen /dev/cu.usbmodem1422 115200` replacing the value `1422` with the number that you got from the previous command
+
+### Screening (Windows)
+* Download, install and then run TeraTerm: https://osdn.net/projects/ttssh2/releases/
+* In the new connection pop-up (file->new connection, may open automaticly) if the serial radio button is greyed out aditionally download and install this driver: https://os.mbed.com/handbook/Windows-serial-configuration
+* In the new connection pop up tick the serial radio button and select 'mbed Serial Port'. You will need to close and re-open TeraTerm if you have just installed the aditional driver
+* Go to setup->terminal and change the recive dropdown to 'LF'
+* Go to setup->serial poirt and change speed to '115200'
+* You will need to do these last 2 each time TeraTerm is restarted, alterntivly you can change the deafult settings to match these by going settup->save setup and overwriting the promted file
 
