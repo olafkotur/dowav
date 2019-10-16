@@ -1,3 +1,6 @@
 sensors/build
 sensors/yotta_targets
 sensors/yotta_modules
+webapp/build
+webapp/node_modules
+.vscode
