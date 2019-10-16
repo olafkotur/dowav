@@ -23,26 +23,32 @@ int getHumidityLevel() {
   return satVapour;
 }
 
+// Returns X force measured in milli-g
 int getAccelorometerX() {
   uBit.accelerometer.setPeriod(500);
   return uBit.accelerometer.getX();
 }
 
-// Returns force measured in milli-g
+// Returns Y force measured in milli-g
 int getAccelorometerY() {
   uBit.accelerometer.setPeriod(500);
   return uBit.accelerometer.getY();
 }
 
-// Returns force measured in milli-g
+// Returns Z force measured in milli-g
 int getAccelorometerZ() {
   uBit.accelerometer.setPeriod(500);
   return uBit.accelerometer.getZ();
 }
 
-// Returns moisture level
+// Returns moisture value in range 0 - 1024
 int getMoistureLevel() {
+  uBit.io.P1.setAnalogPeriod(250);
   return uBit.io.P1.getAnalogValue();
+}
+
+int getReading() {
+  return uBit.io.P0.isAnalog();
 }
 
 void onButtonEvent(MicroBitEvent e) {
@@ -86,6 +92,14 @@ int main() {
     else if (workerNumber == 3) {
       int value = getLightLevel();
       uBit.serial.printf("Light: %d\r\n", value);
+    }
+    else if (workerNumber == 4) {
+      int value = getMoistureLevel();
+      uBit.serial.printf("Moisture: %d\r\n", value);
+    }
+    else if (workerNumber == 5) {
+      int value = getReading();
+      uBit.serial.printf("Reading: %d\r\n", value);
     }
 
     uBit.sleep(250);
