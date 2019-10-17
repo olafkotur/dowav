@@ -92,6 +92,7 @@ void receiveMessage(MicroBitEvent) {
 int main() {
   uBit.init();
   uBit.radio.enable();
+  uBit.radio.setGroup(3);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
@@ -103,17 +104,17 @@ int main() {
 
     int data;
     switch(channelId) {
-      case 1 :
+      case 1:
         data = getTemperature();
         sendMessage("Temperature", data);
         break;
 
-      case 2 :
+      case 2:
         data = getLightLevel();
         sendMessage("Light", data);
         break;
 
-      case 3 :
+      case 3:
         data = getMoistureLevel();
         sendMessage("Moisture", data);
         break;
