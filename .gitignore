@@ -5,3 +5,4 @@ sensors/yotta_modules
 webapp/build
 webapp/node_modules
 .vscode/
+server/*.exe
