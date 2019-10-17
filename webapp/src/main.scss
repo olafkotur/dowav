@@ -53,6 +53,7 @@ body {
         padding: 10px 5px;
         display: flex;
         align-items: center;
+        color: grey;
         .icon {
             padding-right: 10px;
             &.indent {
@@ -61,6 +62,11 @@ body {
         }
         &:hover {
             background: rgba(0, 0, 0, 0.2);
+        }
+
+        &.selected {
+            border-bottom: 1px solid white;
+            color: white;
         }
     }
 }
