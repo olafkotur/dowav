@@ -1,7 +1,7 @@
 #include "MicroBit.h"
 
 MicroBit uBit;
-int workerNumber = 0;
+int channelId = 0;
 
 // Returns temperature in celcius
 int getTemperature() {
@@ -47,33 +47,46 @@ int getMoistureLevel() {
   return uBit.io.P1.getAnalogValue();
 }
 
-int getReading() {
-  return uBit.io.P0.isAnalog();
+void printChannelId() {
+  if (channelId > 0) {
+      uBit.display.print(channelId);
+    }
+    else if (channelId < 0) {
+      uBit.display.print("R");
+    }
+    else {
+      uBit.display.print("-");
+    }
 }
 
 void onButtonEvent(MicroBitEvent e) {
   int maxWorkers = 5;
-  if (e.source == MICROBIT_ID_BUTTON_A && workerNumber > 1) {
-    workerNumber--;
+  if (e.source == MICROBIT_ID_BUTTON_A && channelId > 1) {
+    channelId--;
   }
-  else if (e.source == MICROBIT_ID_BUTTON_B && workerNumber < maxWorkers) {
-    workerNumber++;
+  else if (e.source == MICROBIT_ID_BUTTON_B && channelId < maxWorkers) {
+    channelId++;
   }
   else if (e.source == MICROBIT_ID_BUTTON_AB) {
-    workerNumber = -1;
+    channelId = -1;
   }
 }
 
-void onData(MicroBitEvent) {
+void sendMessage(char* dataType, int data) {
+  uBit.serial.printf("SENDING: %s: %d\r\n", dataType, data);
+  ManagedString title(dataType);
+  ManagedString value(data);
+  ManagedString space(" ");
+  ManagedString message = title + space + value;
+  uBit.radio.datagram.send(message);
+}
+
+void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
-  if (workerNumber == -1) {
+  if (channelId == -1) {
     const char* msg = recv.toCharArray();
     uBit.serial.printf("RECEIVED: %s\r\n", msg);
   }
-}
-
-void sendMessage() {
-  
 }
 
 int main() {
@@ -82,56 +95,30 @@ int main() {
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
-  uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData);
+  uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, receiveMessage);
 
   while(true) {
-    // Display worker number value
-    if (workerNumber > 0) {
-      uBit.display.print(workerNumber);
-    }
-    else if (workerNumber < 0) {
-      uBit.display.print("R");
-    }
-    else {
-      uBit.display.print("-");
-    }
 
-    // Worker tasks
-    if (workerNumber == 1) {
-      int value = getTemperature();
-      ManagedString title("Temperature: ");
-      ManagedString val(value);
-      ManagedString msg = title + val;
-      uBit.radio.datagram.send(msg);
-      uBit.serial.printf("SENDING: Temperature: %d\r\n", value);
-    }
-    else if (workerNumber == 2) {
-      int value = getHumidityLevel();
-      ManagedString title("Humidity: ");
-      ManagedString val(value);
-      ManagedString msg = title + val;
-      uBit.radio.datagram.send(msg);
-      uBit.serial.printf("SENDING: Humidity: %d\r\n", value);
-    }
-    else if (workerNumber == 3) {
-      int value = getLightLevel();
-      ManagedString title("Light: ");
-      ManagedString val(value);
-      ManagedString msg = title + val;
-      uBit.radio.datagram.send(msg);
-      uBit.serial.printf("SENDING: Light: %d\r\n", value);
-    }
-    else if (workerNumber == 4) {
-      int value = getMoistureLevel();
-      ManagedString title("Moisture: ");
-      ManagedString val(value);
-      ManagedString msg = title + val;
-      uBit.radio.datagram.send(msg);
-      uBit.serial.printf("SENDING: Moisture: %d\r\n", value);
+    printChannelId();
+
+    int data;
+    switch(channelId) {
+      case 1 :
+        data = getTemperature();
+        sendMessage("Temperature", data);
+        break;
+
+      case 2 :
+        data = getLightLevel();
+        sendMessage("Light", data);
+        break;
+
+      case 3 :
+        data = getMoistureLevel();
+        sendMessage("Moisture", data);
+        break;
     }
 
     uBit.sleep(250);
   }
-
-  release_fiber();
 }
