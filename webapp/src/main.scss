@@ -1,0 +1,74 @@
+$grey-color: #443737;
+$dark-grey-color: #272121;
+$bright-red: #ff0000;
+$bright-orange: #ff4d00;
+$gradient-start: #2c5364;
+$gradient-end: #0f2027;
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: 'Montserrat', sans-serif;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    background: #0f2027; /* fallback for old browsers */
+    background: -webkit-linear-gradient(
+        to right,
+        $gradient-start,
+        #203a43,
+        $gradient-end
+    ); /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(
+        to right,
+        $gradient-start,
+        #203a43,
+        $gradient-end
+    ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+    padding: 4%;
+}
+
+.menu {
+    flex-basis: 20%;
+    font-size: 17px;
+    color: white;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .item {
+        padding: 10px 5px;
+        display: flex;
+        align-items: center;
+        .icon {
+            padding-right: 10px;
+            &.indent {
+                padding-left: 15px;
+            }
+        }
+        &:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+    }
+}
+
+.dashboard {
+    background: rgba(0, 0, 0, 0.39);
+    display: flex;
+    flex-direction: row;
+    border-radius: 20px;
+    height: 100%;
+}
