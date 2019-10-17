@@ -1,4 +1,4 @@
-# Pythones - Software Engineering
+# Studio
 
 ## General
 * Go into the desired directory you would like the project to be in
