@@ -24,7 +24,7 @@ const menuOptions: Array<IMenuOption> = [
         icon: <FaTemperatureLow size={20} color={iconColor} />
     },
     {
-        name: 'Humidity',
+        name: 'Moisture',
         indented: true,
         icon: <IoIosWater size={20} color={iconColor} />
     },
