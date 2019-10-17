@@ -1,7 +1,16 @@
 package main
+ 
+import (
+    "log"
+    "net/http"
+)
+ 
+func main() {
+    port := "8080"
 
-import "fmt"
+    fs := http.FileServer(http.Dir("../webapp/build"))
+    http.Handle("/", fs)
 
-func main(){
-	fmt.Printf("Hello from terminal. Pytones.")
+    log.Println("Listening on " + port + "...")
+    http.ListenAndServe(":" + port, nil)
 }
