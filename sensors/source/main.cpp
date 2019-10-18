@@ -73,7 +73,7 @@ void onButtonEvent(MicroBitEvent e) {
 }
 
 void sendMessage(char* dataType, int data) {
-  uBit.serial.printf("SENDING: %s: %d\r\n", dataType, data);
+  uBit.serial.printf("SENDING: %s: %d\n", dataType, data);
   ManagedString title(dataType);
   ManagedString value(data);
   ManagedString space(" ");
@@ -85,13 +85,14 @@ void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
   if (channelId == -1) {
     const char* msg = recv.toCharArray();
-    uBit.serial.printf("RECEIVED: %s\r\n", msg);
+    uBit.serial.printf("RECEIVED: %s\n", msg);
   }
 }
 
 int main() {
   uBit.init();
   uBit.radio.enable();
+  uBit.radio.setGroup(3);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
@@ -103,17 +104,17 @@ int main() {
 
     int data;
     switch(channelId) {
-      case 1 :
+      case 1:
         data = getTemperature();
         sendMessage("Temperature", data);
         break;
 
-      case 2 :
+      case 2:
         data = getLightLevel();
         sendMessage("Light", data);
         break;
 
-      case 3 :
+      case 3:
         data = getMoistureLevel();
         sendMessage("Moisture", data);
         break;
