@@ -73,7 +73,7 @@ void onButtonEvent(MicroBitEvent e) {
 }
 
 void sendMessage(char* dataType, int data) {
-  uBit.serial.printf("SENDING: %s: %d\r\n", dataType, data);
+  uBit.serial.printf("SENDING: %s: %d\n", dataType, data);
   ManagedString title(dataType);
   ManagedString value(data);
   ManagedString space(" ");
@@ -85,7 +85,7 @@ void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
   if (channelId == -1) {
     const char* msg = recv.toCharArray();
-    uBit.serial.printf("RECEIVED: %s\r\n", msg);
+    uBit.serial.printf("RECEIVED: %s\n", msg);
   }
 }
 
