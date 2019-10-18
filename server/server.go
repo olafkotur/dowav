@@ -3,31 +3,44 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/argandas/serial"
+	"github.com/joho/godotenv"
 )
 
-const PORT = "8080"
-const WEB_BUILD_PATH = "../webapp/build"
-const SERIAL_PORT_NAME = "/dev/cu.usbmodem141302"
-const SERIAL_PORT_BAUD = 115200
-
 func main() {
-	startServer()
-	readSerial()
+	var err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	SERVER_PORT := os.Getenv("SERVER_PORT")
+	WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
+	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
+	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
+
+	startServer(WEB_BUILD_PATH, SERVER_PORT)
+	readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 }
 
-func startServer() {
-	var fs = http.FileServer(http.Dir(WEB_BUILD_PATH))
+func startServer(path, port string) {
+	var fs = http.FileServer(http.Dir(path))
 	http.Handle("/", fs)
 
-	log.Println("Listening on " + PORT + "...")
-	go http.ListenAndServe(":"+PORT, nil)
+	log.Println("Listening on " + port + "...")
+	go http.ListenAndServe(":"+port, nil)
 }
 
-func readSerial() {
+func readSerial(name, baud string) {
+	var baudInt, err = strconv.Atoi(baud)
+	if err != nil {
+		panic(err)
+	}
+
 	var sp = serial.New()
-	var err = sp.Open(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
+	err = sp.Open(name, baudInt)
 	if err != nil {
 		panic(err)
 	}
