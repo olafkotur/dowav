@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -10,15 +9,15 @@ import (
 )
 
 func startProcessingData(interval time.Duration) {
-	log.Printf("Starting to process data for the last %d seconds\n", interval/time.Second)
+	log.Printf("Starting to process data for the last %d minutes\n", interval/time.Minute)
 
 	// Range of time where data should be read
-	// endTime := time.Now().Unix()
-	// startTime := endTime - int64(interval.Seconds())
+	endTime := time.Now().Unix()
+	startTime := endTime - int64(interval.Seconds())
 
 	path := getLatestLog()
 	data := getDataAsString(path)
-	fmt.Println(data)
+	filtered := filterDataInRange(data, startTime, endTime)
 }
 
 func getLatestLog() (p string) {
@@ -55,4 +54,18 @@ func getDataAsString(path string) (d string) {
 		panic(err)
 	}
 	return string(data)
+}
+
+func filterDataInRange(data string, start, end int64) (f []string) {
+	rows := strings.Split(data, "\r\n")
+	var filtered []string
+	for _, r := range rows {
+		time, _ := strconv.Atoi(strings.Split(r, " ")[0])
+		timeInt := int64(time)
+		if timeInt > start && timeInt < end {
+			filtered = append(filtered, r)
+		}
+	}
+
+	return filtered
 }

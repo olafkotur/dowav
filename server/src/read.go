@@ -61,8 +61,8 @@ func logData(data, path string, file *os.File) {
 		panic(err)
 	}
 
-	t := time.Now()
-	writeBytes := append(existingData, []byte(t.Format("01 January 2006 15:04:05")+" "+data)...)
+	t := time.Now().Unix()
+	writeBytes := append(existingData, []byte(strconv.FormatInt(t, 10)+" "+data)...)
 	err = ioutil.WriteFile(path, writeBytes, 0644)
 	if err != nil {
 		panic(err)
