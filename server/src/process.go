@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -18,6 +19,8 @@ func startProcessingData(interval time.Duration) {
 	path := getLatestLog()
 	data := getDataAsString(path)
 	filtered := filterDataInRange(data, startTime, endTime)
+	average := calcAverage(filtered)
+	fmt.Println(average)
 }
 
 func getLatestLog() (p string) {
@@ -68,4 +71,31 @@ func filterDataInRange(data string, start, end int64) (f []string) {
 	}
 
 	return filtered
+}
+
+func calcAverage(data []string) (a []int) {
+	// Store sum of all values
+	sumTemp, sumMoist, sumLight := 0, 0, 0
+	for _, d := range data {
+		values := strings.Split(d, " ")
+		sumTemp += toInt(values[2])
+		sumMoist += toInt(values[3])
+		sumLight += toInt(values[4])
+	}
+
+	var average []int
+	average = append(average, sumTemp/len(data))
+	average = append(average, sumMoist/len(data))
+	average = append(average, sumLight/len(data))
+
+	return average
+
+}
+
+func calcMin() {
+
+}
+
+func calcMax() {
+
 }
