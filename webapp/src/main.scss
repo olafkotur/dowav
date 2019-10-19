@@ -11,6 +11,8 @@ $gradient-end: #0f2027;
 
 html {
     font-family: 'Montserrat', sans-serif;
+    color: white;
+    font-size: 15px;
     height: 100%;
     width: 100%;
 }
@@ -37,12 +39,12 @@ body {
 #root {
     width: 100%;
     height: 100%;
-    padding: 4%;
+    padding: 3vh 3%;
 }
 
 .menu {
-    flex-basis: 20%;
-    font-size: 17px;
+    flex-basis: 200px;
+    font-size: 1.15em;
     color: white;
     padding: 15px;
     display: flex;
@@ -72,9 +74,54 @@ body {
 }
 
 .dashboard {
-    background: rgba(0, 0, 0, 0.39);
+    background: rgba(0, 0, 0, 0.27);
     display: flex;
     flex-direction: row;
     border-radius: 20px;
     height: 100%;
+}
+
+.switch {
+    flex: 1;
+    padding: 40px 20px 20px 20px;
+}
+
+.graph-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    .graph-view-row {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        &:nth-child(1) {
+            margin: 0 0 10px 0;
+        }
+    }
+}
+
+.graph {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.27);
+    border-radius: 10px;
+    padding: 5px;
+    &:nth-child(2) {
+        margin: 0 10px;
+    }
+}
+
+.not-implemented {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    h1 {
+        font-size: 8em;
+        margin: 5px;
+    }
+    p {
+        font-size: 2em;
+    }
 }
