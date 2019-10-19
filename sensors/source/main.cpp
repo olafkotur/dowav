@@ -60,11 +60,11 @@ void printzoneId() {
 }
 
 void onButtonEvent(MicroBitEvent e) {
-  int maxZones = 5;
+  int maxZones = 3;
   if (e.source == MICROBIT_ID_BUTTON_A && zoneId > 1) {
     zoneId--;
   }
-  else if (e.source == MICROBIT_ID_BUTTON_B && zoneId < maxWorkers) {
+  else if (e.source == MICROBIT_ID_BUTTON_B && zoneId < maxZones) {
     zoneId++;
   }
   else if (e.source == MICROBIT_ID_BUTTON_AB) {
@@ -77,17 +77,12 @@ void sendMessage(int t, int m, int l) {
   ManagedString temp(t);
   ManagedString moist(m);
   ManagedString light(l);
+  ManagedString space(" ");
 
-  ManagedString space(", ");
-  ManagedString arr(" > ");
-  ManagedString T("T: ");
-  ManagedString M("M: ");
-  ManagedString L("L: ");
-
-  ManagedString msg = zone + arr
-    + T + temp + space
-    + M + moist + space
-    + L + light;
+  ManagedString msg = zone + space 
+    + temp + space
+    + moist + space
+    + light;
 
   uBit.radio.datagram.send(msg);
   uBit.serial.printf("S%s\r\n", msg.toCharArray());
