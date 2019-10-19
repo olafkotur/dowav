@@ -26,13 +26,13 @@ func main() {
 	go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 
 	refreshRate := 1 * time.Second
-	processInterval := 15 * time.Second
+	processInterval := 5 * time.Second
 	timeSinceLastRun := 0 * time.Second
 	for {
 		time.Sleep(refreshRate)
 		if timeSinceLastRun >= processInterval {
 			timeSinceLastRun = 0 * time.Second
-			go startProcessingData()
+			startProcessingData(processInterval)
 		} else {
 			timeSinceLastRun += 1 * time.Second
 		}

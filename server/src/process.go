@@ -1,7 +1,12 @@
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+	"time"
+)
 
-func startProcessingData() {
-	log.Printf("Grabbing data for the last 60 minutes\n")
+func startProcessingData(interval time.Duration) {
+	log.Printf("Starting to process data for the last %d seconds\n", interval/time.Second)
+	fmt.Println("")
 }

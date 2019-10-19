@@ -27,6 +27,7 @@ func readSerial(name, baud string) {
 		log.Fatal(err)
 	}
 
+	log.Printf("Success - listening to %s\n\n", name)
 	go listenAndLogR(sp, path, file)
 }
 
