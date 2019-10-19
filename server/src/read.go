@@ -42,8 +42,8 @@ func listenAndLogR(sp *serial.Port, path string, file *os.File) func() {
 }
 
 func createLogFile() (path string, f *os.File) {
-	t := time.Now()
-	logPath := "logs/log-" + t.Format("020106-150405") + ".txt"
+	t := time.Now().Unix()
+	logPath := "logs/log-" + strconv.FormatInt(t, 10) + ".txt"
 
 	file, err := os.Create(logPath)
 	if err != nil {

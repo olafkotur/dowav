@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -16,25 +15,25 @@ func main() {
 	}
 
 	// Enviornment variables
-	SERVER_PORT := os.Getenv("SERVER_PORT")
-	WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
-	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
-	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
+	// SERVER_PORT := os.Getenv("SERVER_PORT")
+	// WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
+	// SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
+	// SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
 
 	// Execution start
-	go startServer(WEB_BUILD_PATH, SERVER_PORT)
-	go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
+	// go startServer(WEB_BUILD_PATH, SERVER_PORT)
+	// go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 
 	refreshRate := 1 * time.Second
 	processInterval := 5 * time.Second
-	timeSinceLastRun := 0 * time.Second
+	timeSinceLastRun := 5 * time.Second
 	for {
-		time.Sleep(refreshRate)
 		if timeSinceLastRun >= processInterval {
 			timeSinceLastRun = 0 * time.Second
 			startProcessingData(processInterval)
 		} else {
 			timeSinceLastRun += 1 * time.Second
 		}
+		time.Sleep(refreshRate)
 	}
 }
