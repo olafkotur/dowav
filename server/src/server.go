@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -9,6 +9,6 @@ func startServer(path, port string) {
 	var fs = http.FileServer(http.Dir(path))
 	http.Handle("/", fs)
 
-	fmt.Println("Listening on " + port + "...")
-	go http.ListenAndServe(":"+port, nil)
+	log.Printf("Listening on %s...\n\n", port)
+	http.ListenAndServe(":"+port, nil)
 }

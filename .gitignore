@@ -2,7 +2,7 @@ sensors/build
 sensors/yotta_targets
 sensors/yotta_modules
 webapp/node_modules
-server/server
+server/main
 server/logs/*
 
 .vscode/
