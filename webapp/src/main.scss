@@ -1,7 +1,7 @@
 $grey-color: #443737;
 $dark-grey-color: #272121;
 $bright-red: #ff0000;
-$bright-orange: #ff4d00;
+$bright-orange: #a1681c;
 $gradient-start: #2c5364;
 $gradient-end: #0f2027;
 
@@ -82,6 +82,7 @@ body {
 }
 
 .switch {
+    overflow: hidden;
     flex: 1;
     padding: 40px 20px 20px 20px;
 }
@@ -109,6 +110,10 @@ body {
     &:nth-child(2) {
         margin: 0 10px;
     }
+
+    &.live {
+        box-shadow: 0 0 6px 1px orange;
+    }
 }
 
 .not-implemented {
@@ -124,4 +129,38 @@ body {
     p {
         font-size: 2em;
     }
+}
+
+.control-pane {
+    height: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    button {
+        transition: 0.2s background-color;
+        font-weight: 600;
+        appearance: none;
+        border: 1px solid orange;
+        background: none;
+        color: orange;
+        border-radius: 5px;
+        font-size: 1.15em;
+        outline: none;
+        &.live {
+            color: black;
+            background: orange;
+        }
+        &:hover {
+            color: black;
+            background: orange;
+        }
+    }
+}
+
+// Line Graph
+
+.line {
+    fill: none;
+    stroke: orange;
+    stroke-width: 2;
 }

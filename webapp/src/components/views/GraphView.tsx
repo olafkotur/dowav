@@ -32,30 +32,31 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                         <Graph
                             viewport={{
                                 width: (size.width - 50) / 3,
-                                height: (size.height - 10) / 2
+                                height: (size.height - 100) / 2
                             }}
                             name="first"
                         />
                         <Graph
                             viewport={{
                                 width: (size.width - 50) / 3,
-                                height: (size.height - 10) / 2
+                                height: (size.height - 100) / 2
                             }}
                             name="second"
                         />
                         <Graph
                             viewport={{
                                 width: (size.width - 50) / 3,
-                                height: (size.height - 10) / 2
+                                height: (size.height - 100) / 2
                             }}
                             name="third"
                         />
                     </div>
                     <div className="graph-view-row">
                         <Graph
+                            control={{ shouldRenderLive: false }}
                             viewport={{
-                                width: size.width,
-                                height: (size.height - 10) / 2
+                                width: size.width - 10,
+                                height: (size.height - 100) / 2
                             }}
                             name="fourth"
                         />

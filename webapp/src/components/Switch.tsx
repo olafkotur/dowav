@@ -15,7 +15,9 @@ const Switch: React.FC = () => {
         case MENU_OPTIONS.TEMPERATURE:
         case MENU_OPTIONS.MOISTURE:
         case MENU_OPTIONS.LIGHT:
-            component = <GraphView currentOption={currentOption} />;
+            component = (
+                <GraphView key={currentOption} currentOption={currentOption} />
+            );
             break;
         default:
             component = (
