@@ -3,7 +3,7 @@ sensors/yotta_targets
 sensors/yotta_modules
 webapp/node_modules
 server/server
-server/log*
+server/logs/*
 
 .vscode/
 *.DS_Store
