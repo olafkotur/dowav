@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -23,4 +24,17 @@ func main() {
 	// Execution start
 	go startServer(WEB_BUILD_PATH, SERVER_PORT)
 	go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
+
+	refreshRate := 1 * time.Second
+	processInterval := 15 * time.Second
+	timeSinceLastRun := 0 * time.Second
+	for {
+		time.Sleep(refreshRate)
+		if timeSinceLastRun >= processInterval {
+			timeSinceLastRun = 0 * time.Second
+			go startProcessingData()
+		} else {
+			timeSinceLastRun += 1 * time.Second
+		}
+	}
 }
