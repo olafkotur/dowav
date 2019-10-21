@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { MdDashboard, MdSettings } from 'react-icons/md';
 import { FaTemperatureLow, FaTwitter } from 'react-icons/fa';
 import { IoIosWater } from 'react-icons/io';
 import { GoPerson, GoLightBulb } from 'react-icons/go';
+import * as MENU_OPTIONS from '../constants/MenuOptionConstants';
+import NavigationContext from '../context/NavigationContext';
 
 interface IMenuOption {
     name: string;
@@ -14,48 +16,57 @@ const iconColor = 'white';
 
 const menuOptions: Array<IMenuOption> = [
     {
-        name: 'Dashboard',
+        name: MENU_OPTIONS.DASHBOARD,
         indented: false,
         icon: <MdDashboard size={20} color={iconColor} />
     },
     {
-        name: 'Temperature',
+        name: MENU_OPTIONS.TEMPERATURE,
         indented: true,
         icon: <FaTemperatureLow size={20} color={iconColor} />
     },
     {
-        name: 'Moisture',
+        name: MENU_OPTIONS.MOISTURE,
         indented: true,
         icon: <IoIosWater size={20} color={iconColor} />
     },
     {
-        name: 'Light',
+        name: MENU_OPTIONS.LIGHT,
         indented: true,
         icon: <GoLightBulb size={20} color={iconColor} />
     },
     {
-        name: 'Movement',
+        name: MENU_OPTIONS.MOVEMENT,
         indented: true,
         icon: <GoPerson size={20} color={iconColor} />
     },
     {
-        name: 'Twitter',
+        name: MENU_OPTIONS.TWITTER,
         indented: false,
         icon: <FaTwitter size={20} color={iconColor} />
     },
     {
-        name: 'Settings',
+        name: MENU_OPTIONS.SETTINGS,
         indented: false,
         icon: <MdSettings size={20} color={iconColor} />
     }
 ];
 
 const Menu: React.FC = () => {
+    const { currentOption, setCurrentOption } = useContext(NavigationContext);
     return (
         <div className="menu">
             {menuOptions.map((option: IMenuOption) => {
                 return (
-                    <div className="item">
+                    <div
+                        key={option.name}
+                        className={`item  ${
+                            option.name === currentOption ? 'selected' : ''
+                        }`}
+                        onClick={() => {
+                            setCurrentOption(option.name);
+                        }}
+                    >
                         <div
                             className={`icon ${
                                 option.indented ? 'indent' : ''
@@ -63,7 +74,7 @@ const Menu: React.FC = () => {
                         >
                             {option.icon}
                         </div>
-                        <div className="text">{option.name}</div>
+                        <div className={`text`}>{option.name}</div>
                     </div>
                 );
             })}
