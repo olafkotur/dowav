@@ -4,6 +4,17 @@
 * Go into the desired directory you would like the project to be in
 * `git clone git@github.com:olafkotur/pythones.git`
 
+## Server
+
+### Setup
+* Ensure you are in the src directory `pythones/server/src`
+* Run `go build -o ../` to compile in the previous directory
+* Ensure you are in the server directory `pythones/server`
+* Run `./main` to start the server
+* The server will host the static webstie on localhost:8080 and process the data produced in `pythones/server/logs`
+
+***
+
 ## Sensors
 
 ### Setup
