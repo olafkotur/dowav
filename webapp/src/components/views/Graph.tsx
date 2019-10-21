@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IViewport } from '../../types';
+import { IViewport, HistoryData } from '../../types';
 import * as d3 from 'd3';
 import ControlPane from '../ControlPane';
 import D3Graph from '../../d3/d3Graph';
 
-import data from '../../data/mockdata';
-
 type GraphView = {
     viewport: IViewport;
     name: string;
+    data: HistoryData;
     control?: {
         shouldRenderLive: boolean;
     };
@@ -17,6 +16,7 @@ type GraphView = {
 const Graph: React.FC<GraphView> = ({
     viewport,
     name,
+    data,
     control = { shouldRenderLive: true }
 }) => {
     const container = useRef<HTMLDivElement>(null);
@@ -25,7 +25,7 @@ const Graph: React.FC<GraphView> = ({
 
     useEffect(() => {
         if (d3chart) {
-            d3chart.plot();
+            d3chart.plot('start');
         }
     }, [d3chart]);
 
