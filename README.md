@@ -49,3 +49,14 @@
 * Go to setup->serial poirt and change speed to `115200`
 * You will need to do these last 2 each time TeraTerm is restarted, alterntivly you can change the deafult settings to match these by going settup->save setup and overwriting the promted file
 
+*** 
+
+## Raspberry Pi
+
+## Setup
+* Ensure you are in the Studio repository directory `Desktop/Studio`
+* Get latest version of the source code `git pull origin master`
+* If the repository directory is not there then clone: `git clone https://codefeedback.lancaster.ac.uk/git330/Team-B/Studio.git`
+* Run `sh ./start.sh`
+* This will compile the server code and host on localhost:8080, see `Server setup` for further explanation
+
