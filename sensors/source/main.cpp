@@ -41,6 +41,18 @@ int getAccelorometerZ() {
   return uBit.accelerometer.getZ();
 }
 
+// Returns pitch in degrees
+int getPitch() {
+  uBit.accelerometer.setPeriod(500);
+  return uBit.accelerometer.getPitch();
+}
+
+// Returns roll in degrees
+int getRoll() {
+  uBit.accelerometer.setPeriod(500);
+  return uBit.accelerometer.getRoll();
+}
+
 // Returns moisture value in range 0 - 1024
 int getMoistureLevel() {
   uBit.io.P1.setAnalogPeriod(250);
