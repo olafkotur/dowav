@@ -1,7 +1,7 @@
 #include "MicroBit.h"
 
 MicroBit uBit;
-int channelId = 0;
+int zoneId = 0;
 
 // Returns temperature in celcius
 int getTemperature() {
@@ -47,11 +47,11 @@ int getMoistureLevel() {
   return uBit.io.P1.getAnalogValue();
 }
 
-void printChannelId() {
-  if (channelId > 0) {
-      uBit.display.print(channelId);
+void printzoneId() {
+  if (zoneId > 0) {
+      uBit.display.print(zoneId);
     }
-    else if (channelId < 0) {
+    else if (zoneId < 0) {
       uBit.display.print("R");
     }
     else {
@@ -60,38 +60,47 @@ void printChannelId() {
 }
 
 void onButtonEvent(MicroBitEvent e) {
-  int maxWorkers = 5;
-  if (e.source == MICROBIT_ID_BUTTON_A && channelId > 1) {
-    channelId--;
+  int maxZones = 3;
+  if (e.source == MICROBIT_ID_BUTTON_A && zoneId > 1) {
+    zoneId--;
   }
-  else if (e.source == MICROBIT_ID_BUTTON_B && channelId < maxWorkers) {
-    channelId++;
+  else if (e.source == MICROBIT_ID_BUTTON_B && zoneId < maxZones) {
+    zoneId++;
   }
   else if (e.source == MICROBIT_ID_BUTTON_AB) {
-    channelId = -1;
+    zoneId = -1;
   }
 }
 
-void sendMessage(char* dataType, int data) {
-  uBit.serial.printf("SENDING: %s: %d\r\n", dataType, data);
-  ManagedString title(dataType);
-  ManagedString value(data);
+void sendMessage(int t, int m, int l) {
+  ManagedString zone(zoneId);
+  ManagedString temp(t);
+  ManagedString moist(m);
+  ManagedString light(l);
   ManagedString space(" ");
-  ManagedString message = title + space + value;
-  uBit.radio.datagram.send(message);
+
+  ManagedString msg = zone + space 
+    + temp + space
+    + moist + space
+    + light;
+
+  uBit.radio.datagram.send(msg);
+  uBit.serial.printf("S%s\r\n", msg.toCharArray());
 }
 
 void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
-  if (channelId == -1) {
+  if (zoneId == -1) {
     const char* msg = recv.toCharArray();
-    uBit.serial.printf("RECEIVED: %s\r\n", msg);
+    uBit.serial.printf("R%s\r\n", msg);
   }
 }
 
 int main() {
   uBit.init();
   uBit.radio.enable();
+  uBit.radio.setGroup(3);
+
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
@@ -99,26 +108,15 @@ int main() {
 
   while(true) {
 
-    printChannelId();
+    if (zoneId > 0) {
+      int temperature = getTemperature();
+      int moisture = getMoistureLevel();
+      int light = getLightLevel();
 
-    int data;
-    switch(channelId) {
-      case 1 :
-        data = getTemperature();
-        sendMessage("Temperature", data);
-        break;
-
-      case 2 :
-        data = getLightLevel();
-        sendMessage("Light", data);
-        break;
-
-      case 3 :
-        data = getMoistureLevel();
-        sendMessage("Moisture", data);
-        break;
+      sendMessage(temperature, moisture, light);
     }
 
-    uBit.sleep(250);
+    printzoneId();
+    uBit.sleep(1000);
   }
 }

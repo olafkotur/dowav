@@ -1,7 +1,10 @@
 sensors/build
 sensors/yotta_targets
 sensors/yotta_modules
-*.DS_Store
 webapp/node_modules
+server/main
+server/logs/*
+
 .vscode/
-server/*.exe
+*.DS_Store
+.env

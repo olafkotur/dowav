@@ -1,8 +1,19 @@
-# Pythones - Software Engineering
+# Studio
 
 ## General
 * Go into the desired directory you would like the project to be in
 * `git clone git@github.com:olafkotur/pythones.git`
+
+## Server
+
+### Setup
+* Ensure you are in the src directory `pythones/server/src`
+* Run `go build -o ../` to compile in the previous directory
+* Ensure you are in the server directory `pythones/server`
+* Run `./main` to start the server
+* The server will host the static webstie on localhost:8080 and process the data produced in `pythones/server/logs`
+
+***
 
 ## Sensors
 
@@ -37,4 +48,15 @@
 * Go to setup->terminal and change the recive dropdown to `LF`
 * Go to setup->serial poirt and change speed to `115200`
 * You will need to do these last 2 each time TeraTerm is restarted, alterntivly you can change the deafult settings to match these by going settup->save setup and overwriting the promted file
+
+*** 
+
+## Raspberry Pi
+
+## Setup
+* Ensure you are in the Studio repository directory `Desktop/Studio`
+* Get latest version of the source code `git pull origin master`
+* If the repository directory is not there then clone: `git clone https://codefeedback.lancaster.ac.uk/git330/Team-B/Studio.git`
+* Run `sh ./start.sh`
+* This will compile the server code and host on localhost:8080, see `Server setup` for further explanation
 
