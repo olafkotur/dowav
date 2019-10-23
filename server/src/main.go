@@ -16,14 +16,14 @@ func main() {
 	}
 
 	// Enviornment variables
-	SERVER_PORT := os.Getenv("SERVER_PORT")
-	WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
-	//SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
-	//SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
+	// SERVER_PORT := os.Getenv("SERVER_PORT")
+	// WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
+	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
+	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
 
 	// Execution start
-	go startServer(WEB_BUILD_PATH, SERVER_PORT)
-	//go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
+	// go startServer(WEB_BUILD_PATH, SERVER_PORT)
+	go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 
 	refreshRate := 1 * time.Second
 	processInterval := 1 * time.Hour

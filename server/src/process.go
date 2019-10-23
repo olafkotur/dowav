@@ -14,11 +14,17 @@ func startProcessingData(interval time.Duration) {
 	endTime := time.Now().Unix()
 	startTime := endTime - int64(interval.Seconds())
 
-	path, isHist := getLatestLog()
+	// Check for log files, quit if none
+	path, logsExist := getLatestLog()
+	if !logsExist {
+		noLogsExist()
+		return // Replace with more appropriate behaviour in future
+	}
+
 	data := getDataAsString(path)
 	filtered := filterDataInRange(data, startTime, endTime)
-	if !isHist || len(filtered) == 0 {
-		fmt.Println("No log history found, quitting")
+	if len(filtered) == 0 {
+		noLogsExist()
 		return
 	}
 
@@ -28,10 +34,10 @@ func startProcessingData(interval time.Duration) {
 	fmt.Println(average)
 }
 
-func getLatestLog() (p string, isHist bool) {
+func getLatestLog() (p string, logsExist bool) {
 	files, err := ioutil.ReadDir("./logs/")
 	if err != nil {
-		panic(err)
+		return "", false
 	}
 
 	// Quit processing if there is no log history
@@ -107,4 +113,8 @@ func calcMin() {
 
 func calcMax() {
 
+}
+
+func noLogsExist() {
+	fmt.Println("No log history found, quitting")
 }
