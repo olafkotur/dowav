@@ -41,13 +41,13 @@ int getAccelorometerZ() {
   return uBit.accelerometer.getZ();
 }
 
-// Returns pitch (forward/back) in degrees
+// Returns pitch in degrees
 int getPitch() {
   uBit.accelerometer.setPeriod(500);
   return uBit.accelerometer.getPitch();
 }
 
-// Returns roll (left/right) in degrees
+// Returns roll in degrees
 int getRoll() {
   uBit.accelerometer.setPeriod(500);
   return uBit.accelerometer.getRoll();
@@ -84,19 +84,17 @@ void onButtonEvent(MicroBitEvent e) {
   }
 }
 
-void sendMessage(int t, int m, int l, int p) {
+void sendMessage(int t, int m, int l) {
   ManagedString zone(zoneId);
   ManagedString temp(t);
   ManagedString moist(m);
   ManagedString light(l);
-  ManagedString pitch(p);
   ManagedString space(" ");
 
   ManagedString msg = zone + space 
     + temp + space
     + moist + space
-    + light + space
-    + pitch;
+    + light;
 
   uBit.radio.datagram.send(msg);
   uBit.serial.printf("S%s\r\n", msg.toCharArray());
@@ -126,9 +124,8 @@ int main() {
       int temperature = getTemperature();
       int moisture = getMoistureLevel();
       int light = getLightLevel();
-      int pitch = getPitch();
 
-      sendMessage(temperature, moisture, light, pitch);
+      sendMessage(temperature, moisture, light);
     }
 
     printzoneId();

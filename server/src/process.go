@@ -10,33 +10,23 @@ import (
 )
 
 func startProcessingData(interval time.Duration) {
+	log.Printf("Starting to process data for the last %d minutes\n", interval/time.Minute)
+
 	// Range of time where data should be read
 	endTime := time.Now().Unix()
 	startTime := endTime - int64(interval.Seconds())
 
-	path, isHist := getLatestLog()
+	path := getLatestLog()
 	data := getDataAsString(path)
 	filtered := filterDataInRange(data, startTime, endTime)
-	if !isHist || len(filtered) == 0 {
-		fmt.Println("No log history found, quitting")
-		return
-	}
-
 	average := calcAverage(filtered)
-
-	log.Printf("Starting to process data for the last %d minutes\n", interval / time.Minute)
 	fmt.Println(average)
 }
 
-func getLatestLog() (p string, isHist bool) {
+func getLatestLog() (p string) {
 	files, err := ioutil.ReadDir("./logs/")
 	if err != nil {
 		panic(err)
-	}
-
-	// Quit processing if there is no log history
-	if len(files) == 0 {
-		return "", false
 	}
 
 	path := ""
@@ -54,10 +44,11 @@ func getLatestLog() (p string, isHist bool) {
 		if nameInt > latestTime {
 			path = f.Name()
 			latestTime = nameInt
+		} else {
 		}
 	}
 
-	return path, true
+	return path
 }
 
 func getDataAsString(path string) (d string) {
