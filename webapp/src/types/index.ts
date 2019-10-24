@@ -16,3 +16,9 @@ export interface IHistoryData {
     min: number;
     max: number;
 }
+
+export type MultipleHistoryData = {
+    [key: string]: IHistoryData[];
+};
+
+export type HistoryData = IHistoryData[] | MultipleHistoryData;

@@ -1,6 +1,7 @@
-import React, { useRef, useState, useLayoutEffect, useCallback } from 'react';
+import React, { useRef, useState, useLayoutEffect } from 'react';
 import { IViewport } from '../../types';
 import Graph from './Graph';
+import data from '../../data/mockdata';
 
 type GraphViewProps = {
     currentOption: string;
@@ -30,6 +31,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                 <>
                     <div className="graph-view-row">
                         <Graph
+                            data={data}
                             viewport={{
                                 width: (size.width - 50) / 3,
                                 height: (size.height - 100) / 2
@@ -37,6 +39,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                             name="first"
                         />
                         <Graph
+                            data={data.slice(30)}
                             viewport={{
                                 width: (size.width - 50) / 3,
                                 height: (size.height - 100) / 2
@@ -44,6 +47,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                             name="second"
                         />
                         <Graph
+                            data={data.slice(20, 40)}
                             viewport={{
                                 width: (size.width - 50) / 3,
                                 height: (size.height - 100) / 2
@@ -53,6 +57,17 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                     </div>
                     <div className="graph-view-row">
                         <Graph
+                            data={{
+                                zoneA: data,
+                                zoneB: data.slice(30).map(d => ({
+                                    ...d,
+                                    avg: d.avg + Math.random() * 5 - 3
+                                })),
+                                zoneC: data.slice(20, 40).map(d => ({
+                                    ...d,
+                                    avg: d.avg + Math.random() * 5 - 6
+                                }))
+                            }}
                             control={{ shouldRenderLive: false }}
                             viewport={{
                                 width: size.width - 10,

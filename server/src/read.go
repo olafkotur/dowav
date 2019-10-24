@@ -27,6 +27,7 @@ func readSerial(name, baud string) {
 		log.Fatal(err)
 	}
 
+	log.Printf("Success - listening to %s\n\n", name)
 	go listenAndLogR(sp, path, file)
 }
 
@@ -41,8 +42,8 @@ func listenAndLogR(sp *serial.Port, path string, file *os.File) func() {
 }
 
 func createLogFile() (path string, f *os.File) {
-	t := time.Now()
-	logPath := "logs/log-" + t.Format("020106-150405") + ".txt"
+	t := time.Now().Unix()
+	logPath := "logs/log-" + strconv.FormatInt(t, 10) + ".txt"
 
 	file, err := os.Create(logPath)
 	if err != nil {
@@ -60,8 +61,8 @@ func logData(data, path string, file *os.File) {
 		panic(err)
 	}
 
-	t := time.Now()
-	writeBytes := append(existingData, []byte(t.Format("01 January 2006 15:04:05")+" "+data)...)
+	t := time.Now().Unix()
+	writeBytes := append(existingData, []byte(strconv.FormatInt(t, 10)+" "+data)...)
 	err = ioutil.WriteFile(path, writeBytes, 0644)
 	if err != nil {
 		panic(err)
