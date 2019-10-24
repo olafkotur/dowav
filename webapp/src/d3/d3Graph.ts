@@ -41,48 +41,48 @@ export default class D3Graph {
     }
 
     public plot(on?: string) {
+        let svgLocal = d3.select(this.svg);
+        let t = d3
+            .transition()
+            .duration(500)
+            .ease(d3.easeLinear);
+        let line = d3
+            .line()
+            .x((d: any) => this.xScale(new Date(d.time)))
+            .y((d: any) => this.yScale(d.avg))
+            .curve(d3.curveMonotoneX);
+        // x axis
+        const availableWidth =
+            this.viewport.width - this.margin.left - this.margin.right;
+        const bottomAxis = d3
+            .axisBottom(this.xScale)
+            .ticks(Math.floor(availableWidth / 40));
+        svgLocal
+            .append('g')
+            .attr('class', 'x-axis')
+            .attr(
+                'transform',
+                `translate(0, ${this.viewport.height - this.margin.bottom})`
+            )
+            .call(bottomAxis);
+        // y axis
+        const axisLeft = d3.axisLeft(this.yScale);
+        svgLocal
+            .append('g')
+            .attr('class', 'y-axis')
+            .attr('transform', `translate(${this.margin.left}, 0)`)
+            .call(axisLeft);
+        const dashedLines = svgLocal.append('g').classed('dashed-line-g', true);
+        (axisLeft.scale() as any).ticks().forEach((d: number[]) => {
+            dashedLines
+                .append('line')
+                .classed('dashed-line', true)
+                .attr('x1', this.margin.left)
+                .attr('y1', this.yScale(d))
+                .attr('x2', this.viewport.width - this.margin.right)
+                .attr('y2', this.yScale(d));
+        });
         if (this.data instanceof Array) {
-            let svgLocal = d3.select(this.svg);
-            let t = d3
-                .transition()
-                .duration(500)
-                .ease(d3.easeLinear);
-            let line = d3
-                .line()
-                .x((d: any) => this.xScale(new Date(d.time)))
-                .y((d: any) => this.yScale(d.avg))
-                .curve(d3.curveMonotoneX);
-
-            // x axis
-            svgLocal
-                .append('g')
-                .attr('class', 'x-axis')
-                .attr(
-                    'transform',
-                    `translate(0, ${this.viewport.height - this.margin.bottom})`
-                )
-                .call(d3.axisBottom(this.xScale));
-            // y axis
-            const availableHeight =
-                this.viewport.height - this.margin.top - this.margin.bottom;
-            const axisLeft = d3.axisLeft(this.yScale);
-            svgLocal
-                .append('g')
-                .attr('class', 'y-axis')
-                .attr('transform', `translate(${this.margin.left}, 0)`)
-                .call(axisLeft);
-            const dashedLines = svgLocal
-                .append('g')
-                .classed('dashed-line-g', true);
-            (axisLeft.scale() as any).ticks().forEach((d: number[]) => {
-                dashedLines
-                    .append('line')
-                    .classed('dashed-line', true)
-                    .attr('x1', this.margin.left)
-                    .attr('y1', this.yScale(d))
-                    .attr('x2', this.viewport.width - this.margin.right)
-                    .attr('y2', this.yScale(d));
-            });
             //path
             svgLocal
                 .append('path')
@@ -100,34 +100,7 @@ export default class D3Graph {
 
             // circles
             svgLocal.selectAll('.dot');
-            //Dumy comment
         } else if (typeof this.data === 'object') {
-            let svgLocal = d3.select(this.svg);
-            let line = d3
-                .line()
-                .x((d: any) => this.xScale(new Date(d.time)))
-                .y((d: any) => this.yScale(d.avg))
-                .curve(d3.curveMonotoneX);
-            let t = d3
-                .transition()
-                .duration(500)
-                .ease(d3.easeLinear);
-            // x axis
-            svgLocal
-                .append('g')
-                .attr('class', 'x-axis')
-                .attr(
-                    'transform',
-                    `translate(0, ${this.viewport.height - this.margin.bottom})`
-                )
-                .call(d3.axisBottom(this.xScale));
-            // y axis
-            svgLocal
-                .append('g')
-                .attr('class', 'y-axis')
-                .attr('transform', `translate(${this.margin.left}, 0)`)
-                .call(d3.axisLeft(this.yScale));
-
             let i = 0;
             for (let key in this.data) {
                 //path
