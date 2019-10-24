@@ -3,15 +3,12 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strconv"
 	"strings"
 	"time"
 )
 
 func startProcessingData(interval time.Duration) {
-	log.Printf("Starting to process data for the last %d minutes\n", interval/time.Minute)
-
 	// Range of time where data should be read
 	endTime := time.Now().Unix()
 	startTime := endTime - int64(interval.Seconds())

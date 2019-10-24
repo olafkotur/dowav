@@ -13,21 +13,22 @@ import (
 )
 
 func readSerial(name, baud string) {
-	path, file := createLogFile()
-
 	log.Printf("Attempting to read serial data\n")
 	baudInt, err := strconv.Atoi(baud)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 
-	conf := &serial.Config{Name: name, Baud: baudInt}
-	sp, err := serial.OpenPort(conf)
+	config := &serial.Config{Name: name, Baud: baudInt}
+	sp, err := serial.OpenPort(config)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
-
 	log.Printf("Success - listening to %s\n\n", name)
+
+	path, file := createLogFile()
 	go listenAndLogR(sp, path, file)
 }
 
@@ -47,7 +48,8 @@ func createLogFile() (path string, f *os.File) {
 
 	file, err := os.Create(logPath)
 	if err != nil {
-		log.Fatal(err, file)
+		log.Println(err)
+		return
 	}
 	log.Printf("New log file created in %s\n\n", logPath)
 
@@ -58,14 +60,16 @@ func createLogFile() (path string, f *os.File) {
 func logData(data, path string, file *os.File) {
 	existingData, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 
 	t := time.Now().Unix()
 	writeBytes := append(existingData, []byte(strconv.FormatInt(t, 10)+" "+data)...)
 	err = ioutil.WriteFile(path, writeBytes, 0644)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 }
 
