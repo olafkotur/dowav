@@ -85,6 +85,7 @@ export default class D3Graph {
 
             // circles
             svgLocal.selectAll('.dot');
+            //Dumy comment
         } else if (typeof this.data === 'object') {
             let svgLocal = d3.select(this.svg);
             let line = d3
