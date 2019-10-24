@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/tarm/serial"
@@ -71,8 +70,4 @@ func logData(data, path string, file *os.File) {
 		log.Println(err)
 		return
 	}
-}
-
-func formatData(data string) (values []string) {
-	return strings.Split(data, " ")
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -10,27 +9,28 @@ import (
 )
 
 func startProcessingData(interval time.Duration) {
-	// // DANGER: TESTING DATA ONLY
-	// endTime := time.Now().Unix()
-	// data := getDataAsString("../test-data.txt")
-	// filtered := filterDataInRange(data, 1571671395, endTime)
-
-	// Range of time where data should be read
+	// DANGER: TESTING DATA ONLY
 	endTime := time.Now().Unix()
+	data := getDataAsString("../test-data.txt")
+	filtered := filterDataInRange(data, 1571671395, endTime)
+
+	// // Range of time where data should be read
+	// endTime := time.Now().Unix()
 	startTime := endTime - int64(interval.Seconds())
 
-	path := getLatestLog()
-	data := getDataAsString(path)
-	filtered := filterDataInRange(data, startTime, endTime)
+	// path := getLatestLog()
+	// data := getDataAsString(path)
+	// filtered := filterDataInRange(data, startTime, endTime)
 
 	if len(filtered) != 0 {
 		average := calcAverage(filtered)
 		min := calcMin(filtered)
 		max := calcMax(filtered)
 
-		fmt.Printf("Average: %d\n", average)
-		fmt.Printf("Min: %d\n", min)
-		fmt.Printf("Max: %d\n\n", max)
+		// fmt.Printf("Average: %d\n", average)
+		// fmt.Printf("Min: %d\n", min)
+		// fmt.Printf("Max: %d\n\n", max)
+		formatData(average, min, max, int(startTime), int(endTime))
 	} else {
 		log.Printf("Skipping processing, no data to process\n\n")
 	}
@@ -105,7 +105,7 @@ func calcAverage(data []string) (a []int) {
 }
 
 func calcMin(data []string) (m []int) {
-	minTemp, minMoist, minLight := 10000, 10000, 10000
+	minTemp, minMoist, minLight := 10000, 10000, 10000 // Hacky - needs to change
 	for _, d := range data {
 		values := strings.Split(d, " ")
 		temp := toInt(values[2])
@@ -132,7 +132,7 @@ func calcMin(data []string) (m []int) {
 }
 
 func calcMax(data []string) (m []int) {
-	maxTemp, maxMoist, maxLight := 0, 0, 0
+	var maxTemp, maxMoist, maxLight int
 	for _, d := range data {
 		values := strings.Split(d, " ")
 		temp := toInt(values[2])
@@ -156,4 +156,31 @@ func calcMax(data []string) (m []int) {
 	max = append(max, maxLight)
 
 	return max
+}
+
+func formatData(avg, min, max []int, startTime, endTime int) {
+	type Calculations struct {
+		average int `json:"average"`
+		minimum int `json:"minimum"`
+		maximum int `json:"maximum"`
+	}
+
+	type Data struct {
+		startTime   int          `json:"startTime"`
+		endTime     int          `json:"endTime"`
+		temperature Calculations `json:"temperature"`
+		moisture    Calculations `json:"moisture"`
+		light       Calculations `json:"light"`
+	}
+
+	data := Data{
+		startTime,
+		endTime,
+		Calculations{avg[0], min[0], max[0]},
+		Calculations{avg[1], min[1], max[1]},
+		Calculations{avg[2], min[2], max[2]},
+	}
+
+	// TODO: Upload to db here
+	log.Println(data)
 }
