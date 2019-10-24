@@ -3,12 +3,18 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strconv"
 	"strings"
 	"time"
 )
 
 func startProcessingData(interval time.Duration) {
+	// // DANGER: TESTING DATA ONLY
+	// endTime := time.Now().Unix()
+	// data := getDataAsString("../test-data.txt")
+	// filtered := filterDataInRange(data, 1571671395, endTime)
+
 	// Range of time where data should be read
 	endTime := time.Now().Unix()
 	startTime := endTime - int64(interval.Seconds())
@@ -16,8 +22,18 @@ func startProcessingData(interval time.Duration) {
 	path := getLatestLog()
 	data := getDataAsString(path)
 	filtered := filterDataInRange(data, startTime, endTime)
-	average := calcAverage(filtered)
-	fmt.Println(average)
+
+	if len(filtered) != 0 {
+		average := calcAverage(filtered)
+		min := calcMin(filtered)
+		max := calcMax(filtered)
+
+		fmt.Printf("Average: %d\n", average)
+		fmt.Printf("Min: %d\n", min)
+		fmt.Printf("Max: %d\n\n", max)
+	} else {
+		log.Printf("Skipping processing, no data to process\n\n")
+	}
 }
 
 func getLatestLog() (p string) {
@@ -41,7 +57,6 @@ func getLatestLog() (p string) {
 		if nameInt > latestTime {
 			path = f.Name()
 			latestTime = nameInt
-		} else {
 		}
 	}
 
@@ -72,27 +87,73 @@ func filterDataInRange(data string, start, end int64) (f []string) {
 
 func calcAverage(data []string) (a []int) {
 	// Store sum of all values
-	sumTemp, sumMoist, sumLight := 0, 0, 0
+	temp, moist, light := 0, 0, 0
 	for _, d := range data {
 		values := strings.Split(d, " ")
-		sumTemp += toInt(values[2])
-		sumMoist += toInt(values[3])
-		sumLight += toInt(values[4])
+		temp += toInt(values[2])
+		moist += toInt(values[3])
+		light += toInt(values[4])
 	}
 
 	var average []int
-	average = append(average, sumTemp/len(data))
-	average = append(average, sumMoist/len(data))
-	average = append(average, sumLight/len(data))
+	total := len(data)
+	average = append(average, temp/total)
+	average = append(average, moist/total)
+	average = append(average, light/total)
 
 	return average
-
 }
 
-func calcMin() {
+func calcMin(data []string) (m []int) {
+	minTemp, minMoist, minLight := 10000, 10000, 10000
+	for _, d := range data {
+		values := strings.Split(d, " ")
+		temp := toInt(values[2])
+		moist := toInt(values[3])
+		light := toInt(values[4])
 
+		if temp < minTemp {
+			minTemp = temp
+		}
+		if moist < minMoist {
+			minMoist = moist
+		}
+		if light < minLight {
+			minLight = light
+		}
+	}
+
+	var min []int
+	min = append(min, minTemp)
+	min = append(min, minMoist)
+	min = append(min, minLight)
+
+	return min
 }
 
-func calcMax() {
+func calcMax(data []string) (m []int) {
+	maxTemp, maxMoist, maxLight := 0, 0, 0
+	for _, d := range data {
+		values := strings.Split(d, " ")
+		temp := toInt(values[2])
+		moist := toInt(values[3])
+		light := toInt(values[4])
 
+		if temp > maxTemp {
+			maxTemp = temp
+		}
+		if moist > maxMoist {
+			maxMoist = moist
+		}
+		if light > maxLight {
+			maxLight = light
+		}
+	}
+
+	var max []int
+	max = append(max, maxTemp)
+	max = append(max, maxMoist)
+	max = append(max, maxLight)
+
+	return max
 }

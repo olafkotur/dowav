@@ -23,7 +23,6 @@ func main() {
 	// Execution start
 	go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 	go startServer(WEB_BUILD_PATH, SERVER_PORT)
-	// startScheduler()
-	for {
-	}
+
+	startScheduler()
 }

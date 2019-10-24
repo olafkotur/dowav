@@ -6,6 +6,8 @@ import (
 )
 
 func startScheduler() {
+	log.Printf("Starting the scheduler\n")
+
 	refreshRate := 1 * time.Second
 	timeSinceLastRun := 10 * time.Second
 	processDataInterval := 10 * time.Second
@@ -13,7 +15,7 @@ func startScheduler() {
 	for {
 		// Process data
 		if timeSinceLastRun >= processDataInterval {
-			log.Printf("Starting to process data for the last %d minutes\n", processDataInterval/time.Minute)
+			log.Printf("Processing serial data...\n")
 			startProcessingData(processDataInterval)
 			timeSinceLastRun = 0 * time.Second
 		} else {
