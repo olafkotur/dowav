@@ -36,7 +36,10 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                                 width: (size.width - 50) / 3,
                                 height: (size.height - 100) / 2
                             }}
-                            name="first"
+                            conf={{
+                                name: currentOption,
+                                id: currentOption + 1
+                            }}
                         />
                         <Graph
                             data={data.slice(30)}
@@ -44,7 +47,10 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                                 width: (size.width - 50) / 3,
                                 height: (size.height - 100) / 2
                             }}
-                            name="second"
+                            conf={{
+                                name: currentOption,
+                                id: currentOption + 2
+                            }}
                         />
                         <Graph
                             data={data.slice(20, 40)}
@@ -52,7 +58,10 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                                 width: (size.width - 50) / 3,
                                 height: (size.height - 100) / 2
                             }}
-                            name="third"
+                            conf={{
+                                name: currentOption,
+                                id: currentOption + 3
+                            }}
                         />
                     </div>
                     <div className="graph-view-row">
@@ -73,7 +82,10 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                                 width: size.width - 10,
                                 height: (size.height - 100) / 2
                             }}
-                            name="fourth"
+                            conf={{
+                                name: currentOption,
+                                id: currentOption + 4
+                            }}
                         />
                     </div>
                 </>

@@ -22,3 +22,9 @@ export type MultipleHistoryData = {
 };
 
 export type HistoryData = IHistoryData[] | MultipleHistoryData;
+
+export type GraphConfiguration = {
+    title?: string;
+    name: string;
+    id: string;
+};

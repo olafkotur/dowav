@@ -4,13 +4,17 @@ import {
     IMargin,
     IHistoryData,
     MultipleHistoryData,
-    HistoryData
+    HistoryData,
+    GraphConfiguration
 } from '../types';
+import * as MENU_OPTIONS from '../constants/MenuOptionConstants';
+import d3LineGradients from '../d3/d3LineGradients';
 
 type D3GraphProps = {
     viewport: IViewport;
     svg: HTMLElement;
     data: HistoryData;
+    conf?: GraphConfiguration;
 };
 
 const colors = ['#ffa500', '#ff2929', '#7a7aed'];
@@ -23,11 +27,13 @@ export default class D3Graph {
     private data: HistoryData;
     private xScale: any;
     private yScale: any;
+    private conf: GraphConfiguration | null;
     public constructor(options: D3GraphProps) {
         this.svg = options.svg;
         this.viewport = options.viewport;
         this.margin = { top: 40, bottom: 40, left: 40, right: 40 };
         this.data = options.data;
+        this.conf = options.conf || null;
         this.getXScale(this.data);
         this.getYScale(this.data);
     }
@@ -40,8 +46,44 @@ export default class D3Graph {
         this.resize();
     }
 
+    public showTip() {
+        const { offsetX, offsetY } = d3.event;
+        if (
+            offsetX > this.margin.left &&
+            offsetX < this.viewport.width - this.margin.right &&
+            offsetY > this.margin.top &&
+            offsetY < this.viewport.height - this.margin.bottom
+        ) {
+            let x = this.xScale.invert(offsetX);
+            if (this.data instanceof Array) {
+                let index = this.data.findIndex(d => d.time > x);
+                let dot = d3.select(this.svg).select('circle');
+                if (dot.empty()) {
+                    d3.select(this.svg)
+                        .append('circle')
+                        .attr('cx', this.xScale(this.data[index].time))
+                        .attr('cy', this.yScale(this.data[index].avg))
+                        .attr('r', 5)
+                        .attr('fill', 'none')
+                        .attr('stroke', 'white');
+                } else {
+                    dot.attr('cx', this.xScale(this.data[index].time)).attr(
+                        'cy',
+                        this.yScale(this.data[index].avg)
+                    );
+                }
+            }
+        } else {
+            let dot = d3.select(this.svg).select('circle');
+            if (!dot.empty()) {
+                dot.remove();
+            }
+        }
+    }
+
     public plot(on?: string) {
         let svgLocal = d3.select(this.svg);
+        svgLocal.on('mousemove', () => this.showTip());
         let t = d3
             .transition()
             .duration(500)
@@ -56,7 +98,7 @@ export default class D3Graph {
             this.viewport.width - this.margin.left - this.margin.right;
         const bottomAxis = d3
             .axisBottom(this.xScale)
-            .ticks(Math.floor(availableWidth / 40));
+            .ticks(Math.floor(availableWidth / 50));
         svgLocal
             .append('g')
             .attr('class', 'x-axis')
@@ -83,11 +125,31 @@ export default class D3Graph {
                 .attr('y2', this.yScale(d));
         });
         if (this.data instanceof Array) {
+            if (
+                this.conf &&
+                (this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                    this.conf.name === MENU_OPTIONS.MOISTURE ||
+                    this.conf.name === MENU_OPTIONS.LIGHT)
+            ) {
+                d3LineGradients.drawGradient(
+                    svgLocal,
+                    this.viewport,
+                    this.conf.name
+                );
+            }
             //path
             svgLocal
                 .append('path')
                 .attr('class', 'line')
-                .attr('stroke', colors[0])
+                .attr(
+                    'stroke',
+                    this.conf &&
+                        (this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                            this.conf.name === MENU_OPTIONS.MOISTURE ||
+                            this.conf.name === MENU_OPTIONS.LIGHT)
+                        ? 'url(#line-gradient)'
+                        : colors[0]
+                )
                 .datum(this.data)
                 .attr('d', <any>line);
 

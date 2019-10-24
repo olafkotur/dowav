@@ -4,6 +4,9 @@ $bright-red: #ff0000;
 $bright-orange: #a1681c;
 $gradient-start: #2c5364;
 $gradient-end: #0f2027;
+$temperature: orange;
+$moisture: #3ad8fc;
+$light: #d1d1d1;
 
 * {
     box-sizing: border-box;
@@ -111,8 +114,21 @@ body {
         margin: 0 10px;
     }
 
-    &.live {
-        box-shadow: 0 0 6px 1px orange;
+    &.Temperature {
+        &.live {
+            box-shadow: 0 0 6px 1px $temperature;
+        }
+    }
+
+    &.Moisture {
+        &.live {
+            box-shadow: 0 0 6px 1px $moisture;
+        }
+    }
+    &.Light {
+        &.live {
+            box-shadow: 0 0 6px 1px $light;
+        }
     }
 }
 
@@ -140,19 +156,45 @@ body {
         transition: 0.2s background-color;
         font-weight: 600;
         appearance: none;
-        border: 1px solid orange;
         background: none;
-        color: orange;
         border-radius: 5px;
         font-size: 1.15em;
         outline: none;
-        &.live {
-            color: black;
-            background: orange;
+        &.Temperature {
+            border: 1px solid $temperature;
+            color: $temperature;
+            &.live {
+                color: black;
+                background: $temperature;
+            }
+            &:hover {
+                color: black;
+                background: $temperature;
+            }
         }
-        &:hover {
-            color: black;
-            background: orange;
+        &.Moisture {
+            border: 1px solid $moisture;
+            color: $moisture;
+            &.live {
+                color: black;
+                background: $moisture;
+            }
+            &:hover {
+                color: black;
+                background: $moisture;
+            }
+        }
+        &.Light {
+            border: 1px solid $light;
+            color: $light;
+            &.live {
+                color: black;
+                background: $light;
+            }
+            &:hover {
+                color: black;
+                background: $light;
+            }
         }
     }
 }

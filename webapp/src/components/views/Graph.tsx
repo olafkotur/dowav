@@ -1,22 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IViewport, HistoryData } from '../../types';
+import { IViewport, HistoryData, GraphConfiguration } from '../../types';
 import * as d3 from 'd3';
 import ControlPane from '../ControlPane';
 import D3Graph from '../../d3/d3Graph';
 
-type GraphView = {
+type GraphProps = {
     viewport: IViewport;
-    name: string;
     data: HistoryData;
+    conf: GraphConfiguration;
     control?: {
         shouldRenderLive: boolean;
     };
 };
 
-const Graph: React.FC<GraphView> = ({
+const Graph: React.FC<GraphProps> = ({
     viewport,
-    name,
     data,
+    conf,
     control = { shouldRenderLive: true }
 }) => {
     const container = useRef<HTMLDivElement>(null);
@@ -31,7 +31,7 @@ const Graph: React.FC<GraphView> = ({
 
     useEffect(() => {
         return () => {
-            let el = document.getElementById(name);
+            let el = document.getElementById(conf.id);
             if (el && container.current) {
                 container.current.removeChild(el);
             }
@@ -43,18 +43,26 @@ const Graph: React.FC<GraphView> = ({
             if (el.childNodes.length === 1) {
                 d3.select(el)
                     .append('svg')
-                    .attr('id', name)
+                    .attr('id', conf.id)
                     .attr('width', viewport.width)
                     .attr('height', viewport.height);
-                const svg = document.getElementById(name);
-                svg && setD3chart(new D3Graph({ svg, viewport, data }));
+                const svg = document.getElementById(conf.id);
+                svg &&
+                    setD3chart(
+                        new D3Graph({
+                            svg,
+                            viewport,
+                            data,
+                            conf
+                        })
+                    );
             }
         }
     }, [container.current]);
 
     useEffect(() => {
         if (container.current) {
-            const svg = document.getElementById(name);
+            const svg = document.getElementById(conf.id);
             if (svg) {
                 const rect = svg.getBoundingClientRect();
                 if (
@@ -70,11 +78,15 @@ const Graph: React.FC<GraphView> = ({
     }, [viewport]);
 
     return (
-        <div ref={container} className={`graph ${live ? 'live' : ''}`}>
+        <div
+            ref={container}
+            className={`graph ${conf.name} ${live ? 'live' : ''}`}
+        >
             <ControlPane
                 shouldRenderLive={control.shouldRenderLive}
                 live={live}
                 setLive={() => setLive(!live)}
+                conf={conf}
             />
         </div>
     );
