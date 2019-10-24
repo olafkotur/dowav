@@ -63,11 +63,26 @@ export default class D3Graph {
                 )
                 .call(d3.axisBottom(this.xScale));
             // y axis
+            const availableHeight =
+                this.viewport.height - this.margin.top - this.margin.bottom;
+            const axisLeft = d3.axisLeft(this.yScale);
             svgLocal
                 .append('g')
                 .attr('class', 'y-axis')
                 .attr('transform', `translate(${this.margin.left}, 0)`)
-                .call(d3.axisLeft(this.yScale));
+                .call(axisLeft);
+            const dashedLines = svgLocal
+                .append('g')
+                .classed('dashed-line-g', true);
+            (axisLeft.scale() as any).ticks().forEach((d: number[]) => {
+                dashedLines
+                    .append('line')
+                    .classed('dashed-line', true)
+                    .attr('x1', this.margin.left)
+                    .attr('y1', this.yScale(d))
+                    .attr('x2', this.viewport.width - this.margin.right)
+                    .attr('y2', this.yScale(d));
+            });
             //path
             svgLocal
                 .append('path')
