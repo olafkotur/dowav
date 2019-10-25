@@ -104,12 +104,30 @@ body {
         }
     }
 }
+.tooltip {
+    position: absolute;
+    display: none;
+    background: #2c5364;
+    border-radius: 10px;
+    padding: 5px;
+    z-index: 10;
+    pointer-events: none;
+    p {
+        margin: 0;
+        padding: 0;
+        font-size: 13px;
+    }
+    &.show {
+        display: block;
+    }
+}
 
 .graph {
     flex: 1;
     background: rgba(0, 0, 0, 0.27);
     border-radius: 10px;
     padding: 5px;
+    position: relative;
     &:nth-child(2) {
         margin: 0 10px;
     }

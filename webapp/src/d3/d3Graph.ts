@@ -28,6 +28,7 @@ export default class D3Graph {
     private xScale: any;
     private yScale: any;
     private conf: GraphConfiguration | null;
+    private tooltip: any;
     public constructor(options: D3GraphProps) {
         this.svg = options.svg;
         this.viewport = options.viewport;
@@ -36,6 +37,10 @@ export default class D3Graph {
         this.conf = options.conf || null;
         this.getXScale(this.data);
         this.getYScale(this.data);
+        this.tooltip = d3
+            .select(this.svg.parentNode as any)
+            .append('div')
+            .attr('class', 'tooltip');
     }
 
     public setViewport(viewport: IViewport) {
@@ -48,20 +53,22 @@ export default class D3Graph {
 
     public showTip() {
         const { offsetX, offsetY } = d3.event;
+        let dot = d3.select(this.svg).select('circle');
         if (
             offsetX > this.margin.left &&
             offsetX < this.viewport.width - this.margin.right &&
             offsetY > this.margin.top &&
             offsetY < this.viewport.height - this.margin.bottom
         ) {
+            console.log(d3.event);
             let x = this.xScale.invert(offsetX);
             if (this.data instanceof Array) {
                 let index = this.data.findIndex(d => d.time > x);
-                let dot = d3.select(this.svg).select('circle');
+                let sX = this.xScale(this.data[index].time);
                 if (dot.empty()) {
                     d3.select(this.svg)
                         .append('circle')
-                        .attr('cx', this.xScale(this.data[index].time))
+                        .attr('cx', sX)
                         .attr('cy', this.yScale(this.data[index].avg))
                         .attr('r', 5)
                         .attr('fill', 'none')
@@ -71,19 +78,44 @@ export default class D3Graph {
                         'cy',
                         this.yScale(this.data[index].avg)
                     );
+                    this.tooltip
+                        .html(
+                            `<p>${new Date(
+                                this.data[index].time
+                            ).toLocaleString()}</p><p>Value: ${this.data[
+                                index
+                            ].avg.toFixed(2)}</p>`
+                        )
+                        .classed('show', true)
+                        .style(
+                            'top',
+                            Math.floor(
+                                this.yScale(this.data[index].avg) +
+                                    this.margin.top
+                            ) + 'px'
+                        )
+                        .style('left', Math.floor(sX) + 'px')
+                        .style(
+                            'margin-left',
+                            sX > this.viewport.width / 2 ? '-130px' : '0px'
+                        );
+                    console.log(sX > this.viewport.width / 2);
                 }
+                // tooltip
             }
         } else {
-            let dot = d3.select(this.svg).select('circle');
             if (!dot.empty()) {
                 dot.remove();
             }
+            this.tooltip.classed('show', false);
         }
     }
 
     public plot(on?: string) {
         let svgLocal = d3.select(this.svg);
+        // Events
         svgLocal.on('mousemove', () => this.showTip());
+
         let t = d3
             .transition()
             .duration(500)
