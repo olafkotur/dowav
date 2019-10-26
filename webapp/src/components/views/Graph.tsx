@@ -35,6 +35,20 @@ const Graph: React.FC<GraphProps> = ({
 
     useEffect(() => {
         if (d3chart) {
+            d3chart.setConf(
+                {
+                    ...conf,
+                    timePeriod: timePeriod.filter(
+                        (t: TimePeriod) => t.selected
+                    )[0]
+                },
+                data
+            );
+        }
+    }, [timePeriod]);
+
+    useEffect(() => {
+        if (d3chart) {
             d3chart.plot('start');
         }
     }, [d3chart]);

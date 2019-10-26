@@ -34,14 +34,108 @@ export default class D3Graph {
         this.svg = options.svg;
         this.viewport = options.viewport;
         this.margin = { top: 40, bottom: 40, left: 40, right: 40 };
-        this.data = options.data;
         this.conf = options.conf;
+        this.data = this.scaleData(options.data);
         this.getXScale(this.data);
         this.getYScale(this.data);
         this.tooltip = d3
             .select(this.svg.parentNode as any)
             .append('div')
             .attr('class', 'tooltip');
+    }
+
+    public setConf(
+        conf: GraphConfiguration & { timePeriod: TimePeriod },
+        data: HistoryData
+    ) {
+        this.conf = conf;
+        this.data = this.scaleData(data);
+        d3.select(this.svg).html('');
+        this.getXScale(this.data);
+        this.getYScale(this.data);
+        this.plot();
+    }
+
+    private scaleData(data: HistoryData): HistoryData {
+        const { timePeriod } = this.conf;
+        if (timePeriod.timePeriod / 5 === 1) {
+            if (data instanceof Array) {
+                return [...data];
+            } else if (typeof data === 'object') {
+                let obj: any = {};
+                for (let keys in data) {
+                    obj[keys] = [...data[keys]];
+                }
+                return obj;
+            }
+        } else {
+            const k = timePeriod.timePeriod / 5;
+            return this.computeData(data, k);
+        }
+        return data;
+    }
+
+    private computeData(data: HistoryData, k: number): HistoryData {
+        if (data instanceof Array) {
+            let newData = [];
+            let tempAvg = 0;
+            let tempTime = 0;
+            for (let i = 0; i < data.length; i++) {
+                if (i % k === k - 1 || i === data.length - 1) {
+                    tempAvg += data[i].avg;
+
+                    const divider = i % k === k - 1 ? k : (data.length - 1) % k;
+                    newData.push({
+                        time: tempTime,
+                        avg: tempAvg / divider,
+                        min: 0,
+                        max: 0
+                    });
+
+                    tempAvg = 0;
+                    tempTime = 0;
+                } else {
+                    tempAvg += data[i].avg;
+                    if (i % k === 0) tempTime = data[i].time;
+                }
+            }
+            console.log(newData);
+            return [...newData];
+        } else if (typeof data === 'object') {
+            const newObj: any = {};
+            for (let key in data) {
+                const zoneData = data[key];
+                console.log(zoneData);
+                let newData = [];
+                let tempAvg = 0;
+                let tempTime = 0;
+                for (let i = 0; i < zoneData.length; i++) {
+                    if (i % k === k - 1 || i === zoneData.length - 1) {
+                        tempAvg += zoneData[i].avg;
+
+                        const divider =
+                            i % k === k - 1 ? k : zoneData.length % k;
+                        console.log(divider);
+                        newData.push({
+                            time: tempTime,
+                            avg: tempAvg / divider,
+                            min: 0,
+                            max: 0
+                        });
+
+                        tempAvg = 0;
+                        tempTime = 0;
+                    } else {
+                        tempAvg += zoneData[i].avg;
+                        if (i % k === 0) tempTime = zoneData[i].time;
+                    }
+                }
+                newObj[key] = newData;
+            }
+            console.log(newObj);
+            return newObj;
+        }
+        return data;
     }
 
     public setViewport(viewport: IViewport) {
@@ -61,7 +155,6 @@ export default class D3Graph {
             offsetY > this.margin.top &&
             offsetY < this.viewport.height - this.margin.bottom
         ) {
-            console.log(d3.event);
             let x = this.xScale.invert(offsetX);
             if (this.data instanceof Array) {
                 let index = this.data.findIndex(d => d.time > x);
@@ -100,9 +193,7 @@ export default class D3Graph {
                             'margin-left',
                             sX > this.viewport.width / 2 ? '-130px' : '0px'
                         );
-                    console.log(sX > this.viewport.width / 2);
                 }
-                // tooltip
             }
         } else {
             if (!dot.empty()) {

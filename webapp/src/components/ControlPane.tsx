@@ -22,22 +22,29 @@ const ControlPane: React.FC<ControlPaneProps> = ({
                 {conf.timePeriod.map((t: TimePeriod) => {
                     return (
                         <div
+                            key={t.timePeriod}
                             className={`time-button ${
                                 t.selected ? 'selected' : ''
                             }`}
                             onClick={() => {
-                                setTimePeriod(
-                                    conf.timePeriod.map((ti: TimePeriod) => {
-                                        if (ti === t) {
-                                            return {
-                                                ...ti,
-                                                selected: !ti.selected
-                                            };
-                                        } else {
-                                            return { ...ti, selected: false };
-                                        }
-                                    })
-                                );
+                                if (!t.selected)
+                                    setTimePeriod(
+                                        conf.timePeriod.map(
+                                            (ti: TimePeriod) => {
+                                                if (ti === t) {
+                                                    return {
+                                                        ...ti,
+                                                        selected: !ti.selected
+                                                    };
+                                                } else {
+                                                    return {
+                                                        ...ti,
+                                                        selected: false
+                                                    };
+                                                }
+                                            }
+                                        )
+                                    );
                             }}
                         >
                             {`${t.timePeriod}m`}
