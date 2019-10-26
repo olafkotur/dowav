@@ -28,3 +28,8 @@ export type GraphConfiguration = {
     name: string;
     id: string;
 };
+
+export type TimePeriod = {
+    timePeriod: number;
+    selected: boolean;
+};

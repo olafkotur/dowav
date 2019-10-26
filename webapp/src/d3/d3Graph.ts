@@ -5,7 +5,8 @@ import {
     IHistoryData,
     MultipleHistoryData,
     HistoryData,
-    GraphConfiguration
+    GraphConfiguration,
+    TimePeriod
 } from '../types';
 import * as MENU_OPTIONS from '../constants/MenuOptionConstants';
 import d3LineGradients from '../d3/d3LineGradients';
@@ -14,7 +15,7 @@ type D3GraphProps = {
     viewport: IViewport;
     svg: HTMLElement;
     data: HistoryData;
-    conf?: GraphConfiguration;
+    conf: GraphConfiguration & { timePeriod: TimePeriod };
 };
 
 const colors = ['#ffa500', '#ff2929', '#7a7aed'];
@@ -27,14 +28,14 @@ export default class D3Graph {
     private data: HistoryData;
     private xScale: any;
     private yScale: any;
-    private conf: GraphConfiguration | null;
+    private conf: GraphConfiguration & { timePeriod: TimePeriod };
     private tooltip: any;
     public constructor(options: D3GraphProps) {
         this.svg = options.svg;
         this.viewport = options.viewport;
         this.margin = { top: 40, bottom: 40, left: 40, right: 40 };
         this.data = options.data;
-        this.conf = options.conf || null;
+        this.conf = options.conf;
         this.getXScale(this.data);
         this.getYScale(this.data);
         this.tooltip = d3
@@ -130,7 +131,7 @@ export default class D3Graph {
             this.viewport.width - this.margin.left - this.margin.right;
         const bottomAxis = d3
             .axisBottom(this.xScale)
-            .ticks(Math.floor(availableWidth / 50));
+            .ticks(Math.floor(availableWidth / 60));
         svgLocal
             .append('g')
             .attr('class', 'x-axis')
@@ -158,10 +159,9 @@ export default class D3Graph {
         });
         if (this.data instanceof Array) {
             if (
-                this.conf &&
-                (this.conf.name === MENU_OPTIONS.TEMPERATURE ||
-                    this.conf.name === MENU_OPTIONS.MOISTURE ||
-                    this.conf.name === MENU_OPTIONS.LIGHT)
+                this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                this.conf.name === MENU_OPTIONS.MOISTURE ||
+                this.conf.name === MENU_OPTIONS.LIGHT
             ) {
                 d3LineGradients.drawGradient(
                     svgLocal,
@@ -175,10 +175,9 @@ export default class D3Graph {
                 .attr('class', 'line')
                 .attr(
                     'stroke',
-                    this.conf &&
-                        (this.conf.name === MENU_OPTIONS.TEMPERATURE ||
-                            this.conf.name === MENU_OPTIONS.MOISTURE ||
-                            this.conf.name === MENU_OPTIONS.LIGHT)
+                    this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                        this.conf.name === MENU_OPTIONS.MOISTURE ||
+                        this.conf.name === MENU_OPTIONS.LIGHT
                         ? 'url(#line-gradient)'
                         : colors[0]
                 )

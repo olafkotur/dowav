@@ -169,7 +169,53 @@ body {
     height: 30px;
     width: 100%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    .time-button-group {
+        display: flex;
+        flex-direction: row;
+        border-radius: 5px;
+        &.Temperature {
+            border: 1px solid $temperature;
+            color: $temperature;
+            .time-button.selected {
+                color: black;
+                background: $temperature;
+            }
+            .time-button:hover {
+                color: black;
+                background: $temperature;
+            }
+        }
+        &.Moisture {
+            border: 1px solid $moisture;
+            color: $moisture;
+            .time-button.selected {
+                color: black;
+                background: $moisture;
+            }
+            .time-button:hover {
+                color: black;
+                background: $moisture;
+            }
+        }
+        &.Light {
+            border: 1px solid $light;
+            color: $light;
+            .time-button.selected {
+                color: black;
+                background: $light;
+            }
+            .time-button:hover {
+                color: black;
+                background: $light;
+            }
+        }
+        .time-button {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+    }
     button {
         transition: 0.2s background-color;
         font-weight: 600;

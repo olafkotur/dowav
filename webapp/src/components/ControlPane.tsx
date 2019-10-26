@@ -1,21 +1,50 @@
 import React from 'react';
-import { GraphConfiguration } from '../types';
+import { GraphConfiguration, TimePeriod } from '../types';
 
 type ControlPaneProps = {
     shouldRenderLive: boolean;
     live: boolean;
     setLive(): void;
-    conf: GraphConfiguration;
+    setTimePeriod: any;
+    conf: GraphConfiguration & { timePeriod: TimePeriod[] };
 };
 
 const ControlPane: React.FC<ControlPaneProps> = ({
     live,
     setLive,
+    setTimePeriod,
     shouldRenderLive,
     conf
 }) => {
     return (
         <div className="control-pane">
+            <div className={`${conf.name} time-button-group`}>
+                {conf.timePeriod.map((t: TimePeriod) => {
+                    return (
+                        <div
+                            className={`time-button ${
+                                t.selected ? 'selected' : ''
+                            }`}
+                            onClick={() => {
+                                setTimePeriod(
+                                    conf.timePeriod.map((ti: TimePeriod) => {
+                                        if (ti === t) {
+                                            return {
+                                                ...ti,
+                                                selected: !ti.selected
+                                            };
+                                        } else {
+                                            return { ...ti, selected: false };
+                                        }
+                                    })
+                                );
+                            }}
+                        >
+                            {`${t.timePeriod}m`}
+                        </div>
+                    );
+                })}
+            </div>
             {shouldRenderLive ? (
                 <button
                     className={`${conf.name} ${live ? 'live' : ''}`}

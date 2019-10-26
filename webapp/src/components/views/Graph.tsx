@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IViewport, HistoryData, GraphConfiguration } from '../../types';
+import {
+    IViewport,
+    HistoryData,
+    GraphConfiguration,
+    TimePeriod
+} from '../../types';
 import * as d3 from 'd3';
 import ControlPane from '../ControlPane';
 import D3Graph from '../../d3/d3Graph';
@@ -21,6 +26,11 @@ const Graph: React.FC<GraphProps> = ({
 }) => {
     const container = useRef<HTMLDivElement>(null);
     const [live, setLive] = useState<boolean>(false);
+    const [timePeriod, setTimePeriod] = useState<TimePeriod[]>([
+        { timePeriod: 5, selected: true },
+        { timePeriod: 15, selected: false },
+        { timePeriod: 30, selected: false }
+    ]);
     const [d3chart, setD3chart] = useState<D3Graph | null>(null);
 
     useEffect(() => {
@@ -53,7 +63,12 @@ const Graph: React.FC<GraphProps> = ({
                             svg,
                             viewport,
                             data,
-                            conf
+                            conf: {
+                                ...conf,
+                                timePeriod: timePeriod.filter(
+                                    (t: TimePeriod) => t.selected
+                                )[0]
+                            }
                         })
                     );
             }
@@ -86,7 +101,8 @@ const Graph: React.FC<GraphProps> = ({
                 shouldRenderLive={control.shouldRenderLive}
                 live={live}
                 setLive={() => setLive(!live)}
-                conf={conf}
+                setTimePeriod={setTimePeriod}
+                conf={{ ...conf, timePeriod: timePeriod }}
             />
         </div>
     );
