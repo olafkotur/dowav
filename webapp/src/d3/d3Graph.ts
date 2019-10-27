@@ -30,6 +30,10 @@ export default class D3Graph {
     private yScale: any;
     private conf: GraphConfiguration & { timePeriod: TimePeriod };
     private tooltip: any;
+    private line: any;
+    private xAxis: any;
+    private yAxis: any;
+    private dashedLines: any;
     public constructor(options: D3GraphProps) {
         this.svg = options.svg;
         this.viewport = options.viewport;
@@ -42,6 +46,50 @@ export default class D3Graph {
             .select(this.svg.parentNode as any)
             .append('div')
             .attr('class', 'tooltip');
+        // Add html
+        if (this.data instanceof Array) {
+            this.line = d3
+                .select(this.svg)
+                .append('path')
+                .attr('class', 'line')
+                .attr(
+                    'stroke',
+                    this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                        this.conf.name === MENU_OPTIONS.MOISTURE ||
+                        this.conf.name === MENU_OPTIONS.LIGHT
+                        ? 'url(#line-gradient)'
+                        : colors[0]
+                );
+        } else if (typeof this.data === 'object') {
+            let keys = Object.keys(this.data);
+            this.line = [];
+            for (let i = 0; i < keys.length; i++) {
+                this.line.push(
+                    d3
+                        .select(this.svg)
+                        .append('path')
+                        .attr('class', 'line')
+                        .attr('stroke', colors[i])
+                );
+            }
+        }
+        this.xAxis = d3
+            .select(this.svg)
+            .append('g')
+            .attr('class', 'x-axis')
+            .attr(
+                'transform',
+                `translate(0, ${this.viewport.height - this.margin.bottom})`
+            );
+        this.yAxis = d3
+            .select(this.svg)
+            .append('g')
+            .attr('class', 'y-axis')
+            .attr('transform', `translate(${this.margin.left}, 0)`);
+        this.dashedLines = d3
+            .select(this.svg)
+            .append('g')
+            .classed('dashed-line-g', true);
     }
 
     public setConf(
@@ -50,10 +98,9 @@ export default class D3Graph {
     ) {
         this.conf = conf;
         this.data = this.scaleData(data);
-        d3.select(this.svg).html('');
         this.getXScale(this.data);
         this.getYScale(this.data);
-        this.plot();
+        this.plot('update');
     }
 
     private scaleData(data: HistoryData): HistoryData {
@@ -84,7 +131,7 @@ export default class D3Graph {
                 if (i % k === k - 1 || i === data.length - 1) {
                     tempAvg += data[i].avg;
 
-                    const divider = i % k === k - 1 ? k : (data.length - 1) % k;
+                    const divider = i % k === k - 1 ? k : data.length % k;
                     newData.push({
                         time: tempTime,
                         avg: tempAvg / divider,
@@ -99,13 +146,11 @@ export default class D3Graph {
                     if (i % k === 0) tempTime = data[i].time;
                 }
             }
-            console.log(newData);
             return [...newData];
         } else if (typeof data === 'object') {
             const newObj: any = {};
             for (let key in data) {
                 const zoneData = data[key];
-                console.log(zoneData);
                 let newData = [];
                 let tempAvg = 0;
                 let tempTime = 0;
@@ -115,7 +160,6 @@ export default class D3Graph {
 
                         const divider =
                             i % k === k - 1 ? k : zoneData.length % k;
-                        console.log(divider);
                         newData.push({
                             time: tempTime,
                             avg: tempAvg / divider,
@@ -132,7 +176,6 @@ export default class D3Graph {
                 }
                 newObj[key] = newData;
             }
-            console.log(newObj);
             return newObj;
         }
         return data;
@@ -204,9 +247,16 @@ export default class D3Graph {
     }
 
     public plot(on?: string) {
+        console.log(on);
         let svgLocal = d3.select(this.svg);
         // Events
         svgLocal.on('mousemove', () => this.showTip());
+        svgLocal.on('mouseleave', () => {
+            d3.select(this.svg)
+                .select('circle')
+                .remove();
+            this.tooltip.classed('show', false);
+        });
 
         let t = d3
             .transition()
@@ -223,24 +273,13 @@ export default class D3Graph {
         const bottomAxis = d3
             .axisBottom(this.xScale)
             .ticks(Math.floor(availableWidth / 60));
-        svgLocal
-            .append('g')
-            .attr('class', 'x-axis')
-            .attr(
-                'transform',
-                `translate(0, ${this.viewport.height - this.margin.bottom})`
-            )
-            .call(bottomAxis);
+        this.xAxis.call(bottomAxis);
         // y axis
         const axisLeft = d3.axisLeft(this.yScale);
-        svgLocal
-            .append('g')
-            .attr('class', 'y-axis')
-            .attr('transform', `translate(${this.margin.left}, 0)`)
-            .call(axisLeft);
-        const dashedLines = svgLocal.append('g').classed('dashed-line-g', true);
+        this.yAxis.call(axisLeft);
+        this.dashedLines.html('');
         (axisLeft.scale() as any).ticks().forEach((d: number[]) => {
-            dashedLines
+            this.dashedLines
                 .append('line')
                 .classed('dashed-line', true)
                 .attr('x1', this.margin.left)
@@ -261,24 +300,28 @@ export default class D3Graph {
                 );
             }
             //path
-            svgLocal
-                .append('path')
-                .attr('class', 'line')
-                .attr(
-                    'stroke',
-                    this.conf.name === MENU_OPTIONS.TEMPERATURE ||
-                        this.conf.name === MENU_OPTIONS.MOISTURE ||
-                        this.conf.name === MENU_OPTIONS.LIGHT
-                        ? 'url(#line-gradient)'
-                        : colors[0]
-                )
-                .datum(this.data)
-                .attr('d', <any>line);
+            this.line.datum(this.data).attr('d', line as any);
 
+            if (on === 'update') {
+                this.line
+                    .attr(
+                        'stroke-dasharray',
+                        this.line.node().getTotalLength() +
+                            ' ' +
+                            this.line.node().getTotalLength()
+                    )
+                    .attr(
+                        'stroke-dashoffset',
+                        this.line.node().getTotalLength()
+                    )
+                    .transition()
+                    .duration(700)
+                    .attr('stroke-dashoffset', 0);
+            }
             if (on === 'start') {
                 svgLocal
                     .attr('opacity', 0)
-                    .transition(<any>t)
+                    .transition(t as any)
                     .attr('opacity', 1);
             }
 
@@ -288,13 +331,24 @@ export default class D3Graph {
             let i = 0;
             for (let key in this.data) {
                 //path
-                svgLocal
-                    .append('path')
-                    .attr('class', 'line')
-                    .attr('stroke', colors[i])
-                    .datum(this.data[key])
-                    .attr('d', <any>line);
+                this.line[i].datum(this.data[key]).attr('d', <any>line);
 
+                if (on === 'update') {
+                    this.line[i]
+                        .attr(
+                            'stroke-dasharray',
+                            this.line[i].node().getTotalLength() +
+                                ' ' +
+                                this.line[i].node().getTotalLength()
+                        )
+                        .attr(
+                            'stroke-dashoffset',
+                            this.line[i].node().getTotalLength()
+                        )
+                        .transition()
+                        .duration(700)
+                        .attr('stroke-dashoffset', 0);
+                }
                 if (on === 'start') {
                     svgLocal
                         .attr('opacity', 0)
@@ -309,8 +363,6 @@ export default class D3Graph {
     }
 
     public resize() {
-        let svgLocal = d3.select(this.svg).html('');
-
         this.getXScale(this.data);
         this.getYScale(this.data);
         this.plot();
