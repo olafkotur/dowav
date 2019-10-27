@@ -1,48 +1,50 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { LineChart, Grid } from 'react-native-svg-charts';
+import GraphSet from '../components/GraphSet';
 
 const TempScreen = () => {
-  return (
-    <SafeAreaView>
-      <ScrollView
-        style={{ height: '50%' }}
-        contentContainerStyle={styles.graphSetContainer}
-        horizontal
-      >
-        <View style={styles.graph}>
-          <Text>Graph 1</Text>
-        </View>
-        <View style={styles.graph}>
-          <Text>Graph 2</Text>
-        </View>
-        <View style={styles.graph}>
-          <Text>Graph 3</Text>
-        </View>
-      </ScrollView>
+  const data = [
+    [43, 45, 56, 42, 34, 39],
+    [63, 75, 23, 54, 24, 54],
+    [45, 63, 64, 27, 54, 53],
+  ];
+  const mainData = [35, 54, 54, 12, 64, 25];
 
-      <View style={styles.mainGraph}>
-        <Text>Main Graph</Text>
-      </View>
-    </SafeAreaView>
+  return (
+    <View style={styles.container}>
+      <GraphSet
+        data={data}
+        style={styles.graphSet}
+        lineColor="orange"
+      />
+
+      <LineChart
+        style={styles.mainGraphContainer}
+        data={mainData}
+        svg={{ stroke: 'orange', strokeWidth: 3, }}
+      >
+        <Grid />
+      </LineChart>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  graphSetContainer: {
+  container: {
     flex: 1,
-    width: 300,
-    height: 300,
-    backgroundColor: 'red',
+    padding: '5%',
+    paddingTop: '2.5%',
+    paddingBottom: '2.5%',
+    backgroundColor: '#2c5364',
   },
-  mainGraph: {
-    flex: 1,
-    backgroundColor: 'green',
+  graphSet: {
+    flex: 2,
+    marginBottom: '2.5%',
   },
-  graph: {
-    width: '50%',
-    height: '100%',
-    backgroundColor: 'yellow',
-  },
+  mainGraphContainer: {
+    flex: 3,
+  }
 });
 
 export default TempScreen;

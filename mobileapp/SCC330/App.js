@@ -28,6 +28,9 @@ const RootStack = createBottomTabNavigator({
   Movement: MovScreen,
 }, {
   initialRouteName: 'Temperature',
+  tabBarOptions: {
+    activeTintColor: '#2c5364',
+  }
 });
 
 const AppContainer = createAppContainer(RootStack);
