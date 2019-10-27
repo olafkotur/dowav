@@ -18,40 +18,44 @@ const ControlPane: React.FC<ControlPaneProps> = ({
 }) => {
     return (
         <div className="control-pane">
-            <div className={`${conf.name} time-button-group`}>
-                {conf.timePeriod.map((t: TimePeriod) => {
-                    return (
-                        <div
-                            key={t.timePeriod}
-                            className={`time-button ${
-                                t.selected ? 'selected' : ''
-                            }`}
-                            onClick={() => {
-                                if (!t.selected)
-                                    setTimePeriod(
-                                        conf.timePeriod.map(
-                                            (ti: TimePeriod) => {
-                                                if (ti === t) {
-                                                    return {
-                                                        ...ti,
-                                                        selected: !ti.selected
-                                                    };
-                                                } else {
-                                                    return {
-                                                        ...ti,
-                                                        selected: false
-                                                    };
+            {!live ? (
+                <div className={`${conf.name} time-button-group`}>
+                    {conf.timePeriod.map((t: TimePeriod) => {
+                        return (
+                            <div
+                                key={t.timePeriod}
+                                className={`time-button ${
+                                    t.selected ? 'selected' : ''
+                                }`}
+                                onClick={() => {
+                                    if (!t.selected)
+                                        setTimePeriod(
+                                            conf.timePeriod.map(
+                                                (ti: TimePeriod) => {
+                                                    if (ti === t) {
+                                                        return {
+                                                            ...ti,
+                                                            selected: !ti.selected
+                                                        };
+                                                    } else {
+                                                        return {
+                                                            ...ti,
+                                                            selected: false
+                                                        };
+                                                    }
                                                 }
-                                            }
-                                        )
-                                    );
-                            }}
-                        >
-                            {`${t.timePeriod}m`}
-                        </div>
-                    );
-                })}
-            </div>
+                                            )
+                                        );
+                                }}
+                            >
+                                {`${t.timePeriod}m`}
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div></div>
+            )}
             {shouldRenderLive ? (
                 <button
                     className={`${conf.name} ${live ? 'live' : ''}`}
