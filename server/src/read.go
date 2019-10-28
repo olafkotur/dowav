@@ -2,12 +2,15 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/tarm/serial"
 )
 
@@ -27,18 +30,25 @@ func readSerial(name, baud string) {
 	}
 	log.Printf("Success - listening to %s\n\n", name)
 
+	go sendSocketData(sp)
+
 	path, file := createLogFile()
-	go listenAndLogR(sp, path, file)
+	for {
+		data := listenToPort(sp)
+		if data != "" {
+			logData(data, path, file)
+		}
+	}
 }
 
-func listenAndLogR(sp *serial.Port, path string, file *os.File) func() {
+func listenToPort(sp *serial.Port) (b string) {
+	var data string
 	reader := bufio.NewReader(sp)
 	bytes, _ := reader.ReadBytes('\x0a')
 	if bytes != nil {
-		str := string(bytes)
-		logData(str, path, file)
+		data = string(bytes)
 	}
-	return listenAndLogR(sp, path, file)
+	return data
 }
 
 func createLogFile() (path string, f *os.File) {
@@ -70,4 +80,26 @@ func logData(data, path string, file *os.File) {
 		log.Println(err)
 		return
 	}
+}
+
+func sendSocketData(sp *serial.Port) {
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	fmt.Println("Establishing web socket connection on /live/data")
+	http.HandleFunc("/live/data", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Println("Sending data")
+		conn, err := upgrader.Upgrade(writer, request, nil)
+		if err != nil {
+			panic(err)
+		}
+		for {
+			data := listenToPort(sp)
+			if data != "" {
+				conn.WriteMessage(1, []byte(data))
+			}
+		}
+	})
 }
