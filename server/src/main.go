@@ -20,7 +20,9 @@ func main() {
 	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
 	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
 
+	serialChan := make(chan string, 1)
 	go startServer(SERVER_PORT, WEB_BUILD_PATH)
-	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
+	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD, serialChan)
+	go sendSocketData(serialChan)
 	startScheduler()
 }

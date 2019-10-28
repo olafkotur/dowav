@@ -2,13 +2,14 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"strconv"
 
 	"github.com/tarm/serial"
 )
 
-func startReadingSerial(name, baud string) {
+func startReadingSerial(name, baud string, serialChan chan string) {
 	log.Printf("Attempting to read serial data\n")
 	baudInt, err := strconv.Atoi(baud)
 	if err != nil {
@@ -29,6 +30,12 @@ func startReadingSerial(name, baud string) {
 		data := listenToPort(sp)
 		if data != "" {
 			logData(data, path, file)
+
+			for len(serialChan) > 0 {
+				<-serialChan
+			}
+			serialChan <- data
+			fmt.Println(data)
 		}
 	}
 }
