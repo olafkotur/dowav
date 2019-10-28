@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -35,7 +34,6 @@ func startReadingSerial(name, baud string, serialChan chan string) {
 				<-serialChan
 			}
 			serialChan <- data
-			fmt.Println(data)
 		}
 	}
 }
