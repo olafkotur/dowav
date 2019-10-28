@@ -33,3 +33,19 @@ export type TimePeriod = {
     timePeriod: number;
     selected: boolean;
 };
+
+export type FetchError = {
+    title: string;
+    message: string;
+    actions?: string[];
+};
+
+export type ErrorMessages = {
+    [key: string]: FetchError;
+};
+
+export type UseFetchState = {
+    loading: boolean;
+    data: any | null;
+    error: FetchError | null;
+};

@@ -247,7 +247,6 @@ export default class D3Graph {
     }
 
     public plot(on?: string) {
-        console.log(on);
         let svgLocal = d3.select(this.svg);
         // Events
         svgLocal.on('mousemove', () => this.showTip());

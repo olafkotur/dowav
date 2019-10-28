@@ -105,19 +105,17 @@ const Graph: React.FC<GraphProps> = ({
             }
         }
     }, [viewport]);
-
     return (
-        <div
-            ref={container}
-            className={`graph ${conf.name} ${live ? 'live' : ''}`}
-        >
-            <ControlPane
-                shouldRenderLive={control.shouldRenderLive}
-                live={live}
-                setLive={() => setLive(!live)}
-                setTimePeriod={setTimePeriod}
-                conf={{ ...conf, timePeriod: timePeriod }}
-            />
+        <div className={`graph ${conf.name} ${live ? 'live' : ''}`}>
+            <div ref={container}>
+                <ControlPane
+                    shouldRenderLive={control.shouldRenderLive}
+                    live={live}
+                    setLive={() => setLive(!live)}
+                    setTimePeriod={setTimePeriod}
+                    conf={{ ...conf, timePeriod: timePeriod }}
+                />
+            </div>
         </div>
     );
 };

@@ -1,15 +1,22 @@
 import React, { useRef, useState, useLayoutEffect } from 'react';
 import { IViewport } from '../../types';
 import Graph from './Graph';
-import data from '../../data/mockdata';
+import useFetch from '../../hooks/useFetch';
+import Loader from '../styled/Loader';
+import ErrorMessage from '../../errors/ErrorMessage';
 
 type GraphViewProps = {
     currentOption: string;
 };
 
 const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
+    const [count, setCount] = useState(0);
     const [size, setSize] = useState<IViewport | null>(null);
     const graphRef = useRef<HTMLDivElement>(null);
+    const { loading, data, error } = useFetch({
+        useCache: true,
+        refetch: count
+    });
     const updateSize = () => {
         if (graphRef.current) {
             let viewport = graphRef.current.getBoundingClientRect();
@@ -29,65 +36,85 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
         <div ref={graphRef} className="graph-view">
             {size ? (
                 <>
-                    <div className="graph-view-row">
-                        <Graph
-                            data={data}
-                            viewport={{
-                                width: (size.width - 50) / 3,
-                                height: (size.height - 100) / 2
-                            }}
-                            conf={{
-                                name: currentOption,
-                                id: currentOption + 1
-                            }}
-                        />
-                        <Graph
-                            data={data.slice(30)}
-                            viewport={{
-                                width: (size.width - 50) / 3,
-                                height: (size.height - 100) / 2
-                            }}
-                            conf={{
-                                name: currentOption,
-                                id: currentOption + 2
-                            }}
-                        />
-                        <Graph
-                            data={data.slice(20, 40)}
-                            viewport={{
-                                width: (size.width - 50) / 3,
-                                height: (size.height - 100) / 2
-                            }}
-                            conf={{
-                                name: currentOption,
-                                id: currentOption + 3
-                            }}
-                        />
-                    </div>
-                    <div className="graph-view-row">
-                        <Graph
-                            data={{
-                                zoneA: data,
-                                zoneB: data.slice(30).map(d => ({
-                                    ...d,
-                                    avg: d.avg + Math.random() * 5 - 3
-                                })),
-                                zoneC: data.slice(20, 40).map(d => ({
-                                    ...d,
-                                    avg: d.avg + Math.random() * 5 - 6
-                                }))
-                            }}
-                            control={{ shouldRenderLive: false }}
-                            viewport={{
-                                width: size.width - 10,
-                                height: (size.height - 100) / 2
-                            }}
-                            conf={{
-                                name: currentOption,
-                                id: currentOption + 4
-                            }}
-                        />
-                    </div>
+                    {loading ? (
+                        <Loader size={size} currentOption={currentOption} />
+                    ) : error ? (
+                        <div className="error-message">
+                            <ErrorMessage
+                                error={error}
+                                onRefetch={() => {
+                                    setCount(count + 1);
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="graph-view-row">
+                                <Graph
+                                    data={data}
+                                    viewport={{
+                                        width: (size.width - 50) / 3,
+                                        height: (size.height - 100) / 2
+                                    }}
+                                    conf={{
+                                        name: currentOption,
+                                        id: currentOption + 1
+                                    }}
+                                />
+                                <Graph
+                                    data={data.slice(30)}
+                                    viewport={{
+                                        width: (size.width - 50) / 3,
+                                        height: (size.height - 100) / 2
+                                    }}
+                                    conf={{
+                                        name: currentOption,
+                                        id: currentOption + 2
+                                    }}
+                                />
+                                <Graph
+                                    data={data.slice(20, 40)}
+                                    viewport={{
+                                        width: (size.width - 50) / 3,
+                                        height: (size.height - 100) / 2
+                                    }}
+                                    conf={{
+                                        name: currentOption,
+                                        id: currentOption + 3
+                                    }}
+                                />
+                            </div>
+                            <div className="graph-view-row">
+                                <Graph
+                                    data={{
+                                        zoneA: data,
+                                        zoneB: data.slice(30).map((d: any) => ({
+                                            ...d,
+                                            avg: d.avg + Math.random() * 5 - 3
+                                        })),
+                                        zoneC: data
+                                            .slice(20, 40)
+                                            .map((d: any) => ({
+                                                ...d,
+                                                avg:
+                                                    d.avg +
+                                                    Math.random() * 5 -
+                                                    6
+                                            }))
+                                    }}
+                                    control={{ shouldRenderLive: false }}
+                                    viewport={{
+                                        width: size.width - 10,
+                                        height: (size.height - 100) / 2
+                                    }}
+                                    conf={{
+                                        name: currentOption,
+                                        id: currentOption + 4
+                                    }}
+                                />
+                            </div>
+                        </>
+                    )}
                 </>
             ) : null}
         </div>

@@ -67,6 +67,7 @@ body {
         }
         &:hover {
             background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
         }
 
         &.selected {
@@ -183,6 +184,7 @@ body {
             }
             .time-button:hover {
                 color: black;
+                cursor: pointer;
                 background: $temperature;
             }
         }
@@ -194,6 +196,7 @@ body {
                 background: $moisture;
             }
             .time-button:hover {
+                cursor: pointer;
                 color: black;
                 background: $moisture;
             }
@@ -206,6 +209,7 @@ body {
                 background: $light;
             }
             .time-button:hover {
+                cursor: pointer;
                 color: black;
                 background: $light;
             }
@@ -233,6 +237,7 @@ body {
             }
             &:hover {
                 color: black;
+                cursor: pointer;
                 background: $temperature;
             }
         }
@@ -244,6 +249,7 @@ body {
                 background: $moisture;
             }
             &:hover {
+                cursor: pointer;
                 color: black;
                 background: $moisture;
             }
@@ -258,6 +264,7 @@ body {
             &:hover {
                 color: black;
                 background: $light;
+                cursor: pointer;
             }
         }
     }
@@ -279,5 +286,33 @@ svg {
         stroke: rgba(255, 255, 255, 0.2);
         stroke-width: 1;
         stroke-dasharray: 2;
+    }
+}
+
+// Error message
+
+.error-message {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    .error-box {
+        background: #4f0606cc;
+        border-radius: 10px;
+        padding: 25px;
+        p {
+            color: rgb(200, 200, 200);
+        }
+        div {
+            display: flex;
+            justify-content: center;
+            .refetch-icon {
+                &:hover {
+                    cursor: pointer;
+                    background: rgba(0, 0, 0, 0.1);
+                }
+            }
+        }
     }
 }
