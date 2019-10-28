@@ -15,7 +15,7 @@ func startScheduler() {
 	for {
 		// Process data
 		if timeSinceLastRun >= processDataInterval {
-			log.Printf("Processing serial data...\n")
+			log.Printf("Starting to process raw data...\n")
 			startProcessingData(processDataInterval)
 			timeSinceLastRun = 0 * time.Second
 		} else {

@@ -2,9 +2,43 @@ package main
 
 import (
 	"io/ioutil"
+	"log"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 )
+
+func createLogFile() (path string, f *os.File) {
+	t := time.Now().Unix()
+	logPath := "logs/log-" + strconv.FormatInt(t, 10) + ".txt"
+
+	file, err := os.Create(logPath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Printf("New log file created in %s\n\n", logPath)
+
+	defer file.Close()
+	return logPath, file
+}
+
+func logData(data, path string, file *os.File) {
+	existingData, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	t := time.Now().Unix()
+	writeBytes := append(existingData, []byte(strconv.FormatInt(t, 10)+" "+data)...)
+	err = ioutil.WriteFile(path, writeBytes, 0644)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
 
 func getLatestLog() (p string) {
 	files, err := ioutil.ReadDir("./logs/")

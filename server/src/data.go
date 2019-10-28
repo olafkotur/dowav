@@ -145,3 +145,11 @@ func formatData(avg, min, max []int, startTime, endTime int) {
 	// TODO: Upload to db here
 	log.Println(data)
 }
+
+func toInt(s string) (i int) {
+	r, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}

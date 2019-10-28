@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func startServer(path, port string) {
+func startServer(port, path string) {
 	var fs = http.FileServer(http.Dir(path))
 	http.Handle("/", fs)
 

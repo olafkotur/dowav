@@ -20,9 +20,7 @@ func main() {
 	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
 	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
 
-	// Execution start
-	go readSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
-	go startServer(WEB_BUILD_PATH, SERVER_PORT)
-
+	go startServer(SERVER_PORT, WEB_BUILD_PATH)
+	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 	startScheduler()
 }
