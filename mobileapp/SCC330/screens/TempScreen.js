@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
+
 import GraphSet from '../components/GraphSet';
 
 const TempScreen = () => {
