@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     IViewport,
     HistoryData,
+    IHistoryData,
     GraphConfiguration,
     TimePeriod
 } from '../../types';
@@ -26,6 +27,7 @@ const Graph: React.FC<GraphProps> = ({
 }) => {
     const container = useRef<HTMLDivElement>(null);
     const [live, setLive] = useState<boolean>(false);
+    const [liveData, setLiveData] = useState<any>([]);
     const [timePeriod, setTimePeriod] = useState<TimePeriod[]>([
         { timePeriod: 5, selected: true },
         { timePeriod: 15, selected: false },
@@ -105,13 +107,60 @@ const Graph: React.FC<GraphProps> = ({
             }
         }
     }, [viewport]);
+
+    useEffect(() => {
+        if (d3chart) {
+            if (live) {
+                d3chart.goLive();
+                const id = setInterval(() => {
+                    setLiveData((prev: any) => {
+                        if (prev.length < 10) {
+                            return [
+                                ...prev,
+                                {
+                                    value: Math.random() * 5 + 17,
+                                    time: Date.now()
+                                }
+                            ];
+                        } else {
+                            return [
+                                ...prev.slice(1),
+                                {
+                                    value: Math.random() * 5 + 17,
+                                    time: Date.now()
+                                }
+                            ];
+                        }
+                    });
+                    console.log({
+                        value: Math.random() * 5 + 17,
+                        time: Date.now()
+                    });
+                }, 1000);
+                return () => clearInterval(id);
+            }
+        }
+    }, [d3chart, live]);
+
+    useEffect(() => {
+        if (live && d3chart && liveData.length > 0) {
+            d3chart.addLiveData(liveData);
+        }
+    }, [liveData]);
+
     return (
         <div className={`graph ${conf.name} ${live ? 'live' : ''}`}>
             <div ref={container}>
                 <ControlPane
                     shouldRenderLive={control.shouldRenderLive}
                     live={live}
-                    setLive={() => setLive(!live)}
+                    setLive={() => {
+                        if (live && d3chart) {
+                            d3chart.goHistory(data);
+                            setLiveData([]);
+                        }
+                        setLive(!live);
+                    }}
                     setTimePeriod={setTimePeriod}
                     conf={{ ...conf, timePeriod: timePeriod }}
                 />

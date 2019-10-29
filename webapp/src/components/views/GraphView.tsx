@@ -90,14 +90,15 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                                         zoneA: data,
                                         zoneB: data.slice(30).map((d: any) => ({
                                             ...d,
-                                            avg: d.avg + Math.random() * 5 - 3
+                                            value:
+                                                d.value + Math.random() * 5 - 3
                                         })),
                                         zoneC: data
                                             .slice(20, 40)
                                             .map((d: any) => ({
                                                 ...d,
-                                                avg:
-                                                    d.avg +
+                                                value:
+                                                    d.value +
                                                     Math.random() * 5 -
                                                     6
                                             }))

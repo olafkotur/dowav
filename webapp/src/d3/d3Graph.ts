@@ -129,12 +129,12 @@ export default class D3Graph {
             let tempTime = 0;
             for (let i = 0; i < data.length; i++) {
                 if (i % k === k - 1 || i === data.length - 1) {
-                    tempAvg += data[i].avg;
+                    tempAvg += data[i].value;
 
                     const divider = i % k === k - 1 ? k : data.length % k;
                     newData.push({
                         time: tempTime,
-                        avg: tempAvg / divider,
+                        value: tempAvg / divider,
                         min: 0,
                         max: 0
                     });
@@ -142,7 +142,7 @@ export default class D3Graph {
                     tempAvg = 0;
                     tempTime = 0;
                 } else {
-                    tempAvg += data[i].avg;
+                    tempAvg += data[i].value;
                     if (i % k === 0) tempTime = data[i].time;
                 }
             }
@@ -156,13 +156,13 @@ export default class D3Graph {
                 let tempTime = 0;
                 for (let i = 0; i < zoneData.length; i++) {
                     if (i % k === k - 1 || i === zoneData.length - 1) {
-                        tempAvg += zoneData[i].avg;
+                        tempAvg += zoneData[i].value;
 
                         const divider =
                             i % k === k - 1 ? k : zoneData.length % k;
                         newData.push({
                             time: tempTime,
-                            avg: tempAvg / divider,
+                            value: tempAvg / divider,
                             min: 0,
                             max: 0
                         });
@@ -170,7 +170,7 @@ export default class D3Graph {
                         tempAvg = 0;
                         tempTime = 0;
                     } else {
-                        tempAvg += zoneData[i].avg;
+                        tempAvg += zoneData[i].value;
                         if (i % k === 0) tempTime = zoneData[i].time;
                     }
                 }
@@ -187,6 +187,55 @@ export default class D3Graph {
             .attr('height', viewport.height);
         this.viewport = viewport;
         this.resize();
+    }
+
+    // Graphs with one source only could be live
+    // Add if statements if that have been changed.
+    public goLive(): void {
+        this.dashedLines.html('');
+        this.line.remove();
+        this.xAxis.html('');
+        this.yAxis.html('');
+        this.line = d3
+            .select(this.svg)
+            .append('path')
+            .attr('class', 'line')
+            .attr(
+                'stroke',
+                this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                    this.conf.name === MENU_OPTIONS.MOISTURE ||
+                    this.conf.name === MENU_OPTIONS.LIGHT
+                    ? 'url(#line-gradient)'
+                    : colors[0]
+            );
+        // Data go here
+    }
+
+    public addLiveData(data: any) {
+        this.data = data;
+        this.getXScale(this.data);
+        this.getYScale(this.data);
+        this.plot('live');
+    }
+
+    public goHistory(data: HistoryData): void {
+        this.data = this.scaleData(data);
+        this.getXScale(this.data);
+        this.getYScale(this.data);
+        this.line.remove();
+        this.line = d3
+            .select(this.svg)
+            .append('path')
+            .attr('class', 'line')
+            .attr(
+                'stroke',
+                this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                    this.conf.name === MENU_OPTIONS.MOISTURE ||
+                    this.conf.name === MENU_OPTIONS.LIGHT
+                    ? 'url(#line-gradient)'
+                    : colors[0]
+            );
+        this.plot('start');
     }
 
     public showTip() {
@@ -206,14 +255,14 @@ export default class D3Graph {
                     d3.select(this.svg)
                         .append('circle')
                         .attr('cx', sX)
-                        .attr('cy', this.yScale(this.data[index].avg))
+                        .attr('cy', this.yScale(this.data[index].value))
                         .attr('r', 5)
                         .attr('fill', 'none')
                         .attr('stroke', 'white');
                 } else {
                     dot.attr('cx', this.xScale(this.data[index].time)).attr(
                         'cy',
-                        this.yScale(this.data[index].avg)
+                        this.yScale(this.data[index].value)
                     );
                     this.tooltip
                         .html(
@@ -221,13 +270,13 @@ export default class D3Graph {
                                 this.data[index].time
                             ).toLocaleString()}</p><p>Value: ${this.data[
                                 index
-                            ].avg.toFixed(2)}</p>`
+                            ].value.toFixed(2)}</p>`
                         )
                         .classed('show', true)
                         .style(
                             'top',
                             Math.floor(
-                                this.yScale(this.data[index].avg) +
+                                this.yScale(this.data[index].value) +
                                     this.margin.top
                             ) + 'px'
                         )
@@ -264,7 +313,7 @@ export default class D3Graph {
         let line = d3
             .line()
             .x((d: any) => this.xScale(new Date(d.time)))
-            .y((d: any) => this.yScale(d.avg))
+            .y((d: any) => this.yScale(d.value))
             .curve(d3.curveMonotoneX);
         // x axis
         const availableWidth =
@@ -300,6 +349,13 @@ export default class D3Graph {
             }
             //path
             this.line.datum(this.data).attr('d', line as any);
+
+            if (on === 'live') {
+                this.line
+                    .attr('transform', null)
+                    .transition()
+                    .attr('transform', 'translate("-20")');
+            }
 
             if (on === 'update') {
                 this.line
@@ -402,7 +458,7 @@ export default class D3Graph {
         if (data instanceof Array) {
             this.yScale = d3
                 .scaleLinear()
-                .domain(<[number, number]>d3.extent(data, d => d.avg))
+                .domain(<[number, number]>d3.extent(data, d => d.value))
                 .range([
                     this.viewport.height - this.margin.top,
                     this.margin.bottom
@@ -410,7 +466,7 @@ export default class D3Graph {
         } else if (typeof data === 'object') {
             let minmax: (number | undefined)[] = [];
             for (let key in data) {
-                minmax.push(...d3.extent(data[key], d => d.avg));
+                minmax.push(...d3.extent(data[key], d => d.value));
             }
             this.yScale = d3
                 .scaleLinear()

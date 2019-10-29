@@ -12,9 +12,9 @@ export interface IMargin {
 
 export interface IHistoryData {
     time: number;
-    avg: number;
-    min: number;
-    max: number;
+    value: number;
+    min?: number;
+    max?: number;
 }
 
 export type MultipleHistoryData = {
