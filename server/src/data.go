@@ -153,3 +153,7 @@ func toInt(s string) (i int) {
 	}
 	return r
 }
+
+func toString(i int) (s string) {
+	return strconv.Itoa(i)
+}

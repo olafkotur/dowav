@@ -8,7 +8,7 @@ import (
 	"github.com/tarm/serial"
 )
 
-func startReadingSerial(name, baud string, serialChan chan string) {
+func startReadingSerial(name, baud string, channels []chan string) {
 	log.Printf("Attempting to read serial data\n")
 	baudInt, err := strconv.Atoi(baud)
 	if err != nil {
@@ -27,14 +27,35 @@ func startReadingSerial(name, baud string, serialChan chan string) {
 	path, file := createLogFile()
 	for {
 		data := listenToPort(sp)
-		if data != "" {
-			logData(data, path, file)
+		strData := string(data[1])
 
-			for len(serialChan) > 0 {
-				<-serialChan
+		if data == "" {
+			continue
+		} else {
+			// Send via goutine channels
+			if strData == "1" {
+				clearChan(channels[0])
+				channels[0] <- data
+
+			} else if strData == "2" {
+				clearChan(channels[1])
+				channels[1] <- data
+
+			} else if strData == "3" {
+				clearChan(channels[2])
+				channels[2] <- data
 			}
-			serialChan <- data
+
+			logData(data, path, file)
 		}
+
+	}
+}
+
+// Deletes unused messgaes
+func clearChan(c chan string) {
+	for len(c) > 0 {
+		<-c
 	}
 }
 

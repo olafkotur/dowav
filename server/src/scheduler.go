@@ -15,8 +15,8 @@ func startScheduler() {
 	for {
 		// Process data
 		if timeSinceLastRun >= processDataInterval {
-			log.Printf("Starting to process raw data...\n")
-			startProcessingData(processDataInterval)
+			// log.Printf("Starting to process raw data...\n")
+			// startProcessingData(processDataInterval)
 			timeSinceLastRun = 0 * time.Second
 		} else {
 			timeSinceLastRun += 1 * time.Second
