@@ -15,22 +15,31 @@ func startServer(port, path string) {
 	http.ListenAndServe(":"+port, nil)
 }
 
-func sendSocketData(serialChan chan string) {
+// Creates web socket for each channel passed into the function
+func sendSocketData(channels []chan string) {
+	for i := 1; i <= len(channels); i++ { // Starts at 1 by design
+		zone := i
+		go http.HandleFunc("/live/zone/"+toString(zone), func(writer http.ResponseWriter, request *http.Request) {
+			handleSocket(zone, channels, writer, request)
+		})
+	}
+}
+
+// Sends data via the websocket from the channel
+func handleSocket(zone int, channels []chan string, writer http.ResponseWriter, request *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 
-	http.HandleFunc("/live/data", func(writer http.ResponseWriter, request *http.Request) {
-		log.Println("Successfuly established web socket connection on /live/data")
-		conn, err := upgrader.Upgrade(writer, request, nil)
-		if err != nil {
-			panic(err)
-		}
+	log.Println("Successfuly established web socket connection on /live/zone/" + toString(zone))
+	conn, err := upgrader.Upgrade(writer, request, nil)
+	if err != nil {
+		panic(err)
+	}
 
-		for {
-			data := <-serialChan
-			conn.WriteMessage(1, []byte(data))
-		}
-	})
+	for {
+		data := <-channels[zone-1]
+		conn.WriteMessage(1, []byte(data))
+	}
 }
