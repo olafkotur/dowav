@@ -26,13 +26,17 @@ function drawGradient(
             });
         }
     }
-    svg.append('linearGradient')
-        .attr('id', 'line-gradient')
-        .attr('gradientUnits', 'userSpaceOnUse')
-        .attr('x1', viewport.width / 2)
-        .attr('y1', 50)
+    let grad = svg.select('#line-gradient');
+    if (grad.empty()) {
+        grad = svg
+            .append('linearGradient')
+            .attr('id', 'line-gradient')
+            .attr('gradientUnits', 'userSpaceOnUse');
+    }
+    grad.attr('x1', viewport.width / 2)
+        .attr('y1', 0)
         .attr('x2', viewport.width / 2)
-        .attr('y2', viewport.height - 50)
+        .attr('y2', viewport.height)
         .selectAll('stop')
         .data(data)
         .enter()

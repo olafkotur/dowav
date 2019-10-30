@@ -21,11 +21,13 @@ type D3GraphProps = {
 const colors = ['#ffa500', '#ff2929', '#7a7aed'];
 
 export default class D3Graph {
-    private svg: HTMLElement;
+    private svgHTML: any;
+    private svg: any;
     private viewport: IViewport;
     private margin: IMargin;
     // TODO CHANGE ANY
     private data: HistoryData;
+    private liveData: IHistoryData[];
     private xScale: any;
     private yScale: any;
     private conf: GraphConfiguration & { timePeriod: TimePeriod };
@@ -33,23 +35,36 @@ export default class D3Graph {
     private line: any;
     private xAxis: any;
     private yAxis: any;
+    private clip: any;
     private dashedLines: any;
     public constructor(options: D3GraphProps) {
-        this.svg = options.svg;
-        this.viewport = options.viewport;
+        this.svgHTML = options.svg;
         this.margin = { top: 40, bottom: 40, left: 40, right: 40 };
+        this.viewport = {
+            width:
+                options.viewport.width - this.margin.left - this.margin.right,
+            height:
+                options.viewport.height - this.margin.top - this.margin.bottom
+        };
+        this.svg = d3
+            .select(options.svg)
+            .append('g')
+            .attr(
+                'transform',
+                `translate(${this.margin.left}, ${this.margin.right})`
+            );
         this.conf = options.conf;
         this.data = this.scaleData(options.data);
+        this.liveData = [];
         this.getXScale(this.data);
         this.getYScale(this.data);
         this.tooltip = d3
-            .select(this.svg.parentNode as any)
+            .select(this.svgHTML.parentNode as any)
             .append('div')
             .attr('class', 'tooltip');
         // Add html
         if (this.data instanceof Array) {
-            this.line = d3
-                .select(this.svg)
+            this.line = this.svg
                 .append('path')
                 .attr('class', 'line')
                 .attr(
@@ -65,31 +80,46 @@ export default class D3Graph {
             this.line = [];
             for (let i = 0; i < keys.length; i++) {
                 this.line.push(
-                    d3
-                        .select(this.svg)
+                    this.svg
                         .append('path')
                         .attr('class', 'line')
                         .attr('stroke', colors[i])
                 );
             }
         }
-        this.xAxis = d3
-            .select(this.svg)
+        this.clip = this.svg
             .append('g')
-            .attr('class', 'x-axis')
-            .attr(
-                'transform',
-                `translate(0, ${this.viewport.height - this.margin.bottom})`
-            );
+            .attr('class', 'clip')
+            .append('defs')
+            .append('clipPath')
+            .attr('id', 'clip')
+            .append('rect')
+            .attr('width', this.viewport.width)
+            .attr('height', this.viewport.height);
+        this.xAxis = d3
+            .select(this.svgHTML)
+            .append('g')
+            .attr('class', 'x-axis');
         this.yAxis = d3
-            .select(this.svg)
+            .select(this.svgHTML)
             .append('g')
             .attr('class', 'y-axis')
-            .attr('transform', `translate(${this.margin.left}, 0)`);
-        this.dashedLines = d3
-            .select(this.svg)
-            .append('g')
-            .classed('dashed-line-g', true);
+            .attr(
+                'transform',
+                `translate(${this.margin.left}, ${this.margin.top})`
+            );
+        this.dashedLines = this.svg.append('g').classed('dashed-line-g', true);
+        if (
+            this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+            this.conf.name === MENU_OPTIONS.MOISTURE ||
+            this.conf.name === MENU_OPTIONS.LIGHT
+        ) {
+            d3LineGradients.drawGradient(
+                this.svg,
+                this.viewport,
+                this.conf.name
+            );
+        }
     }
 
     public setConf(
@@ -182,10 +212,13 @@ export default class D3Graph {
     }
 
     public setViewport(viewport: IViewport) {
-        d3.select(this.svg)
+        d3.select(this.svgHTML)
             .attr('width', viewport.width)
             .attr('height', viewport.height);
-        this.viewport = viewport;
+        this.viewport = {
+            width: viewport.width - this.margin.left - this.margin.right,
+            height: viewport.height - this.margin.top - this.margin.bottom
+        };
         this.resize();
     }
 
@@ -193,12 +226,12 @@ export default class D3Graph {
     // Add if statements if that have been changed.
     public goLive(): void {
         this.dashedLines.html('');
-        this.line.remove();
         this.xAxis.html('');
         this.yAxis.html('');
-        this.line = d3
-            .select(this.svg)
+        this.line.remove();
+        this.line = this.svg
             .append('path')
+            .attr('clip-path', 'url(#clip)')
             .attr('class', 'line')
             .attr(
                 'stroke',
@@ -209,22 +242,75 @@ export default class D3Graph {
                     : colors[0]
             );
         // Data go here
+        this.liveData = [];
+        d3.select(this.svgHTML).on('mousemove', null);
+        d3.select(this.svgHTML).on('mouseleave', null);
     }
 
-    public addLiveData(data: any) {
-        this.data = data;
-        this.getXScale(this.data);
-        this.getYScale(this.data);
-        this.plot('live');
+    public addLiveData(data: IHistoryData) {
+        this.liveData.push(data);
+        this.plotLive();
     }
 
-    public goHistory(data: HistoryData): void {
-        this.data = this.scaleData(data);
+    private plotLive() {
+        console.log(this.liveData);
+        function getTranslate(this: D3Graph): number {
+            if (this.liveData.length >= 30) {
+                let n =
+                    this.xScale(this.liveData[0].time) -
+                    this.xScale(this.liveData[1].time);
+                return n;
+            } else {
+                return 0;
+            }
+        }
+        // y axis
+        if (this.liveData.length > 2) {
+            this.getYScale(this.liveData.slice(1, this.liveData.length - 1));
+            const axisLeft = d3
+                .axisLeft(this.yScale)
+                .ticks(Math.floor(this.viewport.height / 20));
+            this.yAxis
+                .transition()
+                .duration(400)
+                .call(axisLeft);
+            // x-axis
+            this.getXScale(this.liveData);
+            const axisBottom = d3
+                .axisBottom(this.xScale)
+                .ticks(Math.floor(this.viewport.height / 40));
+            this.xAxis
+                .transition()
+                .duration(400)
+                .call(axisBottom);
+
+            let line = d3
+                .line()
+                .x((d: any) => this.xScale(new Date(d.time)))
+                .y((d: any) => this.yScale(d.value))
+                .curve(d3.curveMonotoneX);
+
+            this.line
+                .datum(this.liveData.slice(1))
+                .attr('d', line)
+                .style('transform', null)
+                .transition()
+                .duration(300)
+                .style(
+                    'transform',
+                    `translate(${getTranslate.bind(this)()}px, 0)`
+                );
+            if (this.liveData.length >= 30) {
+                this.liveData.shift();
+            }
+        }
+    }
+
+    public goHistory(): void {
         this.getXScale(this.data);
         this.getYScale(this.data);
         this.line.remove();
-        this.line = d3
-            .select(this.svg)
+        this.line = this.svg
             .append('path')
             .attr('class', 'line')
             .attr(
@@ -240,19 +326,19 @@ export default class D3Graph {
 
     public showTip() {
         const { offsetX, offsetY } = d3.event;
-        let dot = d3.select(this.svg).select('circle');
+        let dot = this.svg.select('circle');
         if (
             offsetX > this.margin.left &&
-            offsetX < this.viewport.width - this.margin.right &&
+            offsetX < this.viewport.width + this.margin.left &&
             offsetY > this.margin.top &&
-            offsetY < this.viewport.height - this.margin.bottom
+            offsetY < this.viewport.height + this.margin.top
         ) {
-            let x = this.xScale.invert(offsetX);
+            let x = this.xScale.invert(offsetX - this.margin.left);
             if (this.data instanceof Array) {
                 let index = this.data.findIndex(d => d.time > x);
                 let sX = this.xScale(this.data[index].time);
                 if (dot.empty()) {
-                    d3.select(this.svg)
+                    this.svg
                         .append('circle')
                         .attr('cx', sX)
                         .attr('cy', this.yScale(this.data[index].value))
@@ -277,10 +363,14 @@ export default class D3Graph {
                             'top',
                             Math.floor(
                                 this.yScale(this.data[index].value) +
-                                    this.margin.top
+                                    this.margin.top -
+                                    3
                             ) + 'px'
                         )
-                        .style('left', Math.floor(sX) + 'px')
+                        .style(
+                            'left',
+                            Math.floor(sX + this.margin.left + 5) + 'px'
+                        )
                         .style(
                             'margin-left',
                             sX > this.viewport.width / 2 ? '-130px' : '0px'
@@ -296,13 +386,10 @@ export default class D3Graph {
     }
 
     public plot(on?: string) {
-        let svgLocal = d3.select(this.svg);
         // Events
-        svgLocal.on('mousemove', () => this.showTip());
-        svgLocal.on('mouseleave', () => {
-            d3.select(this.svg)
-                .select('circle')
-                .remove();
+        d3.select(this.svgHTML).on('mousemove', () => this.showTip());
+        d3.select(this.svgHTML).on('mouseleave', () => {
+            this.svg.select('circle').remove();
             this.tooltip.classed('show', false);
         });
 
@@ -316,46 +403,34 @@ export default class D3Graph {
             .y((d: any) => this.yScale(d.value))
             .curve(d3.curveMonotoneX);
         // x axis
-        const availableWidth =
-            this.viewport.width - this.margin.left - this.margin.right;
         const bottomAxis = d3
             .axisBottom(this.xScale)
-            .ticks(Math.floor(availableWidth / 60));
-        this.xAxis.call(bottomAxis);
+            .ticks(Math.floor(this.viewport.width / 60));
+        this.xAxis
+            .attr(
+                'transform',
+                `translate(${this.margin.left}, ${this.viewport.height +
+                    this.margin.top})`
+            )
+            .call(bottomAxis);
         // y axis
-        const axisLeft = d3.axisLeft(this.yScale);
+        const axisLeft = d3
+            .axisLeft(this.yScale)
+            .ticks(Math.floor(this.viewport.height / 20));
         this.yAxis.call(axisLeft);
         this.dashedLines.html('');
         (axisLeft.scale() as any).ticks().forEach((d: number[]) => {
             this.dashedLines
                 .append('line')
                 .classed('dashed-line', true)
-                .attr('x1', this.margin.left)
+                .attr('x1', 0)
                 .attr('y1', this.yScale(d))
-                .attr('x2', this.viewport.width - this.margin.right)
+                .attr('x2', this.viewport.width)
                 .attr('y2', this.yScale(d));
         });
         if (this.data instanceof Array) {
-            if (
-                this.conf.name === MENU_OPTIONS.TEMPERATURE ||
-                this.conf.name === MENU_OPTIONS.MOISTURE ||
-                this.conf.name === MENU_OPTIONS.LIGHT
-            ) {
-                d3LineGradients.drawGradient(
-                    svgLocal,
-                    this.viewport,
-                    this.conf.name
-                );
-            }
             //path
             this.line.datum(this.data).attr('d', line as any);
-
-            if (on === 'live') {
-                this.line
-                    .attr('transform', null)
-                    .transition()
-                    .attr('transform', 'translate("-20")');
-            }
 
             if (on === 'update') {
                 this.line
@@ -374,14 +449,14 @@ export default class D3Graph {
                     .attr('stroke-dashoffset', 0);
             }
             if (on === 'start') {
-                svgLocal
+                this.svg
                     .attr('opacity', 0)
                     .transition(t as any)
                     .attr('opacity', 1);
             }
 
             // circles
-            svgLocal.selectAll('.dot');
+            this.svg.selectAll('.dot');
         } else if (typeof this.data === 'object') {
             let i = 0;
             for (let key in this.data) {
@@ -405,13 +480,13 @@ export default class D3Graph {
                         .attr('stroke-dashoffset', 0);
                 }
                 if (on === 'start') {
-                    svgLocal
+                    this.svg
                         .attr('opacity', 0)
                         .transition(<any>t)
                         .attr('opacity', 1);
                 }
                 // circles
-                svgLocal.selectAll('.dot');
+                this.svg.selectAll('.dot');
                 i++;
             }
         }
@@ -420,7 +495,25 @@ export default class D3Graph {
     public resize() {
         this.getXScale(this.data);
         this.getYScale(this.data);
-        this.plot();
+        if (
+            this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+            this.conf.name === MENU_OPTIONS.MOISTURE ||
+            this.conf.name === MENU_OPTIONS.LIGHT
+        ) {
+            d3LineGradients.drawGradient(
+                this.svg,
+                this.viewport,
+                this.conf.name
+            );
+        }
+        this.clip
+            .attr('width', this.viewport.width)
+            .attr('height', this.viewport.height);
+        if (this.liveData.length !== 0) {
+            this.plotLive();
+        } else {
+            this.plot();
+        }
     }
 
     private getXScale(data: HistoryData) {
@@ -431,10 +524,7 @@ export default class D3Graph {
                     new Date(data[0].time),
                     new Date(data[data.length - 1].time)
                 ])
-                .range([
-                    this.margin.left,
-                    this.viewport.width - this.margin.right
-                ]);
+                .range([0, this.viewport.width]);
         } else if (typeof data === 'object') {
             let minmax = [];
             for (let key in data) {
@@ -447,10 +537,7 @@ export default class D3Graph {
                     new Date(minmax[0] as any),
                     new Date(minmax[1] as any)
                 ])
-                .range([
-                    this.margin.left,
-                    this.viewport.width - this.margin.right
-                ]);
+                .range([0, this.viewport.width]);
         }
     }
 
@@ -459,10 +546,7 @@ export default class D3Graph {
             this.yScale = d3
                 .scaleLinear()
                 .domain(<[number, number]>d3.extent(data, d => d.value))
-                .range([
-                    this.viewport.height - this.margin.top,
-                    this.margin.bottom
-                ]);
+                .range([this.viewport.height, 0]);
         } else if (typeof data === 'object') {
             let minmax: (number | undefined)[] = [];
             for (let key in data) {
@@ -471,10 +555,7 @@ export default class D3Graph {
             this.yScale = d3
                 .scaleLinear()
                 .domain(d3.extent(minmax as any) as any)
-                .range([
-                    this.viewport.height - this.margin.top,
-                    this.margin.bottom
-                ]);
+                .range([this.viewport.height, 0]);
         }
     }
 }

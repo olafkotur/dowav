@@ -4,8 +4,8 @@ $bright-red: #ff0000;
 $bright-orange: #a1681c;
 $gradient-start: #2c5364;
 $gradient-end: #0f2027;
-$temperature: orange;
-$moisture: #3ad8fc;
+$temperature: #ff7521;
+$moisture: #0c8eeb;
 $light: #d1d1d1;
 
 * {
@@ -24,7 +24,14 @@ body {
     height: 100%;
     width: 100%;
     margin: 0;
-    background: #0f2027; /* fallback for old browsers */
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+    padding: 3vh 3%;
+    min-width: 1000px;
+    min-height: 500px;
     background: -webkit-linear-gradient(
         to right,
         $gradient-start,
@@ -37,12 +44,6 @@ body {
         #203a43,
         $gradient-end
     ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-}
-
-#root {
-    width: 100%;
-    height: 100%;
-    padding: 3vh 3%;
 }
 
 .menu {

@@ -27,7 +27,6 @@ const Graph: React.FC<GraphProps> = ({
 }) => {
     const container = useRef<HTMLDivElement>(null);
     const [live, setLive] = useState<boolean>(false);
-    const [liveData, setLiveData] = useState<any>([]);
     const [timePeriod, setTimePeriod] = useState<TimePeriod[]>([
         { timePeriod: 5, selected: true },
         { timePeriod: 15, selected: false },
@@ -113,26 +112,7 @@ const Graph: React.FC<GraphProps> = ({
             if (live) {
                 d3chart.goLive();
                 const id = setInterval(() => {
-                    setLiveData((prev: any) => {
-                        if (prev.length < 10) {
-                            return [
-                                ...prev,
-                                {
-                                    value: Math.random() * 5 + 17,
-                                    time: Date.now()
-                                }
-                            ];
-                        } else {
-                            return [
-                                ...prev.slice(1),
-                                {
-                                    value: Math.random() * 5 + 17,
-                                    time: Date.now()
-                                }
-                            ];
-                        }
-                    });
-                    console.log({
+                    d3chart.addLiveData({
                         value: Math.random() * 5 + 17,
                         time: Date.now()
                     });
@@ -142,12 +122,6 @@ const Graph: React.FC<GraphProps> = ({
         }
     }, [d3chart, live]);
 
-    useEffect(() => {
-        if (live && d3chart && liveData.length > 0) {
-            d3chart.addLiveData(liveData);
-        }
-    }, [liveData]);
-
     return (
         <div className={`graph ${conf.name} ${live ? 'live' : ''}`}>
             <div ref={container}>
@@ -156,8 +130,7 @@ const Graph: React.FC<GraphProps> = ({
                     live={live}
                     setLive={() => {
                         if (live && d3chart) {
-                            d3chart.goHistory(data);
-                            setLiveData([]);
+                            d3chart.goHistory();
                         }
                         setLive(!live);
                     }}
