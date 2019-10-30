@@ -10,7 +10,12 @@ const GraphButtonSet = props => {
     const isLast = i === count - 1;
 
     const thisStyle = [ styles.globalBtn ];
-    if (activeGraph === i) thisStyle.push(styles.activeBtn);
+    const textStyle = { color: 'white' };
+    
+    if (activeGraph === i) {
+      thisStyle.push(styles.activeBtn);
+      textStyle.color = 'black';
+    }
 
     if (isFirst) thisStyle.push(styles.firstBtn);
     else if (isLast) thisStyle.push(styles.lastBtn);
@@ -21,7 +26,7 @@ const GraphButtonSet = props => {
         onPress={onPress.bind(null, i)}
         key={i}
       >
-        <Text style={styles.title}>{`Device ${i + 1}`}</Text>
+        <Text style={textStyle}>{`Device ${i + 1}`}</Text>
       </TouchableOpacity>
     );
   }
@@ -45,7 +50,9 @@ const styles = StyleSheet.create({
   },
   globalBtn: {
     backgroundColor: 'transparent',
-    padding: 5,
+    padding: 6,
+    paddingLeft: 8,
+    paddingRight: 8,
   },
   firstBtn: {
     borderTopLeftRadius: BORDER_RADIUS,
@@ -57,9 +64,6 @@ const styles = StyleSheet.create({
   },
   activeBtn: {
     backgroundColor: 'orange',
-  },
-  title: {
-    color: 'white',
   },
 });
 

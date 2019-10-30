@@ -9,14 +9,13 @@ class GraphSet extends React.Component {
     graph: 0,
   }
 
-  _graphStyle(i) {
-    return {
-      display: (this.state.graph === i ? 'flex' : 'none'),
-      height: '100%',
-    };
-  }
-
   render() {
+    const { graph } = this.state;
+    const svgStyle = {
+      stroke: this.props.lineColor,
+      strokeWidth: 3,
+    };
+
     return (
       <View style={this.props.style}>
         <GraphButtonSet
@@ -26,16 +25,23 @@ class GraphSet extends React.Component {
         />
 
         <View style={styles.graphContainer}>
-          {this.props.data.map((dataSet, i) => (
-            <LineChart
-              style={this._graphStyle(i)}
-              data={dataSet}
-              svg={{ stroke: this.props.lineColor, strokeWidth: 3 }}
-              key={i}
-            >
-              <Grid />
-            </LineChart>
-          ))}
+          {this.props.data.map((dataSet, i) => {
+            const graphStyle = {
+              display: (graph === i ? 'flex' : 'none'),
+              height: '100%',
+            };
+
+            return (
+              <LineChart
+                style={graphStyle}
+                data={dataSet}
+                svg={svgStyle}
+                key={i}
+              >
+                <Grid />
+              </LineChart>
+            );
+          })}
         </View>
       </View>
     );
@@ -48,5 +54,11 @@ const styles = StyleSheet.create({
     marginTop: '2.5%',
   },
 });
+
+GraphSet.defaultProps = {
+  data: [[]],
+  style: {},
+  lineColor: 'black',
+}
 
 export default GraphSet;
