@@ -419,7 +419,7 @@ export default class D3Graph {
             .ticks(Math.floor(this.viewport.height / 20));
         this.yAxis.call(axisLeft);
         this.dashedLines.html('');
-        (axisLeft.scale() as any).ticks().forEach((d: number[]) => {
+        (axisLeft.scale() as any).ticks(Math.floor(this.viewport.height / 20)).forEach((d: number[]) => {
             this.dashedLines
                 .append('line')
                 .classed('dashed-line', true)
