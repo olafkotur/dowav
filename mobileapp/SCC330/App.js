@@ -2,11 +2,31 @@ import React from 'react';
 import { StatusBar, View } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
+import { Icon } from 'react-native-elements';
 
 import TempScreen from './screens/TempScreen';
 import MoistureScreen from './screens/MoistureScreen';
 import LightScreen from './screens/LightScreen';
 import MovScreen from './screens/MovScreen';
+
+const tabIcons = {
+  Temperature: {
+    name: 'thermometer',
+    type: 'feather',
+  },
+  Moisture: {
+    name: 'ios-water',
+    type: 'ionicon',
+  },
+  Light: {
+    name: 'light-bulb',
+    type: 'octicon',
+  },
+  Movement: {
+    name: 'location-searching',
+    type: 'material',
+  },
+}
 
 const RootStack = createBottomTabNavigator({
   Temperature: TempScreen,
@@ -15,12 +35,20 @@ const RootStack = createBottomTabNavigator({
   Movement: MovScreen,
 }, {
   initialRouteName: 'Temperature',
+  defaultNavigationOptions: ({ navigation }) => ({
+    tabBarIcon: ({ tintColor }) => (
+      <Icon
+        {...tabIcons[navigation.state.routeName]}
+        color={tintColor}
+      />
+    ),
+  }),
   tabBarOptions: {
     activeBackgroundColor: 'orange',
     activeTintColor: 'black',
     inactiveBackgroundColor: '#2c5364',
     inactiveTintColor: 'white',
-  }
+  },
 });
 
 const AppContainer = createAppContainer(RootStack);
