@@ -1,10 +1,24 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 
 import GraphButtonSet from './GraphButtonSet';
 
-class GraphSet extends React.Component {
+interface Props {
+  data: Array<Array<number>>,
+  style?: Object,
+  lineColor?: string,
+}
+interface State {
+  graph: number,
+}
+
+class GraphSet extends React.Component<Props, State> {
+  public static defaultProps = {
+    style: {},
+    lineColor: 'black',
+  }
+  
   state = {
     graph: 0,
   }
@@ -21,12 +35,12 @@ class GraphSet extends React.Component {
         <GraphButtonSet
           count={this.props.data.length}
           activeGraph={this.state.graph}
-          onPress={graph => this.setState({ graph })}
+          onPress={(graph: number) => this.setState({ graph })}
         />
 
         <View style={styles.graphContainer}>
-          {this.props.data.map((dataSet, i) => {
-            const graphStyle = {
+          {this.props.data.map((dataSet: Array<number>, i: number) => {
+            const graphStyle: ViewStyle = {
               display: (graph === i ? 'flex' : 'none'),
               height: '100%',
             };
@@ -54,11 +68,5 @@ const styles = StyleSheet.create({
     marginTop: '2.5%',
   },
 });
-
-GraphSet.defaultProps = {
-  data: [[]],
-  style: {},
-  lineColor: 'black',
-}
 
 export default GraphSet;

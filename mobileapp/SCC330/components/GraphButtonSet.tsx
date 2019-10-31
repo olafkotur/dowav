@@ -1,7 +1,13 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ViewStyle, TextStyle } from 'react-native';
 
-const GraphButtonSet = props => {
+interface Props {
+  activeGraph: number,
+  count: number,
+  onPress: Function,
+}
+
+const GraphButtonSet = (props: Props) => {
   const { activeGraph, count, onPress } = props;
 
   const buttonSet = [];
@@ -9,8 +15,8 @@ const GraphButtonSet = props => {
     const isFirst = i === 0;
     const isLast = i === count - 1;
 
-    const thisStyle = [ styles.globalBtn ];
-    const textStyle = { color: 'white' };
+    const thisStyle: Array<ViewStyle> = [ styles.globalBtn ];
+    const textStyle: TextStyle = { color: 'white' };
     
     if (activeGraph === i) {
       thisStyle.push(styles.activeBtn);
@@ -68,7 +74,6 @@ const styles = StyleSheet.create({
 });
 
 GraphButtonSet.defaultProps = {
-  count: 3,
   onPress: () => {},
 }
 
