@@ -33,7 +33,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
     }, [graphRef.current]);
 
     return (
-        <div ref={graphRef} className="graph-view">
+        <div ref={graphRef} className="view">
             {size ? (
                 <>
                     {loading ? (

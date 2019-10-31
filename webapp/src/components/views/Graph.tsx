@@ -111,7 +111,6 @@ const Graph: React.FC<GraphProps> = ({
         if (d3chart) {
             if (live) {
                 const socket = new WebSocket('ws://localhost:8080');
-                console.log('MMMMMM');
                 socket.addEventListener('open', function(event) {
                     console.log('Successfull connection');
                 });
@@ -136,7 +135,6 @@ const Graph: React.FC<GraphProps> = ({
                     });
                 }, 1000);
                 return () => {
-                    console.log('CLOSING');
                     socket.close();
                     clearInterval(id);
                 };

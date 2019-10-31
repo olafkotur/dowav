@@ -92,7 +92,7 @@ body {
     padding: 40px 20px 20px 20px;
 }
 
-.graph-view {
+.view {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -106,6 +106,18 @@ body {
         }
     }
 }
+
+.movement-view {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    .history-list {
+        width: 200px;
+        height: 100%;
+    }
+}
+
 .tooltip {
     position: absolute;
     display: none;

@@ -3,6 +3,7 @@ import NavigationContext from '../context/NavigationContext';
 import * as MENU_OPTIONS from '../constants/MenuOptionConstants';
 import DashboardView from './views/DashboardView';
 import GraphView from './views/GraphView';
+import MovementView from './views/MovementView';
 
 const Switch: React.FC = () => {
     const { currentOption } = useContext(NavigationContext);
@@ -18,6 +19,9 @@ const Switch: React.FC = () => {
             component = (
                 <GraphView key={currentOption} currentOption={currentOption} />
             );
+            break;
+        case MENU_OPTIONS.MOVEMENT:
+            component = <MovementView />;
             break;
         default:
             component = (
