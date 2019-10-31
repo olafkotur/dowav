@@ -3,9 +3,9 @@ difference(){
     difference(){
         translate([0,0,-47]){
             //Outer cylinder
-            cylinder($fn = 50, h=71, r1=34, r2=34, center=false);
+            cylinder($fn = 50, h=74, r1=37, r2=37, center=false);
         }
-        translate([0,0,-14]){
+        translate([0,0,-11]){
             //Coffee cup - cut out
             cylinder($fn = 50, h=125, r1=28, r2=40.5, center=false);
         }
@@ -15,7 +15,7 @@ difference(){
         }
     }
 
-    translate([25,-11.5,-25]){
+    translate([25,-11.5,-22]){
         //Battery slot
         cube([200,40,18],true);
     }
