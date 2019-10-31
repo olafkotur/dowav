@@ -16,7 +16,7 @@ func startServer(port, path string) {
 }
 
 // Creates web socket for each channel passed into the function
-func sendSocketData(channels []chan string) {
+func sendSocketData(channels []chan []byte) {
 	for i := 1; i <= len(channels); i++ { // Starts at 1 by design
 		zone := i
 		go http.HandleFunc("/live/zone/"+toString(zone), func(writer http.ResponseWriter, request *http.Request) {
@@ -26,7 +26,7 @@ func sendSocketData(channels []chan string) {
 }
 
 // Sends data via the websocket from the channel
-func handleSocket(zone int, channels []chan string, writer http.ResponseWriter, request *http.Request) {
+func handleSocket(zone int, channels []chan []byte, writer http.ResponseWriter, request *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,

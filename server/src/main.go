@@ -20,10 +20,10 @@ func main() {
 	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
 	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
 
-	channels := []chan string{
-		make(chan string, 1),
-		make(chan string, 1),
-		make(chan string, 1),
+	channels := []chan []byte{
+		make(chan []byte, 1),
+		make(chan []byte, 1),
+		make(chan []byte, 1),
 	}
 
 	go startServer(SERVER_PORT, WEB_BUILD_PATH)
