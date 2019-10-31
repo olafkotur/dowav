@@ -2,73 +2,69 @@ package main
 
 import (
 	"bufio"
-	"io/ioutil"
 	"log"
-	"os"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/tarm/serial"
 )
 
-func readSerial(name, baud string) {
-	path, file := createLogFile()
-
+func startReadingSerial(name, baud string, channels []chan string) {
 	log.Printf("Attempting to read serial data\n")
 	baudInt, err := strconv.Atoi(baud)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 
-	conf := &serial.Config{Name: name, Baud: baudInt}
-	sp, err := serial.OpenPort(conf)
+	config := &serial.Config{Name: name, Baud: baudInt}
+	sp, err := serial.OpenPort(config)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
-
 	log.Printf("Success - listening to %s\n\n", name)
-	go listenAndLogR(sp, path, file)
+
+	path, file := createLogFile()
+	for {
+		data := listenToPort(sp)
+		strData := string(data[1])
+
+		if data == "" {
+			continue
+		} else {
+			// Send via goutine channels
+			if strData == "1" {
+				clearChan(channels[0])
+				channels[0] <- data
+
+			} else if strData == "2" {
+				clearChan(channels[1])
+				channels[1] <- data
+
+			} else if strData == "3" {
+				clearChan(channels[2])
+				channels[2] <- data
+			}
+
+			logData(data, path, file)
+		}
+
+	}
 }
 
-func listenAndLogR(sp *serial.Port, path string, file *os.File) func() {
+// Deletes unused messgaes
+func clearChan(c chan string) {
+	for len(c) > 0 {
+		<-c
+	}
+}
+
+func listenToPort(sp *serial.Port) (b string) {
+	var data string
 	reader := bufio.NewReader(sp)
 	bytes, _ := reader.ReadBytes('\x0a')
 	if bytes != nil {
-		str := string(bytes)
-		logData(str, path, file)
+		data = string(bytes)
 	}
-	return listenAndLogR(sp, path, file)
-}
-
-func createLogFile() (path string, f *os.File) {
-	t := time.Now().Unix()
-	logPath := "logs/log-" + strconv.FormatInt(t, 10) + ".txt"
-
-	file, err := os.Create(logPath)
-	if err != nil {
-		log.Fatal(err, file)
-	}
-	log.Printf("New log file created in %s\n\n", logPath)
-
-	defer file.Close()
-	return logPath, file
-}
-
-func logData(data, path string, file *os.File) {
-	existingData, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
-
-	t := time.Now().Unix()
-	writeBytes := append(existingData, []byte(strconv.FormatInt(t, 10)+" "+data)...)
-	err = ioutil.WriteFile(path, writeBytes, 0644)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func formatData(data string) (values []string) {
-	return strings.Split(data, " ")
+	return data
 }
