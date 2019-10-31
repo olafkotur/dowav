@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -26,7 +28,9 @@ func startProcessingData(interval time.Duration) {
 		min := calcMin(filtered)
 		max := calcMax(filtered)
 
-		formatData(average, min, max, int(startTime), int(endTime))
+		// TODO: Upload to db here
+		res := formatProcessedData(average, min, max, int(startTime), int(endTime))
+		fmt.Println(string(res))
 	} else {
 		log.Printf("Skipping processing, no data to process\n\n")
 	}
@@ -119,19 +123,19 @@ func calcMax(data []string) (m []int) {
 	return max
 }
 
-func formatData(avg, min, max []int, startTime, endTime int) {
+func formatProcessedData(avg, min, max []int, startTime, endTime int) []byte {
 	type Calculations struct {
-		average int `json:"average"`
-		minimum int `json:"minimum"`
-		maximum int `json:"maximum"`
+		Average int `json:"average"`
+		Minimum int `json:"minimum"`
+		Maximum int `json:"maximum"`
 	}
 
 	type Data struct {
-		startTime   int          `json:"startTime"`
-		endTime     int          `json:"endTime"`
-		temperature Calculations `json:"temperature"`
-		moisture    Calculations `json:"moisture"`
-		light       Calculations `json:"light"`
+		StartTime   int          `json:"startTime"`
+		EndTime     int          `json:"endTime"`
+		Temperature Calculations `json:"temperature"`
+		Moisture    Calculations `json:"moisture"`
+		Light       Calculations `json:"light"`
 	}
 
 	data := Data{
@@ -142,8 +146,35 @@ func formatData(avg, min, max []int, startTime, endTime int) {
 		Calculations{avg[2], min[2], max[2]},
 	}
 
-	// TODO: Upload to db here
-	log.Println(data)
+	res, _ := json.Marshal(data)
+	return res
+}
+
+func formatSocketData(d string) (r []byte) {
+	split := strings.Split(d, " ")
+	t := toInt(split[1])
+	m := toInt(split[2])
+	l := toInt(strings.Replace(split[3], "\r\n", "", 1))
+
+	type Data struct {
+		Time  int64 `json:"time"`
+		Value int   `json:"value"`
+	}
+
+	type Readings struct {
+		Temperature Data `json:"temp"`
+		Moisture    Data `json:"moisture"`
+		Light       Data `json:"light"`
+	}
+
+	now := time.Now().Unix()
+	data := Readings{
+		Data{now, t},
+		Data{now, m},
+		Data{now, l},
+	}
+	res, _ := json.Marshal(data)
+	return res
 }
 
 func toInt(s string) (i int) {
