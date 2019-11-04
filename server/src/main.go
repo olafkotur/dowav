@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -37,23 +36,19 @@ func serveStatic(port, path string) {
 
 func serveRestful(port string) {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/api", sayHello)
+	router.HandleFunc("/api/upload", uploadData).Methods("POST")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	http.ListenAndServe(":"+port, router)
-
 }
 
-func sayHello(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("Hello")
-	type Data struct {
-		Message string `json:"message"`
-	}
+func printRequest(request *http.Request) {
+	log.Printf("Method: %s\n", request.Method)
+	log.Printf("URL: %s\n\n", request.URL)
+}
 
-	data := Data{"Hello World"}
-	response, _ := json.Marshal(data)
-
-	fmt.Println("Yuppp")
+func sendResponse(res interface{}, writer http.ResponseWriter) {
+	response, _ := json.Marshal(res)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Write(response)
 }
