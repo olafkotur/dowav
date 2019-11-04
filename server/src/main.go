@@ -2,13 +2,14 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	var err = godotenv.Load()
+	var err = godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal(err)
 		log.Fatal("Error loading .env file")
@@ -17,17 +18,14 @@ func main() {
 	// Enviornment variables
 	SERVER_PORT := os.Getenv("SERVER_PORT")
 	WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
-	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
-	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
-
-	channels := []chan []byte{
-		make(chan []byte, 1),
-		make(chan []byte, 1),
-		make(chan []byte, 1),
-	}
 
 	go startServer(SERVER_PORT, WEB_BUILD_PATH)
-	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD, channels)
-	go sendSocketData(channels)
-	startScheduler()
+}
+
+func startServer(port, path string) {
+	var fs = http.FileServer(http.Dir(path))
+	http.Handle("/", fs)
+
+	log.Printf("Listening on %s...\n\n", port)
+	http.ListenAndServe(":"+port, nil)
 }
