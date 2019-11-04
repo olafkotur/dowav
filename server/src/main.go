@@ -4,26 +4,17 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	var err = godotenv.Load("../.env")
-	if err != nil {
-		log.Fatal(err)
-		log.Fatal("Error loading .env file")
-	}
+	staticPort := "8080"
+	restPort := "8081"
+	buildPath := "../../webapp/build"
 
-	// Enviornment variables
-	STATIC_SERVER_PORT := os.Getenv("STATIC_SERVER_PORT")
-	REST_SERVER_PORT := os.Getenv("REST_SERVER_PORT")
-	WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
-
-	go serveStatic(STATIC_SERVER_PORT, WEB_BUILD_PATH)
-	serveRestful(REST_SERVER_PORT)
+	go serveStatic(staticPort, buildPath)
+	serveRestful(restPort)
 }
 
 func serveStatic(port, path string) {
@@ -44,7 +35,7 @@ func serveRestful(port string) {
 
 func printRequest(request *http.Request) {
 	log.Printf("Method: %s\n", request.Method)
-	log.Printf("URL: %s\n\n", request.URL)
+	log.Printf("URL: %s\n", request.URL)
 }
 
 func sendResponse(res interface{}, writer http.ResponseWriter) {
