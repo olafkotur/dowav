@@ -9,3 +9,5 @@ reader/logs/*
 .vscode/
 *.DS_Store
 .env
+main.exe
+build.bat
