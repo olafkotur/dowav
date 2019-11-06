@@ -5,10 +5,14 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+// curl -d "startTime=1&endTime=2&temperature=28&moisture=289&light=80" localhost:8081/api/data/upload
+// curl -d "temperature=28&moisture=289&light=80" localhost:8081/api/live/upload
 
 var database *sql.DB
 
@@ -17,7 +21,11 @@ func main() {
 	restPort := "8081"
 	buildPath := "../../webapp/build"
 
-	database, _ = sql.Open("sqlite3", "./database.db")
+	var err error
+	database, err = sql.Open("sqlite3", "./database.db")
+	if err != nil {
+		panic(err)
+	}
 	insertTables()
 
 	go serveStatic(staticPort, buildPath)
@@ -34,8 +42,9 @@ func serveStatic(port, path string) {
 
 func serveRestful(port string) {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/api/upload", uploadData).Methods("POST")
-	router.HandleFunc("/api/live/data/{id}", getLiveData).Methods("GET")
+	router.HandleFunc("/api/data/upload", uploadData).Methods("POST")
+	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
+	router.HandleFunc("/api/live/zone/{id}", getLiveData).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	http.ListenAndServe(":"+port, router)
@@ -43,6 +52,8 @@ func serveRestful(port string) {
 
 func insertTables() {
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (startTime REAL PRIMARY KEY, endTime REAL, averageTemperature INTEGER, averageMoisture INTEGER, averageLight INTEGER)")
+	statement.Exec()
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (time REAL PRIMARY KEY, temperature INTEGER, moisture INTEGER, light INTEGER)")
 	statement.Exec()
 }
 
@@ -55,4 +66,14 @@ func sendResponse(res interface{}, writer http.ResponseWriter) {
 	response, _ := json.Marshal(res)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Write(response)
+}
+
+func toInt(s string) (i int) {
+	res, _ := strconv.Atoi(s)
+	return res
+}
+
+func toFloat(s string) (f float64) {
+	res, _ := strconv.ParseFloat(s, 64)
+	return res
 }
