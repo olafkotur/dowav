@@ -1,18 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
-// res = [
-// 	1: [{}, {}, {}],
-// 	2: [{}, {}, {}],
-// 	3: []
-// ]
-
-// TEST: curl -d "zone=1&startTime=10&endTime=20&temperature=29&moisture=233&light=110" localhost:8080/api/historic/upload
+// TEST: curl -d "zone=3&startTime=11&endTime=24&temperature=29&moisture=233&light=110" localhost:8080/api/historic/upload
 func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	// Get data from request
 	request.ParseForm()
@@ -22,6 +16,11 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	temperature := toInt(request.Form.Get("temperature"))
 	moisture := toInt(request.Form.Get("moisture"))
 	light := toInt(request.Form.Get("light"))
+
+	if zone <= 0 {
+		// TODO: Should send bad response
+		return
+	}
 
 	// Insert values into db
 	statement, err := database.Prepare("INSERT INTO historic (zone, startTime, endTime, temperature, moisture, light) VALUES (?, ?, ?, ?, ?, ?)")
@@ -42,34 +41,51 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	to := request.URL.Query()["to"][0]
 
 	// Fetch from the db
-	rows, err := database.Query("SELECT * FROM historic WHERE startTime >= " + from + " AND endTime <= " + to + " ORDER BY startTime ASC")
+	rows, err := database.Query("SELECT * FROM historic WHERE startTime >= " + from + " AND endTime <= " + to + " ORDER BY zone ASC")
 	if err != nil {
 		panic(err)
 	}
 
+	var res HistoricDataRes
 	var startTime, endTime float64
 	var zone, temperature, moisture, light int
+
+	// Populate response from the db into correct array positions
 	for rows.Next() {
 		rows.Scan(&zone, &startTime, &endTime, &temperature, &moisture, &light)
-		fmt.Println(zone, startTime, endTime, temperature, moisture, light)
+		if zone == 1 {
+			res.One = append(res.One, HistoricData{zone, startTime, endTime, temperature, moisture, light})
+		} else if zone == 2 {
+			res.Two = append(res.Two, HistoricData{zone, startTime, endTime, temperature, moisture, light})
+		} else if zone == 3 {
+			res.Three = append(res.Three, HistoricData{zone, startTime, endTime, temperature, moisture, light})
+		}
 	}
 
+	sendResponse(res, writer)
 	printRequest(request)
 }
 
+// TEST: curl -d "zone=1&temperature=26&moisture=220&light=98" localhost:8080/api/live/upload
 func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 	// Get data from request
 	request.ParseForm()
 	time := time.Now().Unix()
+	zone := toInt(request.Form.Get("zone"))
 	temperature := toInt(request.Form.Get("temperature"))
 	moisture := toInt(request.Form.Get("moisture"))
 	light := toInt(request.Form.Get("light"))
 
-	statement, err := database.Prepare("INSERT INTO live (time, temperature, moisture, light) VALUES (?, ?, ?, ?)")
+	if zone <= 0 {
+		// TODO: Should send bad response
+		return
+	}
+
+	statement, err := database.Prepare("INSERT INTO live (zone, time, temperature, moisture, light) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		panic(err)
 	}
-	statement.Exec(time, temperature, moisture, light)
+	statement.Exec(zone, time, temperature, moisture, light)
 
 	res := Message{"Success"}
 	sendResponse(res, writer)
@@ -77,20 +93,20 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 }
 
 func getLiveData(writer http.ResponseWriter, request *http.Request) {
-	var time float64
-	var temperature int
-	var moisture int
-	var light int
+	// Get parameters from request
+	uri := request.URL.String()
+	requestedZone := strings.Split(uri, "/api/live/zone/")[1]
 
 	// Get data from db
-	rows, err := database.Query("SELECT * FROM live ORDER BY time DESC LIMIT 1")
+	var time float64
+	var zone, temperature, moisture, light int
+	rows, err := database.Query("SELECT * FROM live WHERE zone == " + requestedZone + " ORDER BY time DESC LIMIT 1")
 	if err != nil {
 		panic(err)
 	}
 
 	for rows.Next() {
-		rows.Scan(&time, &temperature, &moisture, &light)
-		fmt.Println(rows)
+		rows.Scan(&zone, &time, &temperature, &moisture, &light)
 	}
 	rows.Close()
 
