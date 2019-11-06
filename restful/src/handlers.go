@@ -6,31 +6,24 @@ import (
 	"time"
 )
 
-func index(writer http.ResponseWriter, request *http.Request) {
-	fs := http.FileServer(http.Dir("../../webapp/build"))
-	fs.ServeHTTP(writer, request)
-}
-
-func uploadData(writer http.ResponseWriter, request *http.Request) {
-	type Data struct {
-		Message string `json:"message"`
-	}
-
+// curl -d "zone=1&startTime=2312321&endTime=41232312&temperature=29&moisture=233&light=110" localhost:8080/api/historic/upload
+func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	// Get data from request
 	request.ParseForm()
+	zone := toInt(request.Form.Get("zone"))
 	startTime := toFloat(request.Form.Get("startTime"))
 	endTime := toFloat(request.Form.Get("endTime"))
 	averageTemperature := toInt(request.Form.Get("temperature"))
 	averageMoisture := toInt(request.Form.Get("moisture"))
 	averageLight := toInt(request.Form.Get("light"))
 
-	statement, err := database.Prepare("INSERT INTO historic (startTime, endTime, averageTemperature, averageMoisture, averageLight) VALUES (?, ?, ?, ?, ?)")
+	statement, err := database.Prepare("INSERT INTO historic (zone, startTime, endTime, averageTemperature, averageMoisture, averageLight) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		panic(err)
 	}
-	statement.Exec(startTime, endTime, averageTemperature, averageMoisture, averageLight)
+	statement.Exec(zone, startTime, endTime, averageTemperature, averageMoisture, averageLight)
 
-	res := Data{"Success"}
+	res := Message{"Success"}
 	sendResponse(res, writer)
 	printRequest(request)
 }

@@ -1,5 +1,9 @@
 package main
 
+type Message struct {
+	Message string `json:"message"`
+}
+
 type ReadingData struct {
 	Time  float64 `json:"time"`
 	Value int     `json:"value"`

@@ -17,30 +17,24 @@ var database *sql.DB
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8081"
+		port = "8080"
 	}
 
-	var err error
-	database, err = sql.Open("sqlite3", "./database.db")
-	if err != nil {
-		panic(err)
-	}
-	insertTables()
+	// Prepare database tables
+	database, _ = sql.Open("sqlite3", "./database.db")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL PRIMARY KEY, endTime REAL, averageTemperature INTEGER, averageMoisture INTEGER, averageLight INTEGER)")
+	statement.Exec()
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (time REAL PRIMARY KEY, temperature INTEGER, moisture INTEGER, light INTEGER)")
+	statement.Exec()
 
+	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/api/data/upload", uploadData).Methods("POST")
+	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
 	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
 	router.HandleFunc("/api/live/zone/{id}", getLiveData).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	http.ListenAndServe(":"+port, router)
-}
-
-func insertTables() {
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (startTime REAL PRIMARY KEY, endTime REAL, averageTemperature INTEGER, averageMoisture INTEGER, averageLight INTEGER)")
-	statement.Exec()
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (time REAL PRIMARY KEY, temperature INTEGER, moisture INTEGER, light INTEGER)")
-	statement.Exec()
 }
 
 func printRequest(request *http.Request) {
