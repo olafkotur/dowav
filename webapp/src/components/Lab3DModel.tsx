@@ -20,7 +20,11 @@ const Lab3DModel: React.FC<Lab3DModelProps> = ({ viewport }) => {
     return (
         <div
             ref={container}
-            style={{ width: viewport.width, height: viewport.height }}
+            style={{
+                width: viewport.width,
+                height: viewport.height,
+                outline: 'none'
+            }}
         ></div>
     );
 };
