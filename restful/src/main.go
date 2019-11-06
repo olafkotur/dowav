@@ -22,14 +22,15 @@ func main() {
 
 	// Prepare database tables
 	database, _ = sql.Open("sqlite3", "./database.db")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL PRIMARY KEY, endTime REAL, averageTemperature INTEGER, averageMoisture INTEGER, averageLight INTEGER)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL PRIMARY KEY, endTime REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
 	statement.Exec()
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (time REAL PRIMARY KEY, temperature INTEGER, moisture INTEGER, light INTEGER)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (zone INTEGER, time REAL PRIMARY KEY, temperature INTEGER, moisture INTEGER, light INTEGER)")
 	statement.Exec()
 
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
+	router.HandleFunc("/api/historic", getHistoricData).Methods("GET")
 	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
 	router.HandleFunc("/api/live/zone/{id}", getLiveData).Methods("GET")
 
