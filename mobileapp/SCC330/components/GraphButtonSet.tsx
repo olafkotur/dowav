@@ -32,7 +32,7 @@ const GraphButtonSet = (props: Props) => {
         onPress={onPress.bind(null, i)}
         key={i}
       >
-        <Text style={textStyle}>{`Device ${i + 1}`}</Text>
+        <Text style={textStyle}>{`Zone ${i + 1}`}</Text>
       </TouchableOpacity>
     );
   }

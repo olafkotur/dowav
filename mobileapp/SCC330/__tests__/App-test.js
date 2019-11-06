@@ -1,9 +1,10 @@
 import 'react-native';
 import React from 'react';
-import App from '../App';
 
 import renderer from 'react-test-renderer';
+import App from '../App';
 
 it('renders correctly', () => {
-  renderer.create(<App />);
+  const app = renderer.create(<App />).toJSON();
+  expect(app).toMatchSnapshot();
 });

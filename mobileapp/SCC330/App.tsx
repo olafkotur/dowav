@@ -2,14 +2,18 @@ import React from 'react';
 import { StatusBar, View } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
-import { Icon } from 'react-native-elements';
+import { Icon, IconProps } from 'react-native-elements';
 
 import TempScreen from './screens/TempScreen';
 import MoistureScreen from './screens/MoistureScreen';
 import LightScreen from './screens/LightScreen';
 import MovScreen from './screens/MovScreen';
 
-const tabIcons = {
+interface ScreenIcons<T> {
+  [key: string]: T
+}
+
+const tabIcons: ScreenIcons<IconProps> = {
   Temperature: {
     name: 'thermometer',
     type: 'feather',
@@ -53,7 +57,7 @@ const RootStack = createBottomTabNavigator({
 
 const AppContainer = createAppContainer(RootStack);
 
-const App = () => {
+const App: React.FunctionComponent = () => {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar backgroundColor="#1f404f" />
