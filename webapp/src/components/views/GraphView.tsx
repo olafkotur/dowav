@@ -15,6 +15,16 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
     const graphRef = useRef<HTMLDivElement>(null);
     const { loading, data, error } = useFetch({
         useCache: true,
+        query: [
+            {
+                endpoint: '/api/historic/temperature',
+                params: {
+                    zone: 1,
+                    from: 1,
+                    to: 30
+                }
+            }
+        ],
         refetch: count
     });
     const updateSize = () => {

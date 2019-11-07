@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { UseFetchState } from '../types/index';
 import data from '../data/mockdata';
 import { fetchErrorMessages } from '../errors/errors';
+import FetchConstants from '../constants/FetchConstants';
 
 function checkCache(key: string): any | null {
     const cache = window.localStorage.getItem(key);
@@ -9,10 +10,30 @@ function checkCache(key: string): any | null {
     return null;
 }
 
+type Params = {
+    [key: string]: string | number;
+};
+
 type Options = {
     useCache: boolean;
+    query: {
+        endpoint: string;
+        params: Params;
+    }[];
     refetch: number;
 };
+
+function generateQueryString(params: Params): string {
+    const keys = Object.keys(params);
+    if (keys.length === 0) return '';
+    let string = '?';
+    for (let i = 0; i < keys.length; i++) {
+        string += `${keys[i]}=${params[keys[i]]}${
+            i === keys.length - 1 ? '' : '&'
+        }`;
+    }
+    return string;
+}
 
 export default function useFetch(options: Options): UseFetchState {
     const cache = options.useCache ? checkCache('zoneA') : null;
@@ -25,8 +46,14 @@ export default function useFetch(options: Options): UseFetchState {
     function fetchData() {
         new Promise((resolve, reject) => {
             setTimeout(() => {
+                // fetch(
+                //     `${FetchConstants.hostname}${
+                //         options.query.endpoint
+                //     }${generateQueryString(options.query.params)}`
+                // );
                 resolve(data);
             }, 500);
+            // fetch()
             setTimeout(() => {
                 reject(fetchErrorMessages.timeout);
             }, 10000);
