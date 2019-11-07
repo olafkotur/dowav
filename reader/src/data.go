@@ -15,7 +15,7 @@ func startProcessingData(interval time.Duration) {
 	// DANGER: TESTING DATA ONLY
 	// endTime := time.Now().Unix()
 	// startTime := endTime - int64(interval.Seconds())
-	// data := getDataAsString("test-data.txt")
+	// data := getDataAsString("../_test.txt")
 	// filtered := filterDataInRange(data, 1573133958, endTime)
 
 	// Range of time where data should be read
