@@ -67,7 +67,7 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	// Populate response from the db
 	for rows.Next() {
 		rows.Scan(&endTime, &data)
-		res = append(res, ReadingData{endTime, data})
+		res = append(res, ReadingData{endTime * 1000, data})
 	}
 
 	sendResponse(res, writer)
@@ -120,9 +120,9 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 
 	// Format data
 	data := Readings{
-		ReadingData{time, temperature},
-		ReadingData{time, moisture},
-		ReadingData{time, light},
+		ReadingData{time * 1000, temperature},
+		ReadingData{time * 1000, moisture},
+		ReadingData{time * 1000, light},
 	}
 
 	sendResponse(data, writer)
