@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -34,32 +35,36 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 }
 
-// TEST: curl localhost:8080/api/historic/
+// localhost:8080/api/historic/temp/1
 func getHistoricData(writer http.ResponseWriter, request *http.Request) {
+	// Safety in case no paramters are entered
+	if strings.Contains(request.URL.String(), "zone=") != true || strings.Contains(request.URL.String(), "from=") != true || strings.Contains(request.URL.String(), "to=") != true {
+		// TODO: Add a bad request here
+		return
+	}
+
 	// Get parameters from request
+	zone := request.URL.Query()["zone"][0]
 	from := request.URL.Query()["from"][0]
 	to := request.URL.Query()["to"][0]
+	dataType := strings.Split(request.URL.String(), "/api/historic/")[1]
+	dataType = strings.Split(dataType, "?")[0]
+	log.Println(dataType, zone)
 
 	// Fetch from the db
-	rows, err := database.Query("SELECT * FROM historic WHERE startTime >= " + from + " AND endTime <= " + to + " ORDER BY zone ASC")
+	rows, err := database.Query("SELECT endTime, " + dataType + " FROM historic WHERE zone == " + zone + " AND startTime >= " + from + " AND endTime <= " + to + " ORDER BY zone ASC")
 	if err != nil {
 		panic(err)
 	}
 
-	var res HistoricDataRes
-	var startTime, endTime float64
-	var zone, temperature, moisture, light int
+	var res []ReadingData
+	var endTime float64
+	var data int
 
-	// Populate response from the db into correct array positions
+	// Populate response from the db
 	for rows.Next() {
-		rows.Scan(&zone, &startTime, &endTime, &temperature, &moisture, &light)
-		if zone == 1 {
-			res.One = append(res.One, HistoricData{zone, startTime, endTime, temperature, moisture, light})
-		} else if zone == 2 {
-			res.Two = append(res.Two, HistoricData{zone, startTime, endTime, temperature, moisture, light})
-		} else if zone == 3 {
-			res.Three = append(res.Three, HistoricData{zone, startTime, endTime, temperature, moisture, light})
-		}
+		rows.Scan(&endTime, &data)
+		res = append(res, ReadingData{endTime, data})
 	}
 
 	sendResponse(res, writer)
@@ -95,7 +100,7 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	// Get parameters from request
 	uri := request.URL.String()
-	requestedZone := strings.Split(uri, "/api/live/zone/")[1]
+	requestedZone := strings.Split(uri, "/api/live/")[1]
 
 	// Get data from db
 	var time float64

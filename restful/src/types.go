@@ -15,17 +15,11 @@ type Readings struct {
 	Light       ReadingData `json:"light"`
 }
 
-type HistoricData struct {
+type FullData struct {
 	Zone        int     `json:"zone"`
 	StartTime   float64 `json:"startTime"`
 	EndTime     float64 `json:"endTime"`
 	Temperature int     `json:"temperature"`
 	Moisture    int     `json:"moisture"`
 	Light       int     `json:"light"`
-}
-
-type HistoricDataRes struct {
-	One   []HistoricData `json:"1"`
-	Two   []HistoricData `json:"2"`
-	Three []HistoricData `json:"3"`
 }

@@ -30,9 +30,9 @@ func main() {
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
-	router.HandleFunc("/api/historic", getHistoricData).Methods("GET")
+	router.HandleFunc("/api/historic/{type}", getHistoricData).Methods("GET")
 	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
-	router.HandleFunc("/api/live/zone/{id}", getLiveData).Methods("GET")
+	router.HandleFunc("/api/live/{id}", getLiveData).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	http.ListenAndServe(":"+port, router)
@@ -46,6 +46,7 @@ func printRequest(request *http.Request) {
 func sendResponse(res interface{}, writer http.ResponseWriter) {
 	response, _ := json.Marshal(res)
 	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Write(response)
 }
 
