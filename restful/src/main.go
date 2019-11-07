@@ -40,7 +40,7 @@ func main() {
 
 func printRequest(request *http.Request) {
 	log.Printf("Method: %s\n", request.Method)
-	log.Printf("URL: %s\n", request.URL)
+	log.Printf("URL: %s\n\n", request.URL)
 }
 
 func sendResponse(res interface{}, writer http.ResponseWriter) {

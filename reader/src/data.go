@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -12,7 +14,7 @@ func startProcessingData(interval time.Duration) {
 	// DANGER: TESTING DATA ONLY
 	endTime := time.Now().Unix()
 	startTime := endTime - int64(interval.Seconds())
-	data := getDataAsString("../test-data.txt")
+	data := getDataAsString("test-data.txt")
 	filtered := filterDataInRange(data, 1571671395, endTime)
 
 	// TODO: Enable the code below
@@ -124,21 +126,7 @@ func calcMax(data []string) (m []int) {
 }
 
 func formatProcessedData(avg, min, max []int, startTime, endTime int) []byte {
-	type Calculations struct {
-		Average int `json:"average"`
-		Minimum int `json:"minimum"`
-		Maximum int `json:"maximum"`
-	}
-
-	type Data struct {
-		StartTime   int          `json:"startTime"`
-		EndTime     int          `json:"endTime"`
-		Temperature Calculations `json:"temperature"`
-		Moisture    Calculations `json:"moisture"`
-		Light       Calculations `json:"light"`
-	}
-
-	data := Data{
+	data := HistoricData{
 		startTime,
 		endTime,
 		Calculations{avg[0], min[0], max[0]},
@@ -150,14 +138,37 @@ func formatProcessedData(avg, min, max []int, startTime, endTime int) []byte {
 	return res
 }
 
-func toInt(s string) (i int) {
-	r, err := strconv.Atoi(s)
-	if err != nil {
-		panic(err)
+func formatLiveData(d string) (r []byte) {
+	zone := toInt(d[1:2])
+	split := strings.Split(d, " ")
+	t := toInt(split[1])
+	m := toInt(split[2])
+	l := toInt(strings.Replace(split[3], "\r\n", "", 1))
+
+	now := time.Now().Unix()
+	data := Readings{
+		zone,
+		Data{now, t},
+		Data{now, m},
+		Data{now, l},
 	}
-	return r
+	res, _ := json.Marshal(data)
+	return res
 }
 
-func toString(i int) (s string) {
-	return strconv.Itoa(i)
+func uploadLiveData(data []byte) {
+	obj := Readings{}
+	json.Unmarshal(data, &obj)
+
+	// Define the form values
+	values := url.Values{
+		"zone":        {toString(obj.Zone)},
+		"temperature": {toString(obj.Temperature.Value)},
+		"moisture":    {toString(obj.Moisture.Value)},
+		"light":       {toString(obj.Light.Value)},
+	}
+	_, err := http.PostForm("http://dowav-api.herokuapp.com/api/live/upload", values)
+	if err != nil {
+		return
+	}
 }

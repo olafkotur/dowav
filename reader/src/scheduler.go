@@ -10,7 +10,7 @@ func startScheduler() {
 
 	refreshRate := 1 * time.Second
 	timeSinceLastRun := 10 * time.Second
-	processDataInterval := 10 * time.Second
+	processDataInterval := 60 * time.Second
 
 	for {
 		// Process data
