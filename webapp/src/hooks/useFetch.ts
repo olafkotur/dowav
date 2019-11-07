@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import { UseFetchState } from '../types/index';
-import data from '../data/mockdata';
 import { fetchErrorMessages } from '../errors/errors';
 import FetchConstants from '../constants/FetchConstants';
 
 function checkCache(key: string): any | null {
-    const cache = window.localStorage.getItem(key);
-    if (cache) return JSON.parse(cache);
+    const lastFetched = window.localStorage.getItem(key + 'lastFetched');
+    if (
+        lastFetched &&
+        moment(+lastFetched).isAfter(moment().add(-5, 'minutes'))
+    ) {
+        const cache = window.localStorage.getItem(key);
+        if (cache) return JSON.parse(cache);
+    }
     return null;
 }
 
@@ -19,7 +25,7 @@ type Options = {
     query: {
         endpoint: string;
         params: Params;
-    }[];
+    };
     refetch: number;
 };
 
@@ -36,7 +42,9 @@ function generateQueryString(params: Params): string {
 }
 
 export default function useFetch(options: Options): UseFetchState {
-    const cache = options.useCache ? checkCache('zoneA') : null;
+    const cache = options.useCache
+        ? checkCache(options.query.endpoint + options.query.params.zone)
+        : null;
     const [state, setState] = useState<UseFetchState>({
         loading: cache ? false : true,
         data: cache || null,
@@ -45,19 +53,38 @@ export default function useFetch(options: Options): UseFetchState {
 
     function fetchData() {
         new Promise((resolve, reject) => {
-            setTimeout(() => {
-                (Promise as any).allSettled(
-                    options.query.map(d =>
-                        fetch(
-                            `${FetchConstants.hostname}${
-                                d.endpoint
-                            }${generateQueryString(d.params)}`
-                        )
-                    )
-                );
-
-                resolve(data);
-            }, 500);
+            const time = Date.now();
+            fetch(
+                `${FetchConstants.hostname}${
+                    options.query.endpoint
+                }${generateQueryString(options.query.params)}`
+            )
+                .then(data => data.json())
+                .then(data => {
+                    if (data === null) reject(fetchErrorMessages.noData);
+                    if (options.useCache) {
+                        window.localStorage.setItem(
+                            options.query.endpoint + options.query.params.zone,
+                            JSON.stringify(data)
+                        );
+                        window.localStorage.setItem(
+                            options.query.endpoint +
+                                options.query.params.zone +
+                                'lastFetched',
+                            Date.now() + ''
+                        );
+                    }
+                    if (Date.now() - time > 500) {
+                        resolve(data);
+                    } else {
+                        setTimeout(() => {
+                            resolve(data);
+                        }, Date.now() - time);
+                    }
+                })
+                .catch(err => {
+                    reject(fetchErrorMessages.fetchFail);
+                });
             setTimeout(() => {
                 reject(fetchErrorMessages.timeout);
             }, 10000);
@@ -80,13 +107,25 @@ export default function useFetch(options: Options): UseFetchState {
 
     useEffect(() => {
         if (options.refetch !== 0) {
-            setState({ loading: true, data: null, error: null });
-            fetchData();
+            if (options.useCache) {
+                const data = checkCache(options.query.endpoint);
+                if (data) {
+                    setState({ loading: false, data, error: null });
+                } else {
+                    setState({ loading: true, data: null, error: null });
+                    fetchData();
+                }
+            } else {
+                setState({ loading: true, data: null, error: null });
+                fetchData();
+            }
         }
     }, [options.refetch]);
 
     useEffect(() => {
-        fetchData();
+        if (!cache) {
+            fetchData();
+        }
     }, []);
     return { ...state };
 }

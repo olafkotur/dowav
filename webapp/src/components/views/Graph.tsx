@@ -35,6 +35,12 @@ const Graph: React.FC<GraphProps> = ({
     const [d3chart, setD3chart] = useState<D3Graph | null>(null);
 
     useEffect(() => {
+        if (data && d3chart) {
+            d3chart.setData(data);
+        }
+    }, [data]);
+
+    useEffect(() => {
         if (d3chart) {
             d3chart.setConf(
                 {
@@ -111,7 +117,6 @@ const Graph: React.FC<GraphProps> = ({
         if (d3chart) {
             if (live) {
                 const socket = new WebSocket('ws://localhost:8080');
-                console.log('MMMMMM');
                 socket.addEventListener('open', function(event) {
                     console.log('Successfull connection');
                 });

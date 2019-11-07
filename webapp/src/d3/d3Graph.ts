@@ -222,6 +222,11 @@ export default class D3Graph {
         this.resize();
     }
 
+    public setData(data: HistoryData){
+        this.data = data
+        this.resize()
+    }
+
     // Graphs with one source only could be live
     // Add if statements if that have been changed.
     public goLive(): void {

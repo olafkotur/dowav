@@ -1,48 +1,21 @@
 import React, { useRef, useState, useLayoutEffect } from 'react';
-import { IViewport } from '../../types';
+import { IViewport, IHistoryData, MultipleHistoryData } from '../../types';
 import Graph from './Graph';
-import useFetch from '../../hooks/useFetch';
-import Loader from '../styled/Loader';
-import ErrorMessage from '../../errors/ErrorMessage';
+import GraphData from '../GraphData';
 
 type GraphViewProps = {
     currentOption: string;
 };
 
 const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
-    const [count, setCount] = useState(0);
     const [size, setSize] = useState<IViewport | null>(null);
     const graphRef = useRef<HTMLDivElement>(null);
-    const { loading, data, error } = useFetch({
-        useCache: true,
-        query: [
-            {
-                endpoint: `/api/historic/${currentOption.toLowerCase()}`,
-                params: {
-                    zone: 1,
-                    from: 1,
-                    to: 30
-                }
-            },
-            {
-                endpoint: `/api/historic/${currentOption.toLowerCase()}`,
-                params: {
-                    zone: 2,
-                    from: 1,
-                    to: 30
-                }
-            },
-            {
-                endpoint: `/api/historic/${currentOption.toLowerCase()}`,
-                params: {
-                    zone: 3,
-                    from: 1,
-                    to: 30
-                }
-            }
-        ],
-        refetch: count
+    const [graphsData, setGraphsData] = useState<MultipleHistoryData>({
+        zone1: [],
+        zone2: [],
+        zone3: []
     });
+
     const updateSize = () => {
         if (graphRef.current) {
             let viewport = graphRef.current.getBoundingClientRect();
@@ -57,26 +30,28 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
         window.addEventListener('resize', updateSize);
         return () => window.removeEventListener('resize', updateSize);
     }, [graphRef.current]);
-
+    const keys = Object.keys(graphsData);
+    let drawMultipleData = false;
+    keys.forEach(key => {
+        if (graphsData[key].length > 0) drawMultipleData = true;
+    });
     return (
         <div ref={graphRef} className="graph-view">
             {size ? (
                 <>
-                    {loading ? (
-                        <Loader size={size} currentOption={currentOption} />
-                    ) : error ? (
-                        <div className="error-message">
-                            <ErrorMessage
-                                error={error}
-                                onRefetch={() => {
-                                    setCount(count + 1);
+                    <div className="graph-view-row">
+                        {[1, 2, 3].map((d: number) => (
+                            <GraphData
+                                setGraphsData={setGraphsData}
+                                currentOption={currentOption}
+                                zone={d}
+                                size={{
+                                    width: (size.width - 50) / 3,
+                                    height: (size.height - 100) / 2
                                 }}
                             />
-                        </div>
-                    ) : (
-                        <>
-                            <div className="graph-view-row">
-                                <Graph
+                        ))}
+                        {/* <Graph
                                     data={data}
                                     viewport={{
                                         width: (size.width - 50) / 3,
@@ -108,40 +83,24 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                                         name: currentOption,
                                         id: currentOption + 3
                                     }}
-                                />
-                            </div>
-                            <div className="graph-view-row">
-                                <Graph
-                                    data={{
-                                        zoneA: data,
-                                        zoneB: data.slice(30).map((d: any) => ({
-                                            ...d,
-                                            value:
-                                                d.value + Math.random() * 5 - 3
-                                        })),
-                                        zoneC: data
-                                            .slice(20, 40)
-                                            .map((d: any) => ({
-                                                ...d,
-                                                value:
-                                                    d.value +
-                                                    Math.random() * 5 -
-                                                    6
-                                            }))
-                                    }}
-                                    control={{ shouldRenderLive: false }}
-                                    viewport={{
-                                        width: size.width - 10,
-                                        height: (size.height - 100) / 2
-                                    }}
-                                    conf={{
-                                        name: currentOption,
-                                        id: currentOption + 4
-                                    }}
-                                />
-                            </div>
-                        </>
-                    )}
+                                /> */}
+                    </div>
+                    <div className="graph-view-row">
+                        {drawMultipleData ? (
+                            <Graph
+                                data={graphsData}
+                                control={{ shouldRenderLive: false }}
+                                viewport={{
+                                    width: size.width - 10,
+                                    height: (size.height - 100) / 2
+                                }}
+                                conf={{
+                                    name: currentOption,
+                                    id: currentOption + 4
+                                }}
+                            />
+                        ) : null}
+                    </div>
                 </>
             ) : null}
         </div>

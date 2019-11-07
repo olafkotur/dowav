@@ -1,13 +1,14 @@
 import React from 'react';
-import { FetchError } from '../types';
+import { FetchError, IViewport } from '../types';
 import { IoIosRefresh } from 'react-icons/io';
 
-const ErrorMessage: React.FC<{ error: FetchError; onRefetch: any }> = ({
-    error,
-    onRefetch
-}) => {
+const ErrorMessage: React.FC<{
+    error: FetchError;
+    onRefetch: any;
+    size?: IViewport;
+}> = ({ error, onRefetch, size = { width: '100%', height: '100%' } }) => {
     return (
-        <div className="error-box">
+        <div className="error-box" style={{ ...size }}>
             <h1>{error.title}</h1>
             <p>{error.message}</p>
             {error && error.actions!.includes('refetch') ? (

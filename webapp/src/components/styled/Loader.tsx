@@ -37,6 +37,7 @@ const Loader: React.FC<LoaderProps> = ({ size, currentOption }) => {
             stroke={d3Colors[currentOption][1]}
             width={size.width}
             height={size.height}
+            className="loader"
         >
             <Circle />
         </svg>
