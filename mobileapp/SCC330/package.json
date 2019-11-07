@@ -31,16 +31,44 @@
     "@types/react-native-svg-charts": "^5.0.2",
     "@types/react-test-renderer": "^16.9.1",
     "babel-jest": "^24.9.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.15.1",
     "jest": "^24.9.0",
-    "jest-expo": "35.0.0",
+    "jest-environment-enzyme": "^7.1.2",
+    "jest-enzyme": "^7.1.2",
     "metro-react-native-babel-preset": "^0.56.3",
     "react-addons-test-utils": "^15.6.2",
+    "react-dom": "^16.11.0",
     "react-native-typescript-transformer": "^1.2.13",
     "react-test-renderer": "16.9.0",
     "ts-jest": "^24.1.0",
     "typescript": "^3.6.4"
   },
   "jest": {
-    "preset": "jest-expo/android"
+    "preset": "react-native",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "setupFilesAfterEnv": [
+      "jest-enzyme"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js",
+      "\\.(ts|tsx)$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(react-native|react-navigation|react-native-screens|react-native-safe-area-view|react-native-reanimated|react-native-vector-icons|react-native-svg|react-native-svg-charts|react-native-elements|react-native-gesture-handler)/)"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.jest.json"
+      }
+    },
+    "testEnvironment": "enzyme",
+    "testEnvironmentOptions": {
+      "enzymeAdapter": "react16"
+    }
   }
 }
