@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import theme from '../theme';
+
 const LightScreen = () => {
   return (
     <View style={styles.container}>
@@ -14,7 +16,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2c5364',
+    backgroundColor: theme.backgroundColor,
   },
   text: {
     fontSize: 24,

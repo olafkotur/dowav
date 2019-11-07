@@ -1,49 +1,39 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
-import { LineChart, Grid } from 'react-native-svg-charts';
 
+import Graph from './Graph';
 import GraphButtonSet from './GraphButtonSet';
 
 interface Props {
   data: Array<Array<number>>,
-  style?: Object,
-  lineColor?: string,
+  style?: ViewStyle,
+}
+
+// Map given data onto graph components
+const mapDataToGraphs = (data: Array<Array<number>>, activeGraph: number) => {
+  return data.map((dataSet: Array<number>, i: number) => (
+    <Graph
+      data={dataSet}
+      hidden={activeGraph !== i}
+      key={i}
+    />
+  ));
 }
 
 const GraphSet = (props: Props) => {
-  const [ graph, setGraph ] = useState(0);
-
-  const svgStyle = {
-    stroke: props.lineColor,
-    strokeWidth: 3,
-  };
+  const [ activeGraph, setActiveGraph ] = useState(0);
+  const { data, style } = props;
 
   return (
-    <View style={props.style}>
+    <View style={style}>
       <GraphButtonSet
         count={props.data.length}
-        activeGraph={graph}
-        onPress={(g: number) => setGraph(g)}
+        activeGraph={activeGraph}
+        onPress={(g: number) => setActiveGraph(g)}
       />
 
       <View style={styles.graphContainer}>
-        {props.data.map((dataSet: Array<number>, i: number) => {
-          const graphStyle: ViewStyle = {
-            display: (graph === i ? 'flex' : 'none'),
-            height: '100%',
-          };
-
-          return (
-            <LineChart
-              style={graphStyle}
-              data={dataSet}
-              svg={svgStyle}
-              key={i}
-            >
-              <Grid />
-            </LineChart>
-          );
-        })}
+        {mapDataToGraphs(data, activeGraph)}
       </View>
     </View>
   );
@@ -55,5 +45,10 @@ const styles = StyleSheet.create({
     marginTop: '2.5%',
   },
 });
+
+GraphSet.defaultProps = {
+  style: {},
+  lineColor: 'white',
+};
 
 export default GraphSet;

@@ -1,10 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+
+import theme from '../theme';
 
 interface Props {
   activeGraph: number,
   count: number,
-  onPress: Function,
+  onPress?: Function,
 }
 
 const GraphButtonSet = (props: Props) => {
@@ -15,7 +17,7 @@ const GraphButtonSet = (props: Props) => {
     const isFirst = i === 0;
     const isLast = i === count - 1;
 
-    const thisStyle: Array<ViewStyle> = [ styles.globalBtn ];
+    const thisStyle: Array<ViewStyle> = [ styles.everyBtn ];
     const textStyle: TextStyle = { color: 'white' };
     
     if (activeGraph === i) {
@@ -50,11 +52,11 @@ const BORDER_RADIUS = 4;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderColor: 'orange',
+    borderColor: theme.accentColor,
     borderWidth: 1,
     borderRadius: BORDER_RADIUS + 1,
   },
-  globalBtn: {
+  everyBtn: {
     backgroundColor: 'transparent',
     padding: 6,
     paddingLeft: 8,
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: BORDER_RADIUS,
   },
   activeBtn: {
-    backgroundColor: 'orange',
+    backgroundColor: theme.accentColor,
   },
 });
 

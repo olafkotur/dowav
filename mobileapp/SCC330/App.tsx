@@ -8,6 +8,7 @@ import TempScreen from './screens/TempScreen';
 import MoistureScreen from './screens/MoistureScreen';
 import LightScreen from './screens/LightScreen';
 import MovScreen from './screens/MovScreen';
+import theme from './theme';
 
 interface ScreenIcons<T> {
   [key: string]: T
@@ -48,9 +49,9 @@ const RootStack = createBottomTabNavigator({
     ),
   }),
   tabBarOptions: {
-    activeBackgroundColor: 'orange',
+    activeBackgroundColor: theme.accentColor,
     activeTintColor: 'black',
-    inactiveBackgroundColor: '#2c5364',
+    inactiveBackgroundColor: theme.backgroundColor,
     inactiveTintColor: 'white',
   },
 });
@@ -60,7 +61,7 @@ const AppContainer = createAppContainer(RootStack);
 const App: React.FunctionComponent = () => {
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar backgroundColor="#1f404f" />
+      <StatusBar backgroundColor={theme.statusBarColor} />
       <AppContainer />
     </View>
   );

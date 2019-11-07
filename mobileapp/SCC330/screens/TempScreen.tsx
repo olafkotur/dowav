@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { LineChart, Grid } from 'react-native-svg-charts';
 
+import Graph from '../components/Graph';
 import GraphSet from '../components/GraphSet';
+import theme from '../theme';
 
 const TempScreen = () => {
   const data = [
@@ -17,16 +18,12 @@ const TempScreen = () => {
       <GraphSet
         data={data}
         style={styles.graphSet}
-        lineColor="orange"
       />
 
-      <LineChart
-        style={styles.mainGraphContainer}
+      <Graph
         data={mainData}
-        svg={{ stroke: 'orange', strokeWidth: 3, }}
-      >
-        <Grid />
-      </LineChart>
+        style={styles.mainGraphContainer}
+      />
     </View>
   );
 }
@@ -37,7 +34,7 @@ const styles = StyleSheet.create({
     padding: '5%',
     paddingTop: '2.5%',
     paddingBottom: '2.5%',
-    backgroundColor: '#2c5364',
+    backgroundColor: theme.backgroundColor,
   },
   graphSet: {
     flex: 2,
