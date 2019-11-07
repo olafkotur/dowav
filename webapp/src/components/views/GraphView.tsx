@@ -17,9 +17,25 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
         useCache: true,
         query: [
             {
-                endpoint: '/api/historic/temperature',
+                endpoint: `/api/historic/${currentOption.toLowerCase()}`,
                 params: {
                     zone: 1,
+                    from: 1,
+                    to: 30
+                }
+            },
+            {
+                endpoint: `/api/historic/${currentOption.toLowerCase()}`,
+                params: {
+                    zone: 2,
+                    from: 1,
+                    to: 30
+                }
+            },
+            {
+                endpoint: `/api/historic/${currentOption.toLowerCase()}`,
+                params: {
+                    zone: 3,
                     from: 1,
                     to: 30
                 }

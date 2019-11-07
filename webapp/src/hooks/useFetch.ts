@@ -46,14 +46,18 @@ export default function useFetch(options: Options): UseFetchState {
     function fetchData() {
         new Promise((resolve, reject) => {
             setTimeout(() => {
-                // fetch(
-                //     `${FetchConstants.hostname}${
-                //         options.query.endpoint
-                //     }${generateQueryString(options.query.params)}`
-                // );
+                (Promise as any).allSettled(
+                    options.query.map(d =>
+                        fetch(
+                            `${FetchConstants.hostname}${
+                                d.endpoint
+                            }${generateQueryString(d.params)}`
+                        )
+                    )
+                );
+
                 resolve(data);
             }, 500);
-            // fetch()
             setTimeout(() => {
                 reject(fetchErrorMessages.timeout);
             }, 10000);
