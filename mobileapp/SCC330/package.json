@@ -5,7 +5,7 @@
   "scripts": {
     "android": "react-native run-android",
     "start": "react-native start",
-    "test": "node_modules/.bin/jest",
+    "test": "jest",
     "lint": "eslint ."
   },
   "dependencies": {
