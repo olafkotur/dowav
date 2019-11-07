@@ -19,6 +19,7 @@ type Calculations struct {
 }
 
 type HistoricData struct {
+	Zone        int          `json:"zone"`
 	StartTime   int          `json:"startTime"`
 	EndTime     int          `json:"endTime"`
 	Temperature Calculations `json:"temperature"`

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -28,7 +29,9 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	statement.Exec(zone, startTime, endTime, temperature, moisture, light)
+	fmt.Println(zone, temperature, moisture, light)
+	re, er := statement.Exec(zone, startTime, endTime, temperature, moisture, light)
+	fmt.Println(re, er)
 
 	res := Message{"Success"}
 	sendResponse(res, writer)

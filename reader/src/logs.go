@@ -41,7 +41,7 @@ func logRawData(data, path string, file *os.File) {
 }
 
 func getLatestLog() (p string) {
-	files, err := ioutil.ReadDir("./logs/")
+	files, err := ioutil.ReadDir("../logs/")
 	if err != nil {
 		panic(err)
 	}
