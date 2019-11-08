@@ -20,7 +20,7 @@ const GraphData: React.FC<GraphDataProps> = ({
 }) => {
     const [count, setCount] = useState(0);
     const { loading, data, error } = useFetch({
-        useCache: true,
+        useCache: false,
         query: {
             endpoint: `/api/historic/${currentOption.toLowerCase()}`,
             params: {
@@ -59,7 +59,11 @@ const GraphData: React.FC<GraphDataProps> = ({
                     data={data}
                     viewport={size}
                     //TODO think about id
-                    conf={{ name: currentOption, id: currentOption + zone }}
+                    conf={{
+                        name: currentOption,
+                        id: currentOption + zone,
+                        zone
+                    }}
                 />
             )}
         </>

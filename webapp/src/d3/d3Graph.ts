@@ -10,6 +10,8 @@ import {
 } from '../types';
 import * as MENU_OPTIONS from '../constants/MenuOptionConstants';
 import d3LineGradients from '../d3/d3LineGradients';
+import moment from 'moment';
+import d3Colors from './d3Colors';
 
 type D3GraphProps = {
     viewport: IViewport;
@@ -62,19 +64,20 @@ export default class D3Graph {
             .select(this.svgHTML.parentNode as any)
             .append('div')
             .attr('class', 'tooltip');
+        if (
+            this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+            this.conf.name === MENU_OPTIONS.MOISTURE ||
+            this.conf.name === MENU_OPTIONS.LIGHT
+        ) {
+            d3LineGradients.drawGradient(
+                d3.select(options.svg),
+                this.viewport,
+                this.conf.name
+            );
+        }
         // Add html
         if (this.data instanceof Array) {
-            this.line = this.svg
-                .append('path')
-                .attr('class', 'line')
-                .attr(
-                    'stroke',
-                    this.conf.name === MENU_OPTIONS.TEMPERATURE ||
-                        this.conf.name === MENU_OPTIONS.MOISTURE ||
-                        this.conf.name === MENU_OPTIONS.LIGHT
-                        ? 'url(#line-gradient)'
-                        : colors[0]
-                );
+            this.line = this.svg.append('path').attr('class', 'line');
         } else if (typeof this.data === 'object') {
             let keys = Object.keys(this.data);
             this.line = [];
@@ -87,6 +90,7 @@ export default class D3Graph {
                 );
             }
         }
+
         this.clip = this.svg
             .append('g')
             .attr('class', 'clip')
@@ -109,17 +113,6 @@ export default class D3Graph {
                 `translate(${this.margin.left}, ${this.margin.top})`
             );
         this.dashedLines = this.svg.append('g').classed('dashed-line-g', true);
-        if (
-            this.conf.name === MENU_OPTIONS.TEMPERATURE ||
-            this.conf.name === MENU_OPTIONS.MOISTURE ||
-            this.conf.name === MENU_OPTIONS.LIGHT
-        ) {
-            d3LineGradients.drawGradient(
-                this.svg,
-                this.viewport,
-                this.conf.name
-            );
-        }
     }
 
     public setConf(
@@ -135,7 +128,7 @@ export default class D3Graph {
 
     private scaleData(data: HistoryData): HistoryData {
         const { timePeriod } = this.conf;
-        if (timePeriod.timePeriod / 5 === 1) {
+        if (timePeriod.timePeriod === 5) {
             if (data instanceof Array) {
                 return [...data];
             } else if (typeof data === 'object') {
@@ -155,54 +148,64 @@ export default class D3Graph {
     private computeData(data: HistoryData, k: number): HistoryData {
         if (data instanceof Array) {
             let newData = [];
-            let tempAvg = 0;
-            let tempTime = 0;
-            for (let i = 0; i < data.length; i++) {
-                if (i % k === k - 1 || i === data.length - 1) {
-                    tempAvg += data[i].value;
-
-                    const divider = i % k === k - 1 ? k : data.length % k;
-                    newData.push({
-                        time: tempTime,
-                        value: tempAvg / divider,
-                        min: 0,
-                        max: 0
-                    });
-
-                    tempAvg = 0;
-                    tempTime = 0;
-                } else {
-                    tempAvg += data[i].value;
-                    if (i % k === 0) tempTime = data[i].time;
+            const length = Math.ceil(data.length / k);
+            for (let i = 0; i < length - 1; i++) {
+                let tempAvg = 0;
+                let tempTime = 0;
+                for (let j = 0; j < k; j++) {
+                    const index = i * k + j;
+                    tempAvg =
+                        j === 0
+                            ? data[index].value
+                            : (tempAvg + data[index].value) / 2;
+                    if (j === 0) tempTime = data[index].time;
                 }
+                newData.push({
+                    time: tempTime,
+                    value: tempAvg
+                });
             }
+            // for (let i = 0; i < data.length; i++) {
+            //     if (i % k === k - 1 || i === data.length - 1) {
+            //         tempAvg += data[i].value;
+
+            //         const divider = i % k === k - 1 ? k : data.length % k;
+            //         newData.push({
+            //             time: tempTime,
+            //             value: tempAvg / divider,
+            //             min: 0,
+            //             max: 0
+            //         });
+
+            //         tempAvg = 0;
+            //         tempTime = 0;
+            //     } else {
+            //         tempAvg += data[i].value;
+            //         if (i % k === 0) tempTime = data[i].time;
+            //     }
+            // }
             return [...newData];
         } else if (typeof data === 'object') {
             const newObj: any = {};
             for (let key in data) {
                 const zoneData = data[key];
                 let newData = [];
-                let tempAvg = 0;
-                let tempTime = 0;
-                for (let i = 0; i < zoneData.length; i++) {
-                    if (i % k === k - 1 || i === zoneData.length - 1) {
-                        tempAvg += zoneData[i].value;
-
-                        const divider =
-                            i % k === k - 1 ? k : zoneData.length % k;
-                        newData.push({
-                            time: tempTime,
-                            value: tempAvg / divider,
-                            min: 0,
-                            max: 0
-                        });
-
-                        tempAvg = 0;
-                        tempTime = 0;
-                    } else {
-                        tempAvg += zoneData[i].value;
-                        if (i % k === 0) tempTime = zoneData[i].time;
+                const length = Math.ceil(zoneData.length / k);
+                for (let i = 0; i < length - 1; i++) {
+                    let tempAvg = 0;
+                    let tempTime = 0;
+                    for (let j = 0; j < k; j++) {
+                        const index = i * k + j;
+                        tempAvg =
+                            j === 0
+                                ? zoneData[index].value
+                                : (tempAvg + zoneData[index].value) / 2;
+                        if (j === 0) tempTime = zoneData[index].time;
                     }
+                    newData.push({
+                        time: tempTime,
+                        value: tempAvg
+                    });
                 }
                 newObj[key] = newData;
             }
@@ -258,7 +261,6 @@ export default class D3Graph {
     }
 
     private plotLive() {
-        console.log(this.liveData);
         function getTranslate(this: D3Graph): number {
             if (this.liveData.length >= 30) {
                 let n =
@@ -301,6 +303,15 @@ export default class D3Graph {
                 .style('transform', null)
                 .transition()
                 .duration(300)
+                .attr(
+                    'stroke',
+                    this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                        this.conf.name === MENU_OPTIONS.MOISTURE ||
+                        this.conf.name === MENU_OPTIONS.LIGHT
+                        ? 'url(#linegradient)'
+                        : colors[0]
+                    // d3Colors[this.conf.name][1]
+                )
                 .style(
                     'transform',
                     `translate(${getTranslate.bind(this)()}px, 0)`
@@ -399,7 +410,6 @@ export default class D3Graph {
                 this.tooltip.classed('show', false);
             });
         }
-
         let t = d3
             .transition()
             .duration(500)
@@ -439,10 +449,21 @@ export default class D3Graph {
             });
         if (this.data instanceof Array) {
             //path
-            this.line.datum(this.data).attr('d', line as any);
-
+            this.line
+                .datum(this.data)
+                .attr('d', line as any)
+                .attr(
+                    'stroke',
+                    // this.conf.name === MENU_OPTIONS.TEMPERATURE ||
+                    //     this.conf.name === MENU_OPTIONS.MOISTURE ||
+                    //     this.conf.name === MENU_OPTIONS.LIGHT
+                    //     ? 'url(#linegradient)'
+                    //     : colors[0]
+                    d3Colors[this.conf.name][1]
+                );
             if (on === 'update') {
                 this.line
+
                     .attr(
                         'stroke-dasharray',
                         this.line.node().getTotalLength() +
@@ -463,7 +484,6 @@ export default class D3Graph {
                     .transition(t as any)
                     .attr('opacity', 1);
             }
-
             // circles
             this.svg.selectAll('.dot');
         } else if (typeof this.data === 'object') {
@@ -471,7 +491,6 @@ export default class D3Graph {
             for (let key in this.data) {
                 //path
                 this.line[i].datum(this.data[key]).attr('d', <any>line);
-
                 if (on === 'update') {
                     this.line[i]
                         .attr(
@@ -499,6 +518,24 @@ export default class D3Graph {
                 i++;
             }
         }
+    }
+
+    public clean() {
+        delete this.svg;
+        delete this.svgHTML;
+        delete this.viewport;
+        delete this.margin;
+        delete this.data;
+        delete this.liveData;
+        delete this.yScale;
+        delete this.xScale;
+        delete this.conf;
+        delete this.tooltip;
+        delete this.line;
+        delete this.xAxis;
+        delete this.yAxis;
+        delete this.clip;
+        delete this.dashedLines;
     }
 
     public resize() {

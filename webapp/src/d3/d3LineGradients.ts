@@ -26,11 +26,12 @@ function drawGradient(
             });
         }
     }
-    let grad = svg.select('#line-gradient');
+    let grad = svg.select('#linegradient');
     if (grad.empty()) {
         grad = svg
+            .append('defs')
             .append('linearGradient')
-            .attr('id', 'line-gradient')
+            .attr('id', 'linegradient')
             .attr('gradientUnits', 'userSpaceOnUse');
     }
     grad.attr('x1', viewport.width / 2)

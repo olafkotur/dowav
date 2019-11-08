@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import {
     IViewport,
     HistoryData,
@@ -35,10 +35,10 @@ const Graph: React.FC<GraphProps> = ({
     const [d3chart, setD3chart] = useState<D3Graph | null>(null);
 
     useEffect(() => {
-        if (data && d3chart) {
+        if (data && d3chart && container.current) {
             d3chart.setData(data);
         }
-    }, [data]);
+    }, [data, d3chart]);
 
     useEffect(() => {
         if (d3chart) {
@@ -78,20 +78,26 @@ const Graph: React.FC<GraphProps> = ({
                     .attr('width', viewport.width)
                     .attr('height', viewport.height);
                 const svg = document.getElementById(conf.id);
-                svg &&
-                    setD3chart(
-                        new D3Graph({
-                            svg,
-                            viewport,
-                            data,
-                            conf: {
-                                ...conf,
-                                timePeriod: timePeriod.filter(
-                                    (t: TimePeriod) => t.selected
-                                )[0]
-                            }
-                        })
-                    );
+                if (svg) {
+                    const chart = new D3Graph({
+                        svg,
+                        viewport,
+                        data,
+                        conf: {
+                            ...conf,
+                            timePeriod: timePeriod.filter(
+                                (t: TimePeriod) => t.selected
+                            )[0]
+                        }
+                    });
+                    setD3chart(chart);
+                }
+
+                return () => {
+                    if (d3chart) {
+                        d3chart.clean();
+                    }
+                };
             }
         }
     }, [container.current]);
@@ -117,14 +123,35 @@ const Graph: React.FC<GraphProps> = ({
         if (d3chart) {
             if (live) {
                 d3chart.goLive();
-                const id = setInterval(() => {
-                    d3chart.addLiveData({
-                        value: Math.random() * 5 + 17,
-                        time: Date.now()
-                    });
-                }, 1000);
+                const id = setInterval(async () => {
+                    const formData = new URLSearchParams();
+                    formData.set('zone', conf.zone + '');
+                    formData.set(
+                        'temperature',
+                        (Math.random() * 6 + 27).toFixed(0) + ''
+                    );
+                    formData.set('moisture', Math.random() * 150 + 15 + '');
+                    formData.set('light', Math.random() * 140 + 10 + '');
+
+                    const response = await fetch(
+                        'http://dowav-api.herokuapp.com/api/live/upload',
+                        {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            body: formData
+                        }
+                    );
+                    const json = await fetch(
+                        `http://dowav-api.herokuapp.com/api/live/${conf.zone}`
+                    );
+                    const data = await json.json();
+                    d3chart.addLiveData(data[conf.name.toLowerCase()]);
+                    // d3chart.addLiveData({
+                    //     value: Math.random() * 5 + 17,
+                    //     time: Date.now()
+                    // });
+                }, 5000);
                 return () => {
-                    console.log('CLOSING');
                     clearInterval(id);
                 };
             }

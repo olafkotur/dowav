@@ -54,6 +54,9 @@ export default function useFetch(options: Options): UseFetchState {
     function fetchData() {
         new Promise((resolve, reject) => {
             const time = Date.now();
+            const id = setTimeout(() => {
+                reject(fetchErrorMessages.timeout);
+            }, 10000);
             fetch(
                 `${FetchConstants.hostname}${
                     options.query.endpoint
@@ -61,6 +64,7 @@ export default function useFetch(options: Options): UseFetchState {
             )
                 .then(data => data.json())
                 .then(data => {
+                    clearTimeout(id);
                     if (data === null) reject(fetchErrorMessages.noData);
                     if (options.useCache) {
                         window.localStorage.setItem(
@@ -85,9 +89,6 @@ export default function useFetch(options: Options): UseFetchState {
                 .catch(err => {
                     reject(fetchErrorMessages.fetchFail);
                 });
-            setTimeout(() => {
-                reject(fetchErrorMessages.timeout);
-            }, 10000);
         })
             .then(d => {
                 setState({

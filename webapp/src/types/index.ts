@@ -27,6 +27,7 @@ export type GraphConfiguration = {
     title?: string;
     name: string;
     id: string;
+    zone?: number;
 };
 
 export type TimePeriod = {

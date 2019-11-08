@@ -40,8 +40,36 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
             {size ? (
                 <>
                     <div className="graph-view-row">
-                        {[1, 2, 3].map((d: number) => (
+                        <GraphData
+                            setGraphsData={setGraphsData}
+                            currentOption={currentOption}
+                            zone={1}
+                            size={{
+                                width: (size.width - 50) / 3,
+                                height: (size.height - 100) / 2
+                            }}
+                        />
+                        <GraphData
+                            setGraphsData={setGraphsData}
+                            currentOption={currentOption}
+                            zone={2}
+                            size={{
+                                width: (size.width - 50) / 3,
+                                height: (size.height - 100) / 2
+                            }}
+                        />
+                        <GraphData
+                            setGraphsData={setGraphsData}
+                            currentOption={currentOption}
+                            zone={3}
+                            size={{
+                                width: (size.width - 50) / 3,
+                                height: (size.height - 100) / 2
+                            }}
+                        />
+                        {/* {[1, 2, 3].map((d: number) => (
                             <GraphData
+                                key={d}
                                 setGraphsData={setGraphsData}
                                 currentOption={currentOption}
                                 zone={d}
@@ -50,7 +78,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                                     height: (size.height - 100) / 2
                                 }}
                             />
-                        ))}
+                        ))} */}
                         {/* <Graph
                                     data={data}
                                     viewport={{
