@@ -222,9 +222,9 @@ export default class D3Graph {
         this.resize();
     }
 
-    public setData(data: HistoryData){
-        this.data = data
-        this.resize()
+    public setData(data: HistoryData) {
+        this.data = data;
+        this.resize();
     }
 
     // Graphs with one source only could be live
@@ -392,11 +392,13 @@ export default class D3Graph {
 
     public plot(on?: string) {
         // Events
-        d3.select(this.svgHTML).on('mousemove', () => this.showTip());
-        d3.select(this.svgHTML).on('mouseleave', () => {
-            this.svg.select('circle').remove();
-            this.tooltip.classed('show', false);
-        });
+        if (this.data instanceof Array && this.data.length > 1) {
+            d3.select(this.svgHTML).on('mousemove', () => this.showTip());
+            d3.select(this.svgHTML).on('mouseleave', () => {
+                this.svg.select('circle').remove();
+                this.tooltip.classed('show', false);
+            });
+        }
 
         let t = d3
             .transition()
@@ -424,15 +426,17 @@ export default class D3Graph {
             .ticks(Math.floor(this.viewport.height / 20));
         this.yAxis.call(axisLeft);
         this.dashedLines.html('');
-        (axisLeft.scale() as any).ticks(Math.floor(this.viewport.height / 20)).forEach((d: number[]) => {
-            this.dashedLines
-                .append('line')
-                .classed('dashed-line', true)
-                .attr('x1', 0)
-                .attr('y1', this.yScale(d))
-                .attr('x2', this.viewport.width)
-                .attr('y2', this.yScale(d));
-        });
+        (axisLeft.scale() as any)
+            .ticks(Math.floor(this.viewport.height / 20))
+            .forEach((d: number[]) => {
+                this.dashedLines
+                    .append('line')
+                    .classed('dashed-line', true)
+                    .attr('x1', 0)
+                    .attr('y1', this.yScale(d))
+                    .attr('x2', this.viewport.width)
+                    .attr('y2', this.yScale(d));
+            });
         if (this.data instanceof Array) {
             //path
             this.line.datum(this.data).attr('d', line as any);

@@ -116,23 +116,6 @@ const Graph: React.FC<GraphProps> = ({
     useEffect(() => {
         if (d3chart) {
             if (live) {
-                const socket = new WebSocket('ws://localhost:8080');
-                socket.addEventListener('open', function(event) {
-                    console.log('Successfull connection');
-                });
-
-                socket.addEventListener('error', function(event) {
-                    console.log(event);
-                });
-
-                socket.addEventListener('message', function(event) {
-                    console.log(event);
-                });
-
-                socket.addEventListener('close', function(event) {
-                    console.log('Closed');
-                });
-
                 d3chart.goLive();
                 const id = setInterval(() => {
                     d3chart.addLiveData({
@@ -142,7 +125,6 @@ const Graph: React.FC<GraphProps> = ({
                 }, 1000);
                 return () => {
                     console.log('CLOSING');
-                    socket.close();
                     clearInterval(id);
                 };
             }
