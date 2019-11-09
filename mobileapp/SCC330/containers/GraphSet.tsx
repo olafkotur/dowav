@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
 
 GraphSet.defaultProps = {
   style: {},
-  lineColor: 'white',
 };
 
 export default GraphSet;

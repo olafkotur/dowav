@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import Graph from '../components/Graph';
-import GraphSet from '../components/GraphSet';
+import Graph from '../containers/Graph';
+import GraphSet from '../containers/GraphSet';
 import theme from '../theme';
 
 const TempScreen = () => {
