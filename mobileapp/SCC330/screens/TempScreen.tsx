@@ -1,32 +1,24 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
-import Graph from '../containers/Graph';
+import HistoricGraph from '../containers/HistoricGraph';
 import GraphSet from '../containers/GraphSet';
 import theme from '../theme';
+import { LineChart, Grid } from 'react-native-svg-charts';
 
-const TempScreen = () => {
-  const data = [
-    [43, 45, 56, 42, 34, 39],
-    [63, 75, 23, 54, 24, 54],
-    [45, 63, 64, 27, 54, 53],
-  ];
-  const mainData = [35, 54, 54, 12, 64, 25];
+const TempScreen = () => (
+  <View style={styles.container}>
+    <GraphSet
+      sensor="temperature"
+      style={styles.graphSet}
+    />
 
-  return (
-    <View style={styles.container}>
-      <GraphSet
-        data={data}
-        style={styles.graphSet}
-      />
-
-      <Graph
-        data={mainData}
-        style={styles.mainGraphContainer}
-      />
-    </View>
-  );
-}
+    <HistoricGraph
+      sensor="temperature"
+      style={styles.mainGraphContainer}
+    />
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {

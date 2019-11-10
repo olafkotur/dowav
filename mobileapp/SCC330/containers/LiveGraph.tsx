@@ -15,7 +15,7 @@ const svgStyle = {
   strokeWidth: theme.graph.lineWidth,
 }
 
-const Graph = (props: Props) => {
+const DisplayGraph = (props: Props) => {
   const { data, hidden, style } = props;
 
   const graphStyle: ViewStyle = Object.assign({
@@ -34,9 +34,9 @@ const Graph = (props: Props) => {
   );
 }
 
-Graph.defaultProps = {
+DisplayGraph.defaultProps = {
   hidden: false,
   style: {},
 }
 
-export default Graph;
+export default DisplayGraph;

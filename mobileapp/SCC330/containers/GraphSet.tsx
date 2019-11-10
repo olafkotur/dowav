@@ -1,39 +1,46 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 
-import Graph from './Graph';
+import HistoricGraph from './HistoricGraph';
 import GraphButtonSet from './GraphButtonSet';
+import { Sensor } from '../types';
 
 interface Props {
-  data: Array<Array<number>>,
+  sensor: Sensor,
   style?: ViewStyle,
 }
 
-// Map given data onto graph components
-const mapDataToGraphs = (data: Array<Array<number>>, activeGraph: number) => {
-  return data.map((dataSet: Array<number>, i: number) => (
-    <Graph
-      data={dataSet}
-      hidden={activeGraph !== i}
-      key={i}
-    />
-  ));
+const renderGraphs = (sensor: Sensor, activeGraph: number) => {
+  const graphs = [];
+
+  for (let i = 0; i < 3; i++) {
+    graphs.push(
+      <HistoricGraph
+        sensor={sensor}
+        hidden={activeGraph !== i}
+        key={i}
+      />
+    );
+  }
+
+  return graphs;
 }
 
+// Renders 3 toggle-able graphs for the given sensor
 const GraphSet = (props: Props) => {
   const [ activeGraph, setActiveGraph ] = useState(0);
-  const { data, style } = props;
+  const { sensor, style } = props;
 
   return (
     <View style={style}>
       <GraphButtonSet
-        count={props.data.length}
+        count={3}
         activeGraph={activeGraph}
         onPress={(g: number) => setActiveGraph(g)}
       />
 
       <View style={styles.graphContainer}>
-        {mapDataToGraphs(data, activeGraph)}
+        {renderGraphs(sensor, activeGraph)}
       </View>
     </View>
   );

@@ -1,50 +1,46 @@
 import React, { useEffect, useState } from 'react';
 
-import { Sensor, Zone } from '../types';
+import { Sensor, SensorData, ZoneData } from '../types';
 
 const LIVE_ENDPOINT = 'https://dowav-api.herokuapp.com/api/live/';
 const DELAY = 5000;
 
 interface Props {
-  zone: Zone,
   sensor: Sensor,
   children: React.ReactNode,
 }
 
-// Function which polls server for data every DELAY ms
-const start = (zone: number, sensor: string, setData: Function) => {
-  const interval = setInterval(() => {
-    try {
-      const pData = fetch(`${LIVE_ENDPOINT}${zone}`);
-
-      pData.then(res => {
-        res.json().then(serverData => {
-          if (serverData[sensor]) {
-            setData(serverData[sensor]);
-          }
-        });
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }, DELAY);
-
-  return interval;
-};
-
-const LiveDataContext = React.createContext(null);
+const LiveDataContext = React.createContext([] as ZoneData);
 
 // Component which starts polling server and provides latest data
 const LiveDataWorker = (props: Props) => {
-  const [ data, setData ] = useState(null);
-  const { zone, sensor } = props;
+  // Alias props
+  const { sensor } = props;
 
+  // Initialise state
+  const [ data, setData ] = useState([]) as [ ZoneData, Function ];
+
+  // Upon mounting, start worker
   useEffect(() => {
-    const worker = start(zone, sensor, setData);
+    // Get new data every DELAY ms
+    const worker = setInterval(() => {
+      try {
+        const pData = fetch(`${LIVE_ENDPOINT}${sensor}`);
+  
+        pData.then(res => {
+          res.json().then((serverData: ZoneData) => {
+            if (serverData) {
+              setData([ ...data, ...serverData ]);
+            }
+          });
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    }, DELAY);
 
-    return () => {
-      clearInterval(worker);
-    };
+    // Upon unmounting, stop worker
+    return () => clearInterval(worker);
   }, []);
 
   return (
