@@ -2,12 +2,34 @@ import React, { useState } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 
 import HistoricGraph from './HistoricGraph';
-import GraphButtonSet from './GraphButtonSet';
+import GraphButton from './GraphButton';
 import { Sensor } from '../types';
+
+import theme from '../theme';
 
 interface Props {
   sensor: Sensor,
   style?: ViewStyle,
+};
+const BTN_BORDER_RADIUS = 4;
+
+const renderButtons = (activeGraph: number, onPress: Function) => {
+  const btnStyles: ViewStyle[] = [{
+    borderTopLeftRadius: BTN_BORDER_RADIUS,
+    borderBottomLeftRadius: BTN_BORDER_RADIUS,
+  }, {}, {
+    borderTopRightRadius: BTN_BORDER_RADIUS,
+    borderBottomRightRadius: BTN_BORDER_RADIUS,
+  }];
+
+  return btnStyles.map((style, i) => (
+    <GraphButton
+      active={activeGraph === i}
+      label={`Zone ${i + 1}`}
+      style={style}
+      onPress={() => onPress(i)}
+    />
+  ));
 }
 
 const renderGraphs = (sensor: Sensor, activeGraph: number) => {
@@ -26,18 +48,18 @@ const renderGraphs = (sensor: Sensor, activeGraph: number) => {
   return graphs;
 }
 
-// Renders 3 toggle-able graphs for the given sensor
+// Renders 3 toggle-able graphs, with buttons, for the given sensor
 const GraphSet = (props: Props) => {
   const [ activeGraph, setActiveGraph ] = useState(0);
   const { sensor, style } = props;
 
   return (
     <View style={style}>
-      <GraphButtonSet
-        count={3}
-        activeGraph={activeGraph}
-        onPress={(g: number) => setActiveGraph(g)}
-      />
+      <View style={styles.btnContainerOuter}>
+        <View style={styles.btnContainer}>
+          {renderButtons(activeGraph, setActiveGraph)}
+        </View>
+      </View>
 
       <View style={styles.graphContainer}>
         {renderGraphs(sensor, activeGraph)}
@@ -50,6 +72,16 @@ const styles = StyleSheet.create({
   graphContainer: {
     flex: 1,
     marginTop: '2.5%',
+  },
+  btnContainerOuter: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  btnContainer: {
+    flexDirection: 'row',
+    borderColor: theme.accentColor,
+    borderWidth: 1,
+    borderRadius: BTN_BORDER_RADIUS + 1,
   },
 });
 
