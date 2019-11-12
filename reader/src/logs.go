@@ -11,7 +11,7 @@ import (
 
 func createLogFile() (path string, f *os.File) {
 	t := time.Now().Unix()
-	logPath := "logs/log-" + strconv.FormatInt(t, 10) + ".txt"
+	logPath := "../logs/log-" + strconv.FormatInt(t, 10) + ".txt"
 
 	file, err := os.Create(logPath)
 	if err != nil {
@@ -41,7 +41,7 @@ func logRawData(data, path string, file *os.File) {
 }
 
 func getLatestLog() (p string) {
-	files, err := ioutil.ReadDir("./logs/")
+	files, err := ioutil.ReadDir("../logs/")
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +68,7 @@ func getLatestLog() (p string) {
 }
 
 func getDataAsString(path string) (d string) {
-	data, err := ioutil.ReadFile("logs/" + path)
+	data, err := ioutil.ReadFile("../logs/" + path)
 	if err != nil {
 		panic(err)
 	}

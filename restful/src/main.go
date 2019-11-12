@@ -22,9 +22,9 @@ func main() {
 
 	// Prepare database tables
 	database, _ = sql.Open("sqlite3", "./database.db")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL PRIMARY KEY, endTime REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL, endTime REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
 	statement.Exec()
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (zone INTEGER, time REAL PRIMARY KEY, temperature INTEGER, moisture INTEGER, light INTEGER)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (zone INTEGER, time REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
 	statement.Exec()
 
 	// Server routing
@@ -40,7 +40,7 @@ func main() {
 
 func printRequest(request *http.Request) {
 	log.Printf("Method: %s\n", request.Method)
-	log.Printf("URL: %s\n", request.URL)
+	log.Printf("URL: %s\n\n", request.URL)
 }
 
 func sendResponse(res interface{}, writer http.ResponseWriter) {

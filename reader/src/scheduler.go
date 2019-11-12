@@ -9,15 +9,15 @@ func startScheduler() {
 	log.Printf("Starting the scheduler\n")
 
 	refreshRate := 1 * time.Second
-	timeSinceLastRun := 10 * time.Second
-	processDataInterval := 10 * time.Second
+	timeSinceLastRun := 0 * time.Minute
+	processDataInterval := 5 * time.Minute
 
 	for {
 		// Process data
 		if timeSinceLastRun >= processDataInterval {
 			log.Printf("Starting to process raw data...\n")
-			startProcessingData(processDataInterval)
 			timeSinceLastRun = 0 * time.Second
+			startProcessingData(processDataInterval)
 		} else {
 			timeSinceLastRun += 1 * time.Second
 		}

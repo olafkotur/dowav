@@ -3,6 +3,12 @@
 MicroBit uBit;
 int zoneId = 0;
 
+// Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
+int getWaterLevel() {
+    MicroBitPin P0(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG);
+    return P0.getAnalogValue();
+}
+
 // Returns temperature in celcius
 int getTemperature() {
   return uBit.thermometer.getTemperature();
@@ -41,18 +47,6 @@ int getAccelorometerZ() {
   return uBit.accelerometer.getZ();
 }
 
-// Returns pitch (forward/back) in degrees
-int getPitch() {
-  uBit.accelerometer.setPeriod(500);
-  return uBit.accelerometer.getPitch();
-}
-
-// Returns roll (left/right) in degrees
-int getRoll() {
-  uBit.accelerometer.setPeriod(500);
-  return uBit.accelerometer.getRoll();
-}
-
 // Returns moisture value in range 0 - 1024
 int getMoistureLevel() {
   uBit.io.P1.setAnalogPeriod(250);
@@ -84,19 +78,19 @@ void onButtonEvent(MicroBitEvent e) {
   }
 }
 
-void sendMessage(int t, int m, int l, int p) {
+void sendMessage(int t, int m, int l, int w) {
   ManagedString zone(zoneId);
   ManagedString temp(t);
   ManagedString moist(m);
   ManagedString light(l);
-  ManagedString pitch(p);
+  ManagedString water(w);
   ManagedString space(" ");
 
   ManagedString msg = zone + space 
     + temp + space
     + moist + space
     + light + space
-    + pitch;
+    + water;
 
   uBit.radio.datagram.send(msg);
   uBit.serial.printf("S%s\r\n", msg.toCharArray());
@@ -126,9 +120,9 @@ int main() {
       int temperature = getTemperature();
       int moisture = getMoistureLevel();
       int light = getLightLevel();
-      int pitch = getPitch();
+      int water = getWaterLevel();
 
-      sendMessage(temperature, moisture, light, pitch);
+      sendMessage(temperature, moisture, light, water);
     }
 
     printzoneId();

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -28,7 +29,9 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	statement.Exec(zone, startTime, endTime, temperature, moisture, light)
+	fmt.Println(zone, temperature, moisture, light)
+	re, er := statement.Exec(zone, startTime, endTime, temperature, moisture, light)
+	fmt.Println(re, er)
 
 	res := Message{"Success"}
 	sendResponse(res, writer)
@@ -64,7 +67,7 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	// Populate response from the db
 	for rows.Next() {
 		rows.Scan(&endTime, &data)
-		res = append(res, ReadingData{endTime, data})
+		res = append(res, ReadingData{endTime * 1000, data})
 	}
 
 	sendResponse(res, writer)
@@ -117,9 +120,9 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 
 	// Format data
 	data := Readings{
-		ReadingData{time, temperature},
-		ReadingData{time, moisture},
-		ReadingData{time, light},
+		ReadingData{time * 1000, temperature},
+		ReadingData{time * 1000, moisture},
+		ReadingData{time * 1000, light},
 	}
 
 	sendResponse(data, writer)

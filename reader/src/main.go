@@ -11,9 +11,8 @@ import (
 )
 
 func main() {
-	var err = godotenv.Load("../.env")
+	var err = godotenv.Load("../../.env")
 	if err != nil {
-		log.Fatal(err)
 		log.Fatal("Error loading .env file")
 	}
 
@@ -45,6 +44,9 @@ func startReadingSerial(name, baud string) {
 	for {
 		data := listenToPort(sp)
 		logRawData(data, path, file)
+
+		formatted := formatLiveData(data)
+		uploadLiveData(formatted)
 	}
 }
 
@@ -56,4 +58,16 @@ func listenToPort(sp *serial.Port) (b string) {
 		data = string(bytes)
 	}
 	return data
+}
+
+func toInt(s string) (i int) {
+	r, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
+func toString(i int) (s string) {
+	return strconv.Itoa(i)
 }
