@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/tarm/serial"
@@ -43,6 +44,9 @@ func startReadingSerial(name, baud string) {
 	path, file := createLogFile()
 	for {
 		data := listenToPort(sp)
+
+		readedSlice := strings.Fields(data)
+		insertData(readedSlice[0], toInt(readedSlice[1]), toInt(readedSlice[2]), toInt(readedSlice[3]), toInt(readedSlice[4]))
 		logRawData(data, path, file)
 
 		formatted := formatLiveData(data)
