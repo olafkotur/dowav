@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -38,36 +37,37 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 }
 
-// localhost:8080/api/historic/temp/1
+// /api/historic/temperature?from=1573398000&to=1573398300
 func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	// Safety in case no paramters are entered
-	if strings.Contains(request.URL.String(), "zone=") != true || strings.Contains(request.URL.String(), "from=") != true || strings.Contains(request.URL.String(), "to=") != true {
+	if !strings.Contains(request.URL.String(), "from=") || !strings.Contains(request.URL.String(), "to=") {
 		// TODO: Add a bad request here
 		return
 	}
 
 	// Get parameters from request
-	zone := request.URL.Query()["zone"][0]
 	from := request.URL.Query()["from"][0]
 	to := request.URL.Query()["to"][0]
-	dataType := strings.Split(request.URL.String(), "/api/historic/")[1]
-	dataType = strings.Split(dataType, "?")[0]
-	log.Println(dataType, zone)
+	sensor := getMuxVariable("sensor", request)
 
-	// Fetch from the db
-	rows, err := database.Query("SELECT endTime, " + dataType + " FROM historic WHERE zone == " + zone + " AND startTime >= " + from + " AND endTime <= " + to + " ORDER BY zone ASC")
-	if err != nil {
-		panic(err)
-	}
+	var res [][]ReadingData
+	for i := 0; i < 3; i++ {
+		var hisData []ReadingData
+		// Fetch from the db
+		rows, err := database.Query("SELECT endTime, " + sensor + " FROM historic WHERE zone == " + toString(i+1) + " AND startTime >= " + from + " AND endTime <= " + to + " ORDER BY zone ASC")
+		if err != nil {
+			panic(err)
+		}
 
-	var res []ReadingData
-	var endTime float64
-	var data int
+		var endTime float64
+		var sensorData int
 
-	// Populate response from the db
-	for rows.Next() {
-		rows.Scan(&endTime, &data)
-		res = append(res, ReadingData{endTime * 1000, data})
+		// Populate response from the db
+		for rows.Next() {
+			rows.Scan(&endTime, &sensorData)
+			hisData = append(hisData, ReadingData{endTime * 1000, sensorData})
+		}
+		res = append(res, hisData)
 	}
 
 	sendResponse(res, writer)
@@ -102,29 +102,28 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 
 func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	// Get parameters from request
-	uri := request.URL.String()
-	requestedZone := strings.Split(uri, "/api/live/")[1]
+	sensor := getMuxVariable("sensor", request)
 
-	// Get data from db
-	var time float64
-	var zone, temperature, moisture, light int
-	rows, err := database.Query("SELECT * FROM live WHERE zone == " + requestedZone + " ORDER BY time DESC LIMIT 1")
-	if err != nil {
-		panic(err)
+	var res []ReadingData
+	for i := 0; i < 3; i++ {
+		// Get data from db
+		var time float64
+		var sensorValue int
+		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zone == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			panic(err)
+		}
+
+		for rows.Next() {
+			rows.Scan(&time, &sensorValue)
+		}
+		rows.Close()
+
+		// Format data
+		data := ReadingData{time * 1000, sensorValue}
+		res = append(res, data)
 	}
 
-	for rows.Next() {
-		rows.Scan(&zone, &time, &temperature, &moisture, &light)
-	}
-	rows.Close()
-
-	// Format data
-	data := Readings{
-		ReadingData{time * 1000, temperature},
-		ReadingData{time * 1000, moisture},
-		ReadingData{time * 1000, light},
-	}
-
-	sendResponse(data, writer)
+	sendResponse(res, writer)
 	printRequest(request)
 }

@@ -10,7 +10,7 @@ type ReadingData struct {
 }
 
 type Readings struct {
-	Temperature ReadingData `json:"temp"`
+	Temperature ReadingData `json:"temperature"`
 	Moisture    ReadingData `json:"moisture"`
 	Light       ReadingData `json:"light"`
 }
