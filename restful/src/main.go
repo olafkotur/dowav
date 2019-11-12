@@ -33,7 +33,7 @@ func main() {
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
-	router.HandleFunc("/api/historic/{type}", getHistoricData).Methods("GET")
+	router.HandleFunc("/api/historic/{sensor}", getHistoricData).Methods("GET")
 	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
 	router.HandleFunc("/api/live/{sensor}", getLiveData).Methods("GET")
 
