@@ -180,7 +180,7 @@ func splitByZone(data []string) (z [3][]string) {
 // Uploads the live data via the rest api
 func uploadLiveData(data []byte) {
 	obj := Readings{}
-	json.Unmarshal(data, &obj)
+	_ = json.Unmarshal(data, &obj)
 
 	// Define the form values
 	values := url.Values{
@@ -198,7 +198,7 @@ func uploadLiveData(data []byte) {
 // Uploads the historic data via the rest api
 func uploadHistoricData(data []byte) {
 	obj := HistoricData{}
-	json.Unmarshal(data, &obj)
+	_ = json.Unmarshal(data, &obj)
 
 	// Define the form values
 	values := url.Values{

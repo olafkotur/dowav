@@ -50,7 +50,7 @@ func getLatestLog() (p string) {
 	latestTime := 0
 	for _, f := range files {
 		// Safety net in case something else ends up in /log dir
-		if strings.Contains(f.Name(), "log") == false {
+		if !strings.Contains(f.Name(), "log") {
 			continue
 		}
 
