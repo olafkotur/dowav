@@ -4,6 +4,7 @@ MicroBit uBit;
 int zoneId = -2;
 int signalStrength = -128;
 ManagedString currentZone("0");
+ManagedString userCurrentZone("-1");
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -106,7 +107,13 @@ void receiveMessage(MicroBitEvent) {
   const char* msg = recv.toCharArray();
   if (zoneId == 0) {
     //Reciver
-    uBit.serial.printf("R%s\r\n", msg);
+    if(recv.charAt(0)=='U'){
+      userCurrentZone = recv.charAt(1);
+    } else if (recv.charAt(0)==userCurrentZone.charAt(0)){
+      uBit.serial.printf("R%s 1\r\n", msg);
+    } else {
+      uBit.serial.printf("R%s -1\r\n", msg);
+    }
   } if(zoneId == -1) {
     //User
     if(recv.charAt(0)==currentZone.charAt(0)){
@@ -120,9 +127,9 @@ void receiveMessage(MicroBitEvent) {
       ManagedString temp("Now in zone");
       uBit.serial.printf("%s %s\r\n",temp.toCharArray(),currentZone.toCharArray());
 
-      ManagedString msg1("User now in zone:");
-      ManagedString msg = msg1 + currentZone;
-      uBit.radio.datagram.send(msg);
+      ManagedString msg1("U");
+      ManagedString msg2 = msg1 + currentZone;
+      uBit.radio.datagram.send(msg2);
     }
   uBit.serial.printf("U%c %i\r\n",recv.charAt(0),uBit.radio.getRSSI());
   }
