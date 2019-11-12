@@ -27,12 +27,15 @@ func main() {
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (zone INTEGER, time REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
 	statement.Exec()
 
+	historicData := generateMockHistoricData()
+	uploadMockHistoricData(historicData)
+
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
 	router.HandleFunc("/api/historic/{type}", getHistoricData).Methods("GET")
 	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
-	router.HandleFunc("/api/live/{id}", getLiveData).Methods("GET")
+	router.HandleFunc("/api/live/{sensor}", getLiveData).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	http.ListenAndServe(":"+port, router)
@@ -47,7 +50,13 @@ func sendResponse(res interface{}, writer http.ResponseWriter) {
 	response, _ := json.Marshal(res)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+	writer.Header().Set("Access-Control-Max-Age", "2592000")
 	writer.Write(response)
+}
+
+func getMuxVariable(target string, request *http.Request) (v string) {
+	return mux.Vars(request)[target]
 }
 
 func toInt(s string) (i int) {
@@ -58,4 +67,8 @@ func toInt(s string) (i int) {
 func toFloat(s string) (f float64) {
 	res, _ := strconv.ParseFloat(s, 64)
 	return res
+}
+
+func toString(i int) (s string) {
+	return strconv.Itoa(i)
 }

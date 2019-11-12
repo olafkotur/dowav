@@ -100,31 +100,31 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 }
 
+// https://dowav-api.herokuapp.com/api/live/temperature
 func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	// Get parameters from request
-	uri := request.URL.String()
-	requestedZone := strings.Split(uri, "/api/live/")[1]
+	sensor := getMuxVariable("sensor", request)
 
-	// Get data from db
-	var time float64
-	var zone, temperature, moisture, light int
-	rows, err := database.Query("SELECT * FROM live WHERE zone == " + requestedZone + " ORDER BY time DESC LIMIT 1")
-	if err != nil {
-		panic(err)
+	var res []ReadingData
+	for i := 0; i < 3; i++ {
+		// Get data from db
+		var time float64
+		var sensorValue int
+		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zone == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			panic(err)
+		}
+
+		for rows.Next() {
+			rows.Scan(&time, &sensorValue)
+		}
+		rows.Close()
+
+		// Format data
+		data := ReadingData{time * 1000, sensorValue}
+		res = append(res, data)
 	}
 
-	for rows.Next() {
-		rows.Scan(&zone, &time, &temperature, &moisture, &light)
-	}
-	rows.Close()
-
-	// Format data
-	data := Readings{
-		ReadingData{time * 1000, temperature},
-		ReadingData{time * 1000, moisture},
-		ReadingData{time * 1000, light},
-	}
-
-	sendResponse(data, writer)
+	sendResponse(res, writer)
 	printRequest(request)
 }
