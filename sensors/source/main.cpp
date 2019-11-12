@@ -1,7 +1,9 @@
 #include "MicroBit.h"
 
 MicroBit uBit;
-int zoneId = 0;
+int zoneId = -2;
+int signalStrength = -128;
+ManagedString currentZone("0");
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -57,8 +59,11 @@ void printzoneId() {
   if (zoneId > 0) {
       uBit.display.print(zoneId);
     }
-    else if (zoneId < 0) {
+    else if (zoneId == 0) {
       uBit.display.print("R");
+    }
+    else if (zoneId == -1){
+      uBit.display.print("U");
     }
     else {
       uBit.display.print("-");
@@ -67,14 +72,14 @@ void printzoneId() {
 
 void onButtonEvent(MicroBitEvent e) {
   int maxZones = 3;
-  if (e.source == MICROBIT_ID_BUTTON_A && zoneId > 1) {
+  if (e.source == MICROBIT_ID_BUTTON_A && zoneId > -1) {
     zoneId--;
   }
   else if (e.source == MICROBIT_ID_BUTTON_B && zoneId < maxZones) {
     zoneId++;
   }
   else if (e.source == MICROBIT_ID_BUTTON_AB) {
-    zoneId = -1;
+    zoneId = -2;
   }
 }
 
@@ -86,7 +91,7 @@ void sendMessage(int t, int m, int l, int w) {
   ManagedString water(w);
   ManagedString space(" ");
 
-  ManagedString msg = zone + space 
+  ManagedString msg = zone + space
     + temp + space
     + moist + space
     + light + space
@@ -98,10 +103,30 @@ void sendMessage(int t, int m, int l, int w) {
 
 void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
-  if (zoneId == -1) {
-    const char* msg = recv.toCharArray();
+  const char* msg = recv.toCharArray();
+  if (zoneId == 0) {
+    //Reciver
     uBit.serial.printf("R%s\r\n", msg);
+  } if(zoneId == -1) {
+    //User
+    if(recv.charAt(0)==currentZone.charAt(0)){
+      signalStrength = uBit.radio.getRSSI();
+      ManagedString temp("Still in current zone");
+      uBit.serial.printf("%s\r\n",temp.toCharArray());
+    }
+    if (uBit.radio.getRSSI()>signalStrength){
+      signalStrength = uBit.radio.getRSSI();
+      currentZone = recv.charAt(0);
+      ManagedString temp("Now in zone");
+      uBit.serial.printf("%s %s\r\n",temp.toCharArray(),currentZone.toCharArray());
+
+      ManagedString msg1("User now in zone:");
+      ManagedString msg = msg1 + currentZone;
+      uBit.radio.datagram.send(msg);
+    }
+  uBit.serial.printf("U%c %i\r\n",recv.charAt(0),uBit.radio.getRSSI());
   }
+
 }
 
 int main() {
