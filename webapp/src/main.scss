@@ -9,324 +9,330 @@ $moisture: #0c8eeb;
 $light: #d1d1d1;
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-    font-family: 'Montserrat', sans-serif;
-    color: white;
-    font-size: 15px;
-    height: 100%;
-    width: 100%;
+  font-family: "Montserrat", sans-serif;
+  color: white;
+  font-size: 15px;
+  height: 100%;
+  width: 100%;
 }
 
 body {
-    height: 100%;
-    width: 100%;
-    margin: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
 }
 
 #root {
-    width: 100%;
-    height: 100%;
-    padding: 3vh 3%;
-    min-width: 1000px;
-    min-height: 500px;
-    background: -webkit-linear-gradient(
-        to right,
-        $gradient-start,
-        #203a43,
-        $gradient-end
-    ); /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(
-        to right,
-        $gradient-start,
-        #203a43,
-        $gradient-end
-    ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  width: 100%;
+  height: 100%;
+  padding: 3vh 3%;
+  min-width: 1000px;
+  min-height: 500px;
+  background: -webkit-linear-gradient(
+    to right,
+    $gradient-start,
+    #203a43,
+    $gradient-end
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(
+    to right,
+    $gradient-start,
+    #203a43,
+    $gradient-end
+  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 .menu {
-    flex-basis: 200px;
-    font-size: 1.15em;
-    color: white;
-    padding: 15px;
+  flex-basis: 200px;
+  font-size: 1.15em;
+  color: white;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .item {
+    padding: 10px 5px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    .item {
-        padding: 10px 5px;
-        display: flex;
-        align-items: center;
-        color: grey;
-        .icon {
-            padding-right: 10px;
-            &.indent {
-                padding-left: 15px;
-            }
-        }
-        &:hover {
-            background: rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-        }
-
-        &.selected {
-            border-bottom: 1px solid white;
-            color: white;
-        }
+    align-items: center;
+    color: grey;
+    .icon {
+      padding-right: 10px;
+      &.indent {
+        padding-left: 15px;
+      }
     }
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+
+    &.selected {
+      border-bottom: 1px solid white;
+      color: white;
+    }
+  }
 }
 
 .dashboard {
-    background: rgba(0, 0, 0, 0.27);
-    display: flex;
-    flex-direction: row;
-    border-radius: 20px;
-    height: 100%;
+  background: rgba(0, 0, 0, 0.27);
+  display: flex;
+  flex-direction: row;
+  border-radius: 20px;
+  height: 100%;
 }
 
 .switch {
-    overflow: hidden;
-    flex: 1;
-    padding: 40px 20px 20px 20px;
+  overflow: hidden;
+  flex: 1;
+  padding: 40px 20px 20px 20px;
 }
 
 .graph-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  .graph-view-row {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    .graph-view-row {
-        display: flex;
-        flex-direction: row;
-        flex: 1;
-        &:nth-child(1) {
-            margin: 0 0 10px 0;
-        }
+    flex-direction: row;
+    flex: 1;
+    &:nth-child(1) {
+      margin: 0 0 10px 0;
     }
+  }
 }
 .tooltip {
-    position: absolute;
-    display: none;
-    background: #2c5364;
-    border-radius: 10px;
-    padding: 5px;
-    z-index: 10;
-    pointer-events: none;
-    p {
-        margin: 0;
-        padding: 0;
-        font-size: 13px;
-    }
-    &.show {
-        display: block;
-    }
+  position: absolute;
+  display: none;
+  background: #2c5364;
+  border-radius: 10px;
+  padding: 5px;
+  z-index: 10;
+  pointer-events: none;
+  p {
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+  }
+  &.show {
+    display: block;
+  }
 }
 
 .loader {
-    flex-grow: 1;
-    flex-shrink: 0;
-    background: rgba(0, 0, 0, 0.27);
-    border-radius: 10px;
-    &:nth-child(2) {
-        margin: 0 10px;
-    }
+  flex-grow: 1;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.27);
+  border-radius: 10px;
+  &:nth-child(2) {
+    margin: 0 10px;
+  }
 }
 
 .graph {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.27);
-    border-radius: 10px;
-    padding: 5px;
-    position: relative;
-    &:nth-child(2) {
-        margin: 0 10px;
-    }
+  flex: 1;
+  background: rgba(0, 0, 0, 0.27);
+  border-radius: 10px;
+  padding: 5px;
+  position: relative;
+  &:nth-child(2) {
+    margin: 0 10px;
+  }
 
-    &.Temperature {
-        &.live {
-            box-shadow: 0 0 6px 1px $temperature;
-        }
+  &.Temperature {
+    &.live {
+      box-shadow: 0 0 6px 1px $temperature;
     }
+  }
 
-    &.Moisture {
-        &.live {
-            box-shadow: 0 0 6px 1px $moisture;
-        }
+  &.Moisture {
+    &.live {
+      box-shadow: 0 0 6px 1px $moisture;
     }
-    &.Light {
-        &.live {
-            box-shadow: 0 0 6px 1px $light;
-        }
+  }
+  &.Light {
+    &.live {
+      box-shadow: 0 0 6px 1px $light;
     }
+  }
 }
 
 .not-implemented {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    h1 {
-        font-size: 8em;
-        margin: 5px;
-    }
-    p {
-        font-size: 2em;
-    }
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  h1 {
+    font-size: 8em;
+    margin: 5px;
+  }
+  p {
+    font-size: 2em;
+  }
 }
 
 .control-pane {
-    height: 30px;
-    width: 100%;
+  height: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  .time-button-group {
     display: flex;
-    justify-content: space-between;
-    .time-button-group {
-        display: flex;
-        flex-direction: row;
-        border-radius: 5px;
-        &.Temperature {
-            border: 1px solid $temperature;
-            color: $temperature;
-            .time-button.selected {
-                color: black;
-                background: $temperature;
-            }
-            .time-button:hover {
-                color: black;
-                cursor: pointer;
-                background: $temperature;
-            }
-        }
-        &.Moisture {
-            border: 1px solid $moisture;
-            color: $moisture;
-            .time-button.selected {
-                color: black;
-                background: $moisture;
-            }
-            .time-button:hover {
-                cursor: pointer;
-                color: black;
-                background: $moisture;
-            }
-        }
-        &.Light {
-            border: 1px solid $light;
-            color: $light;
-            .time-button.selected {
-                color: black;
-                background: $light;
-            }
-            .time-button:hover {
-                cursor: pointer;
-                color: black;
-                background: $light;
-            }
-        }
-        .time-button {
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-        }
+    flex-direction: row;
+    border-radius: 5px;
+    &.Temperature {
+      border: 1px solid $temperature;
+      color: $temperature;
+      .time-button.selected {
+        color: black;
+        background: $temperature;
+      }
+      .time-button:hover {
+        color: black;
+        cursor: pointer;
+        background: $temperature;
+      }
     }
-    button {
-        transition: 0.2s background-color;
-        font-weight: 600;
-        appearance: none;
-        background: none;
-        border-radius: 5px;
-        font-size: 1.15em;
-        outline: none;
-        &.Temperature {
-            border: 1px solid $temperature;
-            color: $temperature;
-            &.live {
-                color: black;
-                background: $temperature;
-            }
-            &:hover {
-                color: black;
-                cursor: pointer;
-                background: $temperature;
-            }
-        }
-        &.Moisture {
-            border: 1px solid $moisture;
-            color: $moisture;
-            &.live {
-                color: black;
-                background: $moisture;
-            }
-            &:hover {
-                cursor: pointer;
-                color: black;
-                background: $moisture;
-            }
-        }
-        &.Light {
-            border: 1px solid $light;
-            color: $light;
-            &.live {
-                color: black;
-                background: $light;
-            }
-            &:hover {
-                color: black;
-                background: $light;
-                cursor: pointer;
-            }
-        }
+    &.Moisture {
+      border: 1px solid $moisture;
+      color: $moisture;
+      .time-button.selected {
+        color: black;
+        background: $moisture;
+      }
+      .time-button:hover {
+        cursor: pointer;
+        color: black;
+        background: $moisture;
+      }
     }
+    &.Light {
+      border: 1px solid $light;
+      color: $light;
+      .time-button.selected {
+        color: black;
+        background: $light;
+      }
+      .time-button:hover {
+        cursor: pointer;
+        color: black;
+        background: $light;
+      }
+    }
+    .time-button {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+    }
+  }
+  button {
+    transition: 0.2s background-color;
+    font-weight: 600;
+    appearance: none;
+    background: none;
+    border-radius: 5px;
+    font-size: 1.15em;
+    outline: none;
+    &.Temperature {
+      border: 1px solid $temperature;
+      color: $temperature;
+      &.live {
+        color: black;
+        background: $temperature;
+      }
+      &:hover {
+        color: black;
+        cursor: pointer;
+        background: $temperature;
+      }
+    }
+    &.Moisture {
+      border: 1px solid $moisture;
+      color: $moisture;
+      &.live {
+        color: black;
+        background: $moisture;
+      }
+      &:hover {
+        cursor: pointer;
+        color: black;
+        background: $moisture;
+      }
+    }
+    &.Light {
+      border: 1px solid $light;
+      color: $light;
+      &.live {
+        color: black;
+        background: $light;
+      }
+      &:hover {
+        color: black;
+        background: $light;
+        cursor: pointer;
+      }
+    }
+  }
 }
 
 // Line Graph
 
 svg {
-    .line {
-        fill: none;
-        stroke-width: 2;
-    }
+  .line {
+    fill: none;
+    stroke-width: 2;
+  }
 
-    .x-axis,
-    .y-axis {
-        color: #dbdbdb;
-    }
-    .dashed-line {
-        stroke: rgba(255, 255, 255, 0.2);
-        stroke-width: 1;
-        stroke-dasharray: 2;
-    }
+  .x-axis,
+  .y-axis {
+    color: #dbdbdb;
+  }
+  .dashed-line {
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 1;
+    stroke-dasharray: 2;
+  }
 }
 
 // Error message
 
 .error-box {
-    flex-grow: 1;
-    flex-shrink: 0;
+  flex-grow: 1;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background: #4f0606cc;
+  border-radius: 10px;
+  padding: 25px;
+  p {
+    color: rgb(200, 200, 200);
+  }
+  div {
     display: flex;
-    flex-direction: column;
-    height: 100%;
     justify-content: center;
-    align-items: center;
-    background: #4f0606cc;
-    border-radius: 10px;
-    padding: 25px;
-    p {
-        color: rgb(200, 200, 200);
+    .refetch-icon {
+      &:hover {
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.1);
+      }
+      &:focus {
+        outline: lightblue;
+      }
+      &:active {
+        outline: lightblue;
+      }
     }
-    div {
-        display: flex;
-        justify-content: center;
-        .refetch-icon {
-            &:hover {
-                cursor: pointer;
-                background: rgba(0, 0, 0, 0.1);
-            }
-        }
-    }
-    &:nth-child(2) {
-        margin: 0 10px;
-    }
+  }
+  &:nth-child(2) {
+    margin: 0 10px;
+  }
 }
