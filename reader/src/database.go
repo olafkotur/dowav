@@ -15,9 +15,9 @@ import (
 func checkDeletion(start time.Time, lastHourDiff int) (hDiff int) {
 	diff := time.Now().Sub(start)
 	hourDiff := int(diff.Hours())
-	if hourDiff >= 24 && lastHourDiff != hourDiff {
+	if hourDiff >= 72 && lastHourDiff != hourDiff {
 		//fmt.Println(reflect.TypeOf(hourDiff))
-		deleteHr := intToString(hourDiff % 24)
+		deleteHr := intToString(hourDiff % 72)
 		deleteHour("db", deleteHr) // *should add all microbit(DB)
 	}
 	return hourDiff
@@ -148,7 +148,7 @@ func deleteHour(microbit, hour string) {
 	defer db.Close()
 
 	var name string
-	err = db.QueryRow("DELETE FROM " + hour + ";").Scan(&name)
+	err = db.QueryRow("DELETE FROM " + hour + "hour" + ";").Scan(&name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func insertData(microbit string, temp, humidity, light, location int) {
 	t := time.Now()
 	hour := intToString(t.Hour())
 
-	result, err := db.Exec("INSERT INTO "+hour+"hour"+" VALUES (?, ?, ?, ?)", temp, humidity, light, location)
+	result, err := db.Exec("INSERT INTO "+hour+"hour"+" VALUES (?, ?, ?, ?, ?)", t, temp, humidity, light, location)
 
 	if err != nil {
 		log.Fatal(err)
