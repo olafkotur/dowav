@@ -4,30 +4,31 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
 	//"reflect"
-	"time"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func main(){
+func main() {
 	queryHourlyData("db", "mic1")
 	startTime := time.Now()
-    var lastHourDiff int
+	var lastHourDiff int
 	//fmt.Println(reflect.TypeOf(time.Now()))
 	lastHourDiff = checkDeletion(startTime, lastHourDiff)
-	//insertData("db", 17, 300, 20, 300)	
+	//insertData("db", 17, 300, 20, 300)
 }
 
-func checkDeletion (start time.Time, lastHourDiff int) (hDiff int){
+func checkDeletion(start time.Time, lastHourDiff int) (hDiff int) {
 	diff := time.Now().Sub(start)
 	hourDiff := int(diff.Hours())
-	if hourDiff >= 24 && lastHourDiff != hourDiff{
+	if hourDiff >= 24 && lastHourDiff != hourDiff {
 		//fmt.Println(reflect.TypeOf(hourDiff))
-		deleteHr := intToString(hourDiff%24)
-		deleteHour("db", deleteHr)  // *should add all microbit(DB)
-	}	
+		deleteHr := intToString(hourDiff % 24)
+		deleteHour("db", deleteHr) // *should add all microbit(DB)
+	}
 	return hourDiff
 }
 
@@ -36,9 +37,9 @@ func checkDeletion (start time.Time, lastHourDiff int) (hDiff int){
  * param microbit : name of DB (microbit number)
  * param hour     : name of table (hour)
  */
-func queryHourlyData(microbit, hour string)() { //microbit = name of DB, hour = name of table 
+func queryHourlyData(microbit, hour string) { //microbit = name of DB, hour = name of table
 	// Open database connection
-	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/" + microbit)
+	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Println(err)
 		return
@@ -62,7 +63,7 @@ func queryHourlyData(microbit, hour string)() { //microbit = name of DB, hour = 
 
 	// Make a slice for the values
 	values := make([]sql.RawBytes, len(columns))
-	
+
 	//fmt.Println(reflect.TypeOf(values[0]))
 
 	// rows.Scan wants '[]interface{}' as an argument, so we must copy the
@@ -103,14 +104,14 @@ func queryHourlyData(microbit, hour string)() { //microbit = name of DB, hour = 
 }
 
 func queryMaxData(microbit, data string, hour string) {
-	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/" + microbit)
+	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	var name string
-	err = db.QueryRow("SELECT MAX(" + data + ") FROM "+ hour + ";").Scan(&name)
+	err = db.QueryRow("SELECT MAX(" + data + ") FROM " + hour + ";").Scan(&name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -118,14 +119,14 @@ func queryMaxData(microbit, data string, hour string) {
 }
 
 func queryMinData(microbit, data string, hour string) {
-	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/" + microbit)
+	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	var name string
-	err = db.QueryRow("SELECT MIN(" + data + ") FROM "+ hour + ";").Scan(&name)
+	err = db.QueryRow("SELECT MIN(" + data + ") FROM " + hour + ";").Scan(&name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -133,14 +134,14 @@ func queryMinData(microbit, data string, hour string) {
 }
 
 func queryAvgData(microbit, data string, hour string) {
-	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/" + microbit)
+	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	var name string
-	err = db.QueryRow("SELECT AVG(" + data + ") FROM "+ hour + ";").Scan(&name)
+	err = db.QueryRow("SELECT AVG(" + data + ") FROM " + hour + ";").Scan(&name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -149,14 +150,14 @@ func queryAvgData(microbit, data string, hour string) {
 
 //delete data inside table
 func deleteHour(microbit, hour string) {
-	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/" + microbit)
+	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	var name string
-	err = db.QueryRow("DELETE FROM "+ hour + ";").Scan(&name)
+	err = db.QueryRow("DELETE FROM " + hour + ";").Scan(&name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -164,17 +165,17 @@ func deleteHour(microbit, hour string) {
 }
 
 //insert data to table of database it will automatically add to table
-func insertData(microbit string, temp, humidity, light int)(){
-	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/" + microbit)
+func insertData(microbit string, temp, humidity, light, location int) {
+	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-    t := time.Now()
+	t := time.Now()
 	hour := intToString(t.Hour())
-	
-	result, err := db.Exec("INSERT INTO " + hour + "hour" + " VALUES (?, ?, ?)", temp, humidity, light) 
+
+	result, err := db.Exec("INSERT INTO "+hour+"hour"+" VALUES (?, ?, ?, ?)", temp, humidity, light, location)
 
 	if err != nil {
 		log.Fatal(err)
