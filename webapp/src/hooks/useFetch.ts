@@ -52,43 +52,44 @@ export default function useFetch(options: Options): UseFetchState {
     });
 
     function fetchData() {
-        new Promise((resolve, reject) => {
+        console.log('useFetc', state);
+        new Promise(async (resolve, reject) => {
             const time = Date.now();
             const id = setTimeout(() => {
                 reject(fetchErrorMessages.timeout);
             }, 10000);
-            fetch(
-                `${FetchConstants.hostname}${
-                    options.query.endpoint
-                }${generateQueryString(options.query.params)}`
-            )
-                .then(data => data.json())
-                .then(data => {
-                    clearTimeout(id);
-                    if (data === null) reject(fetchErrorMessages.noData);
-                    if (options.useCache) {
-                        window.localStorage.setItem(
-                            options.query.endpoint + options.query.params.zone,
-                            JSON.stringify(data)
-                        );
-                        window.localStorage.setItem(
-                            options.query.endpoint +
-                                options.query.params.zone +
-                                'lastFetched',
-                            Date.now() + ''
-                        );
-                    }
-                    if (Date.now() - time > 500) {
-                        resolve(data);
-                    } else {
-                        setTimeout(() => {
-                            resolve(data);
-                        }, Date.now() - time);
-                    }
-                })
-                .catch(err => {
-                    reject(fetchErrorMessages.fetchFail);
-                });
+            try {
+                const response = await fetch(
+                    `${FetchConstants.hostname}${
+                        options.query.endpoint
+                    }${generateQueryString(options.query.params)}`
+                );
+                const json = await response.json();
+                console.log(json);
+                clearTimeout(id);
+                if (json === null) reject(fetchErrorMessages.noData);
+                if (options.useCache) {
+                    window.localStorage.setItem(
+                        options.query.endpoint + options.query.params.zone,
+                        JSON.stringify(json)
+                    );
+                    window.localStorage.setItem(
+                        options.query.endpoint +
+                            options.query.params.zone +
+                            'lastFetched',
+                        Date.now() + ''
+                    );
+                }
+                if (Date.now() - time > 500) {
+                    resolve(json);
+                } else {
+                    setTimeout(() => {
+                        resolve(json);
+                    }, Date.now() - time);
+                }
+            } catch (err) {
+                reject(fetchErrorMessages.fetchFail);
+            }
         })
             .then(d => {
                 setState({

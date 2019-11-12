@@ -14,7 +14,7 @@ interface IMenuOption {
 
 const iconColor = 'white';
 
-const menuOptions: Array<IMenuOption> = [
+export const menuOptions: Array<IMenuOption> = [
     {
         name: MENU_OPTIONS.DASHBOARD,
         indented: false,
@@ -64,7 +64,8 @@ const Menu: React.FC = () => {
                             option.name === currentOption ? 'selected' : ''
                         }`}
                         onClick={() => {
-                            setCurrentOption(option.name);
+                            if (currentOption !== option.name)
+                                setCurrentOption(option.name);
                         }}
                     >
                         <div

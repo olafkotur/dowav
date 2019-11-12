@@ -23,7 +23,7 @@ const Switch: React.FC = () => {
             component = (
                 <div className="not-implemented">
                     <h1>404</h1>
-                    <p>Not implemented yet. Come later ;) </p>
+                    <p>Not implemented yet. Coming soon. </p>
                 </div>
             );
     }

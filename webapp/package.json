@@ -34,14 +34,23 @@
         ]
     },
     "devDependencies": {
+        "@testing-library/react-hooks": "^3.2.1",
         "@types/d3": "^5.7.2",
+        "@types/enzyme": "^3.10.3",
+        "@types/fetch-mock": "^7.3.1",
         "@types/jest": "24.0.19",
         "@types/node": "12.11.1",
         "@types/promise.allsettled": "^1.0.2",
         "@types/react": "16.9.8",
         "@types/react-dom": "16.9.2",
         "@types/styled-components": "^4.1.20",
+        "enzyme": "^3.10.0",
+        "enzyme-adapter-react-16": "^1.15.1",
+        "fetch-mock": "^7.7.3",
+        "jest-fetch-mock": "^2.1.2",
+        "node-fetch": "^2.6.0",
         "node-sass": "^4.12.0",
-        "typescript": "3.6.4"
+        "typescript": "3.6.4",
+        "whatwg-fetch": "^3.0.0"
     }
 }

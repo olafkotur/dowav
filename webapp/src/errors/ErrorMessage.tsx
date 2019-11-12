@@ -4,14 +4,18 @@ import { IoIosRefresh } from 'react-icons/io';
 
 const ErrorMessage: React.FC<{
     error: FetchError;
-    onRefetch: any;
+    onRefetch?: any;
     size?: IViewport;
-}> = ({ error, onRefetch, size = { width: '100%', height: '100%' } }) => {
+}> = ({
+    error,
+    onRefetch = () => console.warn("You haven't passed a fucntion"),
+    size = { width: '100%', height: '100%' }
+}) => {
     return (
         <div className="error-box" style={{ ...size }}>
             <h1>{error.title}</h1>
             <p>{error.message}</p>
-            {error && error.actions!.includes('refetch') ? (
+            {error && error.actions && error.actions.includes('refetch') ? (
                 <div>
                     <IoIosRefresh
                         size="40"
