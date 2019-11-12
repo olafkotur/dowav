@@ -43,6 +43,7 @@ func startReadingSerial(name, baud string) {
 	path, file := createLogFile()
 	for {
 		data := listenToPort(sp)
+		// TOOD: RAW DATA
 		logRawData(data, path, file)
 
 		formatted := formatLiveData(data)
