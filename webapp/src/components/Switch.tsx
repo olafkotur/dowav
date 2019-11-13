@@ -3,6 +3,7 @@ import NavigationContext from '../context/NavigationContext';
 import * as MENU_OPTIONS from '../constants/MenuOptionConstants';
 import DashboardView from './views/DashboardView';
 import GraphView from './views/GraphView';
+import MovementView from './views/MovementView';
 
 const Switch: React.FC = () => {
     const { currentOption } = useContext(NavigationContext);
@@ -19,11 +20,14 @@ const Switch: React.FC = () => {
                 <GraphView key={currentOption} currentOption={currentOption} />
             );
             break;
+        case MENU_OPTIONS.MOVEMENT:
+            component = <MovementView />;
+            break;
         default:
             component = (
                 <div className="not-implemented">
                     <h1>404</h1>
-                    <p>Not implemented yet. Come later ;) </p>
+                    <p>Not implemented yet. Coming soon. </p>
                 </div>
             );
     }
