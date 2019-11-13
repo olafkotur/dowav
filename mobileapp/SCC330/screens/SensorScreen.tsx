@@ -25,7 +25,7 @@ const TempScreen = (props: Props) => {
         style={styles.graphSet}
       />
 
-      <View style={styles.liveBtnContainer}>
+      <View style={theme.liveBtnContainer}>
         <GraphButton
           active={isLive}
           label="Live"
@@ -64,10 +64,6 @@ const styles = StyleSheet.create({
   },
   mainGraphContainer: {
     flex: 3,
-  },
-  liveBtnContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
   },
   title: {
     fontSize: 18,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useLayoutEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 
@@ -20,10 +20,12 @@ const DELAY = 1000;
 const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
   const chartData: number[][] = [[], [], []];
   data.forEach(zoneData => {
-    zoneData.forEach((point, i) => {
-      if (zone && zone !== i) return;
+    for (let i = 0; i < zoneData.length; i++) {
+      const point = zoneData[i];
+
+      if (zone && zone !== (i + 1)) continue;
       chartData[i].push(point.value);
-    });
+    }
   });
 
   const gridSvgStyle = {
@@ -40,6 +42,8 @@ const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
       data={curData}
       style={StyleSheet.absoluteFill}
       svg={chartSvgStyle}
+      yMin={Math.min(...curData) - 1}
+      yMax={Math.max(...curData) + 1}
       key={i}
     >
       {i === 0 ? (
@@ -59,6 +63,8 @@ const LiveGraph = (props: Props) => {
 
   // Upon mounting, start worker
   useEffect(() => {
+    let doUpdate = true;
+
     // Get new data every DELAY ms
     const worker = setInterval(() => {
       try {
@@ -67,8 +73,14 @@ const LiveGraph = (props: Props) => {
         pData.then(res => {
           res.json().then((serverData: ZoneData) => {
             if (serverData) {
-              setData([ ...data, serverData ]);
-              setGraphState('displaying');
+              if (doUpdate) {
+                if (data.length <= 15) {
+                  setData([ ...data, serverData ]);
+                } else {
+                  setData([ ...data.slice(1), serverData ]);
+                }
+                setGraphState('displaying');
+              }
             }
           });
         });
@@ -79,7 +91,10 @@ const LiveGraph = (props: Props) => {
     }, DELAY);
 
     // Upon unmounting, stop worker
-    return () => clearInterval(worker);
+    return () => {
+      doUpdate = false;
+      clearInterval(worker);
+    }
   }, [data]);
 
   const graphStyle: ViewStyle = {
@@ -94,7 +109,7 @@ const LiveGraph = (props: Props) => {
     );
   } else if (graphState === 'error') {
     return (
-      <Text>An error occured :(</Text>
+      <Text>An error occured, please try again</Text>
     );
   }
 

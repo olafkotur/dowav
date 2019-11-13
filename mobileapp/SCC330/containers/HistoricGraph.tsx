@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle, TextStyle } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 
 import Loader from './Loader';
-import { HistoricData, Sensor, Zone, ZoneData } from '../types';
+import { HistoricData, Sensor, Zone, ZoneData, GraphState } from '../types';
 import theme from '../theme';
 
 interface Props {
@@ -14,31 +14,42 @@ interface Props {
 }
 
 const HISTORIC_ENDPOINT = 'https://dowav-api.herokuapp.com/api/historic/';
+const gridSvgStyle = {
+  stroke: 'grey',
+};
+const errorMsgStyle: TextStyle = {
+  color: 'white',
+  fontSize: 18,
+}
 
 // Function which maps historic data to charts on a graph
 const mapDataToCharts = (data: HistoricData, zone: Zone) => {
   return data.map((zoneData: ZoneData, i) => {
-    const graphData = zoneData.map(point => point.value);
-    const chartSvgStyle = {
-      stroke: theme.graph.chartColors[zone ? (zone - 1) : i % 3],
-      strokeWidth: theme.graph.lineWidth,
-    };
-    const gridSvgStyle = {
-      stroke: 'grey',
-    };
-    
-    return (
-      <LineChart
-        data={graphData}
-        style={StyleSheet.absoluteFill}
-        svg={chartSvgStyle}
-        key={i}
-      >
-        {i === 0 ? (
-          <Grid svg={gridSvgStyle} />
-        ) : null}
-      </LineChart>
-    );
+    if (zoneData) {
+      const graphData = zoneData.map(point => point.value);
+      const chartSvgStyle = {
+        stroke: theme.graph.chartColors[zone ? (zone - 1) : i % 3],
+        strokeWidth: theme.graph.lineWidth,
+      };
+      
+      return (
+        <LineChart
+          data={graphData}
+          style={StyleSheet.absoluteFill}
+          svg={chartSvgStyle}
+          animate
+          yMin={Math.min(...graphData) - 0.2}
+          yMax={Math.max(...graphData) + 0.2}
+          key={i}
+        >
+          {i === 0 ? (
+            <Grid svg={gridSvgStyle} />
+          ) : null}
+        </LineChart>
+      );
+    }
+
+    return null;
   });
 }
 
@@ -48,7 +59,7 @@ const HistoricGraph = (props: Props) => {
 
   // Initialise state
   const [ data, setData ] = useState([]) as [ HistoricData, Function ];
-  const [ loading, setLoading ] = useState(true);
+  const [ graphState, setGraphState ] = useState('loading') as [ GraphState, Function ];
 
   // On mount, fetch data for given sensor
   useEffect(() => {
@@ -70,14 +81,19 @@ const HistoricGraph = (props: Props) => {
               histData = histData.filter((zoneData, i) => i === (zone - 1));
             }
 
-            // Update component
-            setData(histData);
-            setLoading(false);
+            if (histData.some(d => d && d !== null)) {
+              // Update component
+              setData(histData);
+              setGraphState('displaying');
+            } else {
+              setGraphState('error');
+            }
           }
         });
       }
     }).catch(err => {
       console.log(err);
+      setGraphState('error');
     });
 
     // Cancel updating component if unmounted mid network request
@@ -86,29 +102,27 @@ const HistoricGraph = (props: Props) => {
     };
   }, []);
 
-  const loadingStyle: ViewStyle = {
+  const containerStyle: ViewStyle = {
     flex: 1,
-    ...style,
     display: hidden ? 'none' : 'flex',
-  }
-  const displayStyle: ViewStyle = {
-    flex: 1,
-    position: 'relative',
     ...style,
-    display: hidden ? 'none' : 'flex',
   }
 
-  if (loading) {
-    return (
-      <View style={loadingStyle}>
-        <Loader />
+  let component = <Text style={errorMsgStyle}>No {sensor} data was received from the server, please try again later</Text>;
+  if (graphState === 'loading') {
+    component = <Loader />;
+  } else if (graphState === 'displaying') {
+    containerStyle.position = 'relative';
+    component = (
+      <View style={containerStyle}>
+        {mapDataToCharts(data, zone)}
       </View>
     );
   }
 
   return (
-    <View style={displayStyle}>
-      {mapDataToCharts(data, zone)}
+    <View style={containerStyle}>
+      {component}
     </View>
   );
 }

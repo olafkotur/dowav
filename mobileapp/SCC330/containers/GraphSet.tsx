@@ -6,6 +6,7 @@ import GraphButton from './GraphButton';
 import { Sensor, Zone } from '../types';
 
 import theme from '../theme';
+import LiveGraph from './LiveGraph';
 
 interface Props {
   sensor: Sensor,
@@ -33,19 +34,35 @@ const renderButtons = (activeGraph: number, onPress: Function) => {
   ));
 }
 
-const renderGraphs = (sensor: Sensor, activeGraph: number) => {
+const renderGraphs = (sensor: Sensor, activeGraph: number, liveStates: boolean[], setOneLiveState: Function) => {
   const graphs = [];
 
   for (let i = 0; i < 3; i++) {
-    const zone = i + 1;
+    const zone = (i + 1) as Zone;
 
     graphs.push(
-      <HistoricGraph
-        sensor={sensor}
-        zone={zone as Zone}
-        hidden={activeGraph !== i}
-        key={i}
-      />
+      <View style={{ flex: 1, display: activeGraph === i ? 'flex' : 'none' }}>
+        <View style={{ flexDirection: 'row' }}>
+          <GraphButton
+            active={liveStates[i]}
+            label="Live"
+            onPress={() => setOneLiveState(i, !liveStates[i])}
+          />
+        </View>
+        {liveStates[i] ? (
+          <LiveGraph
+            sensor={sensor}
+            zone={zone}
+            key={i}
+          />
+        ) : (
+          <HistoricGraph
+            sensor={sensor}
+            zone={zone}
+            key={i}
+          />
+        )}
+      </View>
     );
   }
 
@@ -54,8 +71,16 @@ const renderGraphs = (sensor: Sensor, activeGraph: number) => {
 
 // Renders 3 toggle-able graphs, with buttons, for the given sensor
 const GraphSet = (props: Props) => {
-  const [ activeGraph, setActiveGraph ] = useState(0);
   const { sensor, style } = props;
+
+  const [ activeGraph, setActiveGraph ] = useState(0);
+  const [ liveStates, setLiveStates ] = useState([false, false, false]);
+
+  const setOneLiveState = (graphIndex: number, value: boolean) => {
+    const newLiveStates = Array.from(liveStates);
+    newLiveStates[graphIndex] = value;
+    setLiveStates(newLiveStates);
+  }
 
   return (
     <View style={style}>
@@ -66,7 +91,7 @@ const GraphSet = (props: Props) => {
       </View>
 
       <View style={styles.graphContainer}>
-        {renderGraphs(sensor, activeGraph)}
+        {renderGraphs(sensor, activeGraph, liveStates, setOneLiveState)}
       </View>
     </View>
   );
