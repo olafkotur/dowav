@@ -107,7 +107,6 @@ void receiveMessage(MicroBitEvent) {
   if (zoneId == 0) {
     // Change zone each time it changes
     if (msg[0] == 'U') {
-      uBit.serial.printf("hello\r\n");
       currentLocation = msg[1];
     }
     else {
