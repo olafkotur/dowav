@@ -3,8 +3,7 @@
 MicroBit uBit;
 int zoneId = -2;
 int signalStrength = -128;
-ManagedString currentZone("0");
-ManagedString userCurrentZone("-1");
+char currentLocation = '0';
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -84,19 +83,17 @@ void onButtonEvent(MicroBitEvent e) {
   }
 }
 
-void sendMessage(int t, int m, int l, int w) {
+void sendMessage(int t, int m, int l) {
   ManagedString zone(zoneId);
   ManagedString temp(t);
   ManagedString moist(m);
   ManagedString light(l);
-  ManagedString water(w);
   ManagedString space(" ");
 
   ManagedString msg = zone + space
     + temp + space
     + moist + space
-    + light + space
-    + water;
+    + light;
 
   uBit.radio.datagram.send(msg);
   uBit.serial.printf("S%s\r\n", msg.toCharArray());
@@ -105,33 +102,33 @@ void sendMessage(int t, int m, int l, int w) {
 void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
   const char* msg = recv.toCharArray();
-  if (zoneId == 0) {
-    //Reciver
-    if(recv.charAt(0)=='U'){
-      userCurrentZone = recv.charAt(1);
-    } else if (recv.charAt(0)==userCurrentZone.charAt(0)){
-      uBit.serial.printf("R%s 1\r\n", msg);
-    } else {
-      uBit.serial.printf("R%s -1\r\n", msg);
-    }
-  } if(zoneId == -1) {
-    //User
-    if(recv.charAt(0)==currentZone.charAt(0)){
-      signalStrength = uBit.radio.getRSSI();
-      ManagedString temp("Still in current zone");
-      uBit.serial.printf("%s\r\n",temp.toCharArray());
-    }
-    if (uBit.radio.getRSSI()>signalStrength){
-      signalStrength = uBit.radio.getRSSI();
-      currentZone = recv.charAt(0);
-      ManagedString temp("Now in zone");
-      uBit.serial.printf("%s %s\r\n",temp.toCharArray(),currentZone.toCharArray());
 
-      ManagedString msg1("U");
-      ManagedString msg2 = msg1 + currentZone;
-      uBit.radio.datagram.send(msg2);
+  // Receiver
+  if (zoneId == 0) {
+    // Change zone each time it changes
+    if (msg[0] == 'U') {
+      uBit.serial.printf("hello\r\n");
+      currentLocation = msg[1];
     }
-  uBit.serial.printf("U%c %i\r\n",recv.charAt(0),uBit.radio.getRSSI());
+    else {
+      uBit.serial.printf("R%s %c\r\n", msg, currentLocation);
+    }
+  }
+
+  //User
+  if(msg[0] != 'U' && zoneId == -1) {
+    if (msg[0] == currentLocation) {
+      signalStrength = uBit.radio.getRSSI();
+    }
+  
+    if (uBit.radio.getRSSI() > signalStrength) {
+      signalStrength = uBit.radio.getRSSI();
+      currentLocation = msg[0];
+
+      ManagedString prefix("U");
+      ManagedString zone(currentLocation);
+      uBit.radio.datagram.send(prefix + zone);
+    }
   }
 
 }
@@ -148,13 +145,13 @@ int main() {
 
   while(true) {
 
+    // Senders
     if (zoneId > 0) {
       int temperature = getTemperature();
       int moisture = getMoistureLevel();
       int light = getLightLevel();
-      int water = getWaterLevel();
 
-      sendMessage(temperature, moisture, light, water);
+      sendMessage(temperature, moisture, light);
     }
 
     printzoneId();
