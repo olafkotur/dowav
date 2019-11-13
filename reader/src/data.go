@@ -185,11 +185,6 @@ func splitByZone(data []string) (z [3][]string) {
 
 // Uploads the live data via the rest api
 func uploadLiveData(data []byte) {
-	shouldSkipRefresh := lastLiveRefresh > time.Now().Add(-1*time.Second).Unix()
-	if shouldSkipRefresh {
-		return
-	}
-
 	obj := Readings{}
 	_ = json.Unmarshal(data, &obj)
 
