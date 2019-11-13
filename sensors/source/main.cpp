@@ -1,9 +1,12 @@
 #include "MicroBit.h"
+#include "time.h"
 
 MicroBit uBit;
 int zoneId = -2;
 int signalStrength = -128;
 char currentLocation = '0';
+int userLocationLastUpdateTime = 0;
+int currentTime = 0;
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -112,11 +115,15 @@ void receiveMessage(MicroBitEvent) {
   if (zoneId == 0) {
     // Change zone each time it changes
     if (msg[0] == 'U') {
-      uBit.serial.printf("hello\r\n");
       currentLocation = msg[1];
-    }
-    else {
-      uBit.serial.printf("R%s %c\r\n", msg, currentLocation);
+      userLocationLastUpdateTime = currentTime;
+    } else {
+      if(currentTime-userLocationLastUpdateTime<10){
+        uBit.serial.printf("R%s %c\r\n", msg, currentLocation);
+      } else {
+        //No user recived for more then 10 seconds - so send 0 for location
+        uBit.serial.printf("R%s 0\r\n", msg);
+      }
     }
   }
 
@@ -125,15 +132,15 @@ void receiveMessage(MicroBitEvent) {
     if (msg[0] == currentLocation) {
       signalStrength = uBit.radio.getRSSI();
     }
-  
+
     if (uBit.radio.getRSSI() > signalStrength) {
       signalStrength = uBit.radio.getRSSI();
       currentLocation = msg[0];
-
-      ManagedString prefix("U");
-      ManagedString zone(currentLocation);
-      uBit.radio.datagram.send(prefix + zone);
     }
+    ManagedString prefix("U");
+    ManagedString zone(currentLocation);
+    uBit.radio.datagram.send(prefix + zone);
+    uBit.serial.printf("S%s%s\r\n", prefix.toCharArray(),zone.toCharArray());
   }
 
 }
@@ -157,9 +164,12 @@ int main() {
       light = getLightLevel();
 
       sendMessage(temperature, moisture, light);
+    } else if (zoneId == -1){
+
     }
 
     printzoneId();
+    currentTime = currentTime + 1;
     uBit.sleep(1000);
   }
 }
