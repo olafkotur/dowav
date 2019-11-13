@@ -35,7 +35,6 @@ func queryHourlyData(microbit string, hour int) (vals string) { //microbit = nam
 		log.Println(err)
 		return
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	// Execute the query
 	rows, err := db.Query("SELECT * FROM " + hr + "hour")
@@ -48,6 +47,7 @@ func queryHourlyData(microbit string, hour int) (vals string) { //microbit = nam
 		log.Println(err)
 		return
 	}
+	db.Close()
 	//fmt.Println(reflect.TypeOf(rows))
 
 	//fmt.Println(reflect.TypeOf(columns))
@@ -99,16 +99,15 @@ func queryHourlyData(microbit string, hour int) (vals string) { //microbit = nam
 func queryMaxData(microbit, data string, hour int) (maxV string) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	defer db.Close()
-
 	hr := intToString(hour)
 	var max string
 	err = db.QueryRow("SELECT MAX(" + data + ") FROM " + hr + "hour;").Scan(&max)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+	db.Close()
 	//fmt.Println(name)
 	return max
 }
@@ -116,15 +115,16 @@ func queryMaxData(microbit, data string, hour int) (maxV string) {
 func queryMinData(microbit, data string, hour int) (minV string) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	var min string
 	err = db.QueryRow("SELECT MIN(" + data + ") FROM " + hr + "hour;").Scan(&min)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+	db.Close()
+
 	//fmt.Println(min)
 	return min
 }
@@ -132,15 +132,16 @@ func queryMinData(microbit, data string, hour int) (minV string) {
 func queryAvgData(microbit, data string, hour int) (avgV string) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	var avg string
 	err = db.QueryRow("SELECT AVG(" + data + ") FROM " + hr + "hour;").Scan(&avg)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+	db.Close()
+
 	//fmt.Println(avg)
 	return avg
 }
@@ -149,15 +150,16 @@ func queryAvgData(microbit, data string, hour int) (avgV string) {
 func deleteHour(microbit string, hour int) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	var name string
 	err = db.QueryRow("DELETE FROM " + hr + "hour;").Scan(&name)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+	db.Close()
+
 	fmt.Println(name)
 }
 
@@ -165,23 +167,17 @@ func deleteHour(microbit string, hour int) {
 func insertData(microbit string, temp, humidity, light, location int) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	defer db.Close()
-
 	t := time.Now()
 	hour := intToString(t.Hour())
 
-	result, err := db.Exec("INSERT INTO "+hour+"hour"+" VALUES (?, ?, ?, ?, ?)", t, temp, humidity, light, location)
+	_, err = db.Exec("INSERT INTO "+hour+"hour"+" VALUES (?, ?, ?, ?, ?)", t, temp, humidity, light, location)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-
-	n, _ := result.RowsAffected()
-	if n == 1 {
-		fmt.Println("1 row inserted.")
-	}
+	db.Close()
 }
 
 func intToString(i int) (s string) {
