@@ -58,8 +58,8 @@ const HistoricGraph = (props: Props) => {
   const { sensor, zone, hidden, style } = props;
 
   // Initialise state
-  const [ data, setData ] = useState([]) as [ HistoricData, Function ];
-  const [ graphState, setGraphState ] = useState('loading') as [ GraphState, Function ];
+  const [ data, setData ] = useState([] as HistoricData);
+  const [ graphState, setGraphState ] = useState('loading' as GraphState);
 
   // On mount, fetch data for given sensor
   useEffect(() => {

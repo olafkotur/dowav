@@ -41,7 +41,10 @@ const renderGraphs = (sensor: Sensor, activeGraph: number, liveStates: boolean[]
     const zone = (i + 1) as Zone;
 
     graphs.push(
-      <View style={{ flex: 1, display: activeGraph === i ? 'flex' : 'none' }}>
+      <View
+        style={{ flex: 1, display: activeGraph === i ? 'flex' : 'none' }}
+        key={i}
+      >
         <View style={{ flexDirection: 'row' }}>
           <GraphButton
             active={liveStates[i]}
@@ -53,13 +56,11 @@ const renderGraphs = (sensor: Sensor, activeGraph: number, liveStates: boolean[]
           <LiveGraph
             sensor={sensor}
             zone={zone}
-            key={i}
           />
         ) : (
           <HistoricGraph
             sensor={sensor}
             zone={zone}
-            key={i}
           />
         )}
       </View>

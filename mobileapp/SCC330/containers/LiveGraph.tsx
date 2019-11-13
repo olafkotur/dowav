@@ -58,8 +58,8 @@ const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
 const LiveGraph = (props: Props) => {
   const { sensor, zone, hidden, style } = props;
 
-  const [ data, setData ] = useState([]) as [ ZoneData[], Function ];
-  const [ graphState, setGraphState ] = useState('loading') as [ GraphState, Function ];
+  const [ data, setData ] = useState([] as ZoneData[]);
+  const [ graphState, setGraphState ] = useState('loading' as GraphState);
 
   // Upon mounting, start worker
   useEffect(() => {
