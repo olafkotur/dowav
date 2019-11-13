@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import "./main.scss";
 import Dashboard from "./components/Dashboard";
 import NavigationContext from "./context/NavigationContext";
-import { DASHBOARD, MOVEMENT } from "./constants/MenuOptionConstants";
+import {
+  DASHBOARD,
+  MOVEMENT,
+  TEMPERATURE
+} from "./constants/MenuOptionConstants";
 
 const App: React.FC = () => {
   const [navigation, setNavigation] = useState(MOVEMENT);

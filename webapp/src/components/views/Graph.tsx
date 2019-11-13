@@ -128,7 +128,7 @@ const Graph: React.FC<GraphProps> = ({
               "Please specify zone for Graphh with name " + conf.name
             );
           }
-        }, 5000);
+        }, 2000);
         return () => {
           clearInterval(id);
         };

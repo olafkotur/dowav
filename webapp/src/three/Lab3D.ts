@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import { IViewport } from "../types";
+import { IViewport, LocationData } from "../types";
 
 type Lab3DProps = {
   viewport: IViewport;
@@ -15,8 +15,10 @@ export default class Lab3D {
   private renderer: THREE.WebGLRenderer;
   private controls: OrbitControls;
   private cube: THREE.Mesh;
+  private locationData: LocationData | null;
   constructor(options: Lab3DProps) {
     this.scene = new THREE.Scene();
+    this.locationData = null;
     this.camera = new THREE.PerspectiveCamera(
       75,
       options.viewport.width / options.viewport.height,
@@ -115,13 +117,24 @@ export default class Lab3D {
     this.renderer.setSize(viewport.width, viewport.height);
   };
 
-  highlightZone = (zone: number) => {
-    this.cube.position.set(0, 1.4, 4.53 * zone - 4.53);
-    this.scene.remove(this.cube);
-    this.scene.add(this.cube);
+  private highlightZone = () => {
+    if (this.locationData) {
+      this.cube.position.set(
+        0,
+        1.4,
+        4.53 * (this.locationData.value - 1) - 4.53
+      );
+      this.scene.remove(this.cube);
+      this.scene.add(this.cube);
+    }
   };
 
-  animate = () => {
+  public addLocationData = (data: LocationData) => {
+    this.locationData = data;
+    this.highlightZone();
+  };
+
+  private animate = () => {
     requestAnimationFrame(this.animate);
 
     this.controls.update();

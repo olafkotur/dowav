@@ -108,14 +108,14 @@ body {
 }
 
 .movement-view {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  .history-list {
+    width: 250px;
     height: 100%;
-    width: 100%;
-    .history-list {
-        width: 200px;
-        height: 100%;
-    }
+  }
 }
 
 .tooltip {
@@ -346,5 +346,35 @@ svg {
   }
   &:nth-child(2) {
     margin: 0 10px;
+  }
+}
+
+// Location view
+
+.history-list {
+  overflow-y: auto;
+  overflow: -moz-scrollbars-none;
+  &::-webkit-scrollbar {
+    width: 0 !important;
+  }
+
+  .historic-item {
+    padding: 10px 5px;
+    color: black;
+    border-radius: 4px;
+    text-align: center;
+    margin-bottom: 3px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 5px;
+    border-bottom: 2px solid white;
+  }
+  h4 {
+    color: grey;
+    margin: 0;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 2px solid grey;
   }
 }
