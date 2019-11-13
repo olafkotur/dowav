@@ -7,6 +7,7 @@ int signalStrength = -128;
 char currentLocation = '0';
 int userLocationLastUpdateTime = 0;
 int currentTime = 0;
+int version = 1;
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -20,7 +21,13 @@ int getTemperature() {
 }
 
 // Returns light level from 0 - 255
+// Note - first value in light sensor needs to be thrown out
+int lightLevelInit = 0;
 int getLightLevel() {
+  if (lightLevelInit==0){
+    lightLevelInit = 1;
+    uBit.display.readLightLevel();
+  }
   return uBit.display.readLightLevel();
 }
 
@@ -53,9 +60,14 @@ int getAccelorometerZ() {
 }
 
 // Returns moisture value in range 0 - 1024
+int toReturn = 255;
 int getMoistureLevel() {
   uBit.io.P1.setAnalogPeriod(250);
-  return uBit.io.P1.getAnalogValue();
+  toReturn = 255;
+  while (toReturn==255){
+    toReturn = uBit.io.P1.getAnalogValue();
+  }
+  return toReturn;
 }
 
 int temperature = getTemperature();
@@ -138,7 +150,6 @@ void receiveMessage(MicroBitEvent) {
     ManagedString prefix("U");
     ManagedString zone(currentLocation);
     uBit.radio.datagram.send(prefix + zone);
-    uBit.serial.printf("S%s%s\r\n", prefix.toCharArray(),zone.toCharArray());
   }
 }
 
