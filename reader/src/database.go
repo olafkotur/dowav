@@ -167,7 +167,7 @@ func deleteHour(microbit string, hour int) {
 func insertData(microbit string, temp, humidity, light, location int) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
-		log.Println(err)
+		return
 	}
 	t := time.Now()
 	hour := intToString(t.Hour())
@@ -175,7 +175,7 @@ func insertData(microbit string, temp, humidity, light, location int) {
 	_, err = db.Exec("INSERT INTO "+hour+"hour"+" VALUES (?, ?, ?, ?, ?)", t, temp, humidity, light, location)
 
 	if err != nil {
-		log.Println(err)
+		return
 	}
 	db.Close()
 }
