@@ -35,7 +35,6 @@ func queryHourlyData(microbit string, hour int) (vals string) { //microbit = nam
 		log.Println(err)
 		return
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	// Execute the query
 	rows, err := db.Query("SELECT * FROM " + hr + "hour")
@@ -48,6 +47,7 @@ func queryHourlyData(microbit string, hour int) (vals string) { //microbit = nam
 		log.Println(err)
 		return
 	}
+	db.Close()
 	//fmt.Println(reflect.TypeOf(rows))
 
 	//fmt.Println(reflect.TypeOf(columns))
@@ -101,14 +101,13 @@ func queryMaxData(microbit, data string, hour int) (maxV string) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
-
 	hr := intToString(hour)
 	var max string
 	err = db.QueryRow("SELECT MAX(" + data + ") FROM " + hr + "hour;").Scan(&max)
 	if err != nil {
 		log.Println(err)
 	}
+	db.Close()
 	//fmt.Println(name)
 	return max
 }
@@ -118,13 +117,14 @@ func queryMinData(microbit, data string, hour int) (minV string) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	var min string
 	err = db.QueryRow("SELECT MIN(" + data + ") FROM " + hr + "hour;").Scan(&min)
 	if err != nil {
 		log.Println(err)
 	}
+	db.Close()
+
 	//fmt.Println(min)
 	return min
 }
@@ -134,13 +134,14 @@ func queryAvgData(microbit, data string, hour int) (avgV string) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	var avg string
 	err = db.QueryRow("SELECT AVG(" + data + ") FROM " + hr + "hour;").Scan(&avg)
 	if err != nil {
 		log.Println(err)
 	}
+	db.Close()
+
 	//fmt.Println(avg)
 	return avg
 }
@@ -151,13 +152,14 @@ func deleteHour(microbit string, hour int) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
 	hr := intToString(hour)
 	var name string
 	err = db.QueryRow("DELETE FROM " + hr + "hour;").Scan(&name)
 	if err != nil {
 		log.Println(err)
 	}
+	db.Close()
+
 	fmt.Println(name)
 }
 
@@ -167,8 +169,6 @@ func insertData(microbit string, temp, humidity, light, location int) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
-
 	t := time.Now()
 	hour := intToString(t.Hour())
 
@@ -177,7 +177,7 @@ func insertData(microbit string, temp, humidity, light, location int) {
 	if err != nil {
 		log.Println(err)
 	}
-
+	db.Close()
 	n, err := result.RowsAffected()
 	if n == 1 {
 		//fmt.Println("1 row inserted.")
