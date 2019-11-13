@@ -4,7 +4,10 @@ sensors/yotta_modules
 webapp/node_modules
 server/main
 server/logs/*
+reader/logs/*
 
 .vscode/
 *.DS_Store
 .env
+main.exe
+build.bat

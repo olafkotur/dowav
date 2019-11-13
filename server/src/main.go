@@ -1,33 +1,36 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	var err = godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-		log.Fatal("Error loading .env file")
+	port := getPort()
+	buildPath := getPath()
+
+	fs := http.FileServer(http.Dir(buildPath))
+	http.Handle("/", fs)
+
+	log.Printf("Serving static on port %s...\n", port)
+	http.ListenAndServe(":"+port, nil)
+}
+
+func getPort() (p string) {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
+	return port
+}
 
-	// Enviornment variables
-	SERVER_PORT := os.Getenv("SERVER_PORT")
-	WEB_BUILD_PATH := os.Getenv("WEB_BUILD_PATH")
-	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
-	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
-
-	channels := []chan string{
-		make(chan string, 1),
-		make(chan string, 1),
-		make(chan string, 1),
+func getPath() (p string) {
+	path := os.Getenv("BUILD_PATH")
+	if path == "" {
+		path = "../../webapp/build"
 	}
-
-	go startServer(SERVER_PORT, WEB_BUILD_PATH)
-	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD, channels)
-	go sendSocketData(channels)
-	startScheduler()
+	fmt.Println(path)
+	return path
 }
