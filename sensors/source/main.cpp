@@ -4,6 +4,9 @@ MicroBit uBit;
 int zoneId = -2;
 int signalStrength = -128;
 char currentLocation = '0';
+int temperature = getTemperature();
+int moisture = getMoistureLevel();
+int light = getLightLevel();
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -147,9 +150,9 @@ int main() {
 
     // Senders
     if (zoneId > 0) {
-      int temperature = getTemperature();
-      int moisture = getMoistureLevel();
-      int light = getLightLevel();
+      temperature = getTemperature();
+      moisture = getMoistureLevel();
+      light = getLightLevel();
 
       sendMessage(temperature, moisture, light);
     }
