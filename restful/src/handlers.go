@@ -127,3 +127,64 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	sendResponse(res, writer)
 	printRequest(request)
 }
+
+func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
+	// Get data from request
+	_ = request.ParseForm()
+	time := toFloat(request.Form.Get("time"))
+	zone := toInt(request.Form.Get("zone"))
+
+	if zone <= 0 {
+		// TODO: Should send bad response
+		return
+	}
+
+	statement, _ := database.Prepare("INSERT INTO location (time, zone) VALUES (?, ?)")
+	_, err := statement.Exec(time, zone)
+	if err != nil {
+		panic(err)
+	}
+
+	res := Message{"Success"}
+	sendResponse(res, writer)
+	printRequest(request)
+}
+
+func getLocationData(writer http.ResponseWriter, request *http.Request) {
+	// Get parameters from request
+	dataType := getMuxVariable("type", request)
+
+	var res interface{}
+	var now float64
+	var location int
+
+	// Fetch and return live data
+	if dataType == "live" {
+		// Scan db and save to var
+		rows, _ := database.Query("SELECT * FROM location ORDER BY time DESC LIMIT 1")
+		for rows.Next() {
+			_ = rows.Scan(&now, &location)
+		}
+		rows.Close()
+		res = ReadingData{now * 1000, location}
+
+	}
+
+	// Fetch and return historic data
+	if dataType == "historic" {
+		timeRange := int(time.Now().Add(-time.Duration(time.Hour * 24)).Unix())
+
+		// Scan db and save to var
+		var data []ReadingData
+		rows, _ := database.Query("SELECT * FROM location WHERE time > " + toString(timeRange))
+		for rows.Next() {
+			_ = rows.Scan(&now, &location)
+			data = append(data, ReadingData{now * 1000, location})
+		}
+		rows.Close()
+		res = data
+	}
+
+	sendResponse(res, writer)
+	printRequest(request)
+}
