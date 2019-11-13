@@ -62,7 +62,6 @@ int temperature = getTemperature();
 int moisture = getMoistureLevel();
 int light = getLightLevel();
 
-
 void printzoneId() {
   if (zoneId > 0) {
       uBit.display.print(zoneId);
@@ -132,7 +131,6 @@ void receiveMessage(MicroBitEvent) {
     if (msg[0] == currentLocation) {
       signalStrength = uBit.radio.getRSSI();
     }
-
     if (uBit.radio.getRSSI() > signalStrength) {
       signalStrength = uBit.radio.getRSSI();
       currentLocation = msg[0];
@@ -142,7 +140,6 @@ void receiveMessage(MicroBitEvent) {
     uBit.radio.datagram.send(prefix + zone);
     uBit.serial.printf("S%s%s\r\n", prefix.toCharArray(),zone.toCharArray());
   }
-
 }
 
 int main() {
@@ -164,8 +161,6 @@ int main() {
       light = getLightLevel();
 
       sendMessage(temperature, moisture, light);
-    } else if (zoneId == -1){
-
     }
 
     printzoneId();
