@@ -136,8 +136,12 @@ export default class Lab3D {
   };
 
   public addLocationData = (data: LocationData) => {
-    this.locationData = data;
-    this.highlightZone();
+    if (data.value !== 0) {
+      this.locationData = data;
+      this.highlightZone();
+    } else {
+      this.scene.remove(this.cube);
+    }
   };
 
   private animate = () => {

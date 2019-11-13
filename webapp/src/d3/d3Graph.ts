@@ -112,6 +112,7 @@ export default class D3Graph {
         );
       }
     }
+    console.log(this.viewport);
     this.title = this.svg
       .append("text")
       .text(this.conf.title || "")
@@ -172,9 +173,17 @@ export default class D3Graph {
       }
     } else {
       const k = timePeriod.timePeriod / 5;
+      this.fillGaps(data, k);
       return this.computeData(data, k);
     }
     return data;
+  }
+
+  private fillGaps(data: HistoryData, k: number) {
+    // console.log(data, k);
+    // if(data.length > 2){
+    //   const startTime = data[0]
+    // }
   }
 
   private computeData(data: HistoryData, k: number): HistoryData {
@@ -293,7 +302,7 @@ export default class D3Graph {
 
   private plotLive() {
     function getTranslate(this: D3Graph): number {
-      if (this.liveData.length >= 60) {
+      if (this.liveData.length >= 90) {
         let n =
           this.xScale(this.liveData[0].time) -
           this.xScale(this.liveData[1].time);
@@ -562,10 +571,9 @@ export default class D3Graph {
     ) {
       d3LineGradients.drawGradient(this.svg, this.viewport, this.conf.name);
     }
-    this.title.attr(
-      "transform",
-      `translate(${this.viewport.width}, ${-this.margin.top / 2})`
-    );
+    this.title
+      .attr("x", this.viewport.width / 2)
+      .attr("y", -this.margin.top / 2);
     this.clip
       .attr("width", this.viewport.width)
       .attr("height", this.viewport.height);

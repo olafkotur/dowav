@@ -10,6 +10,15 @@ const HistoryList: React.FC = () => {
       <h4>Last 24 hours</h4>
       <div className="historic-item-list">
         {data.map((d, i) => {
+          if (d.value === 0)
+            return (
+              <div
+                key={d.time + " - " + i}
+                className="historic-item"
+                style={{ background: `rgb(120, 120, 120)` }}
+              >{`${moment(d.time).format("D MMM HH:mm:ss")} - No Location
+        `}</div>
+            );
           let val = 255 - (d.value - 1) * 30;
           return (
             <div
