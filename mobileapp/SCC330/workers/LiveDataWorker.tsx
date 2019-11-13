@@ -2,23 +2,20 @@ import React, { useEffect, useState } from 'react';
 
 import { Sensor, ZoneData } from '../types';
 
-const LIVE_ENDPOINT = 'https://dowav-api.herokuapp.com/api/live/';
-const DELAY = 5000;
-
 interface Props {
   sensor: Sensor,
   children: React.ReactNode,
 }
 
-const LiveDataContext = React.createContext([] as ZoneData);
+const LiveDataContext = React.createContext([[]] as ZoneData[]);
 
 // Component which starts polling server and provides latest data
 const LiveDataWorker = (props: Props) => {
   // Alias props
-  const { sensor } = props;
+  const { children, sensor } = props;
 
   // Initialise state
-  const [ data, setData ] = useState([]) as [ ZoneData, Function ];
+  const [ data, setData ] = useState([]) as [ ZoneData[], Function ];
 
   // Upon mounting, start worker
   useEffect(() => {
@@ -30,7 +27,7 @@ const LiveDataWorker = (props: Props) => {
         pData.then(res => {
           res.json().then((serverData: ZoneData) => {
             if (serverData) {
-              setData([ ...data, ...serverData ]);
+              setData([...data, serverData]);
             }
           });
         });
@@ -41,11 +38,11 @@ const LiveDataWorker = (props: Props) => {
 
     // Upon unmounting, stop worker
     return () => clearInterval(worker);
-  }, []);
+  }, [data]);
 
   return (
     <LiveDataContext.Provider value={data}>
-      { props.children }
+      {children}
     </LiveDataContext.Provider>
   );
 }

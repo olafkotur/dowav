@@ -1,28 +1,7 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
 
-import theme from '../theme';
+import SensorScreen from './SensorScreen';
 
-const MoistureScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Moisture</Text>
-    </View>
-  );
-}
+const TempScreen = () => <SensorScreen sensor="moisture" />;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.backgroundColor,
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-});
-
-export default MoistureScreen;
+export default TempScreen;
