@@ -15,9 +15,9 @@ import (
 func checkDeletion(start time.Time, lastHourDiff int) (hDiff int) {
 	diff := time.Now().Sub(start)
 	hourDiff := int(diff.Hours())
-	if hourDiff >= 72 && lastHourDiff != hourDiff {
+	if hourDiff >= 24 && lastHourDiff != hourDiff {
 		//fmt.Println(reflect.TypeOf(hourDiff))
-		deleteHr := (hourDiff % 72)
+		deleteHr := (hourDiff % 24)
 		deleteHour("db", deleteHr) // *should add all microbit(DB)
 	}
 	return hourDiff
