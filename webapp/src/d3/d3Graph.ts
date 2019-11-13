@@ -293,7 +293,7 @@ export default class D3Graph {
 
   private plotLive() {
     function getTranslate(this: D3Graph): number {
-      if (this.liveData.length >= 30) {
+      if (this.liveData.length >= 60) {
         let n =
           this.xScale(this.liveData[0].time) -
           this.xScale(this.liveData[1].time);

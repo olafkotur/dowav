@@ -83,7 +83,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                     }}
                   />
                 )}
-                {data[0] instanceof Array && data[0].length > 0 ? (
+                {data[1] instanceof Array && data[1].length > 0 ? (
                   <Graph
                     data={data[1]}
                     viewport={{
@@ -109,7 +109,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                     }}
                   />
                 )}
-                {data[0] instanceof Array && data[0].length > 0 ? (
+                {data[2] instanceof Array && data[2].length > 0 ? (
                   <Graph
                     data={data[2]}
                     viewport={{
