@@ -16,6 +16,7 @@ export default class Lab3D {
   private controls: OrbitControls;
   private cube: THREE.Mesh;
   private locationData: LocationData | null;
+  private labModelLoaded: boolean;
   constructor(options: Lab3DProps) {
     this.scene = new THREE.Scene();
     this.locationData = null;
@@ -25,11 +26,14 @@ export default class Lab3D {
       0.1,
       1000
     );
+    this.camera.position.set(-14, 10, -9);
+    this.camera.lookAt(0, 0, 0);
     this.controls = new OrbitControls(this.camera, options.container);
     this.renderer = new THREE.WebGLRenderer({ alpha: true });
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.setSize(options.viewport.width, options.viewport.height);
     options.container.appendChild(this.renderer.domElement);
+    this.labModelLoaded = false;
 
     // Add a light
     const sun = new THREE.PointLight(0xffffff, 1.6, 0);
@@ -50,9 +54,8 @@ export default class Lab3D {
     loader.load(
       `${process.env.PUBLIC_URL}/labmodel.glb`,
       gltf => {
+        this.labModelLoaded = true;
         this.scene.add(gltf.scene);
-        this.camera.position.set(-14, 10, -9);
-        this.camera.lookAt(0, 0, 0);
         this.controls.update();
       },
       xhr => {
@@ -108,7 +111,9 @@ export default class Lab3D {
         side: THREE.DoubleSide
       })
     ];
-    return new THREE.Mesh(geometry, cubeMaterials);
+    let cube = new THREE.Mesh(geometry, cubeMaterials);
+    cube.position.set(-14, 10, -100);
+    return cube;
   };
 
   public updateViewport = (viewport: IViewport) => {
@@ -124,8 +129,6 @@ export default class Lab3D {
         1.4,
         4.53 * (this.locationData.value - 1) - 4.53
       );
-      this.scene.remove(this.cube);
-      this.scene.add(this.cube);
     }
   };
 
@@ -136,7 +139,10 @@ export default class Lab3D {
 
   private animate = () => {
     requestAnimationFrame(this.animate);
-
+    if (this.labModelLoaded) {
+      this.scene.remove(this.cube);
+      this.scene.add(this.cube);
+    }
     this.controls.update();
 
     this.renderer.render(this.scene, this.camera);
