@@ -31,6 +31,7 @@ export default class Lab3D {
     this.controls = new OrbitControls(this.camera, options.container);
     this.controls.minDistance = 3;
     this.controls.maxDistance = 60;
+    this.controls.maxPolarAngle = Math.PI / 2.1;
     this.renderer = new THREE.WebGLRenderer({ alpha: true });
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.setSize(options.viewport.width, options.viewport.height);
@@ -114,7 +115,7 @@ export default class Lab3D {
       })
     ];
     let cube = new THREE.Mesh(geometry, cubeMaterials);
-    cube.position.set(-14, 10, -100);
+    cube.position.set(-14, 10, -10000);
     return cube;
   };
 
