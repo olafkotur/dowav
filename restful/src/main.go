@@ -43,9 +43,6 @@ func main() {
 		panic(err)
 	}
 
-	historicData := generateMockHistoricData()
-	uploadMockHistoricData(historicData)
-
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
