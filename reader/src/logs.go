@@ -24,7 +24,7 @@ func createLogFile() (path string, f *os.File) {
 	return logPath, file
 }
 
-func logRawData(data, path string, file *os.File) {
+func logRawData(data, path string) {
 	existingData, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println(err)
@@ -38,7 +38,6 @@ func logRawData(data, path string, file *os.File) {
 		log.Println(err)
 		return
 	}
-	file.Close()
 }
 
 func getLatestLog() (p string) {
