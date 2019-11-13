@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import HistoricGraph from '../containers/HistoricGraph';
 import GraphSet from '../containers/GraphSet';
+
 import theme from '../theme';
-import { LineChart, Grid } from 'react-native-svg-charts';
 
 const TempScreen = () => (
   <View style={styles.container}>
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   },
   mainGraphContainer: {
     flex: 3,
-  }
+  },
 });
 
 export default TempScreen;

@@ -5,6 +5,7 @@ const theme = {
 
   graph: {
     lineWidth: 3,
+    chartColors: ['#ff3d3d', '#ff7521', '#ffa500'],
   },
 };
 

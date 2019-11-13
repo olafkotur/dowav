@@ -3,7 +3,7 @@ import { StyleSheet, View, ViewStyle } from 'react-native';
 
 import HistoricGraph from './HistoricGraph';
 import GraphButton from './GraphButton';
-import { Sensor } from '../types';
+import { Sensor, Zone } from '../types';
 
 import theme from '../theme';
 
@@ -28,6 +28,7 @@ const renderButtons = (activeGraph: number, onPress: Function) => {
       label={`Zone ${i + 1}`}
       style={style}
       onPress={() => onPress(i)}
+      key={i}
     />
   ));
 }
@@ -36,9 +37,12 @@ const renderGraphs = (sensor: Sensor, activeGraph: number) => {
   const graphs = [];
 
   for (let i = 0; i < 3; i++) {
+    const zone = i + 1;
+
     graphs.push(
       <HistoricGraph
         sensor={sensor}
+        zone={zone as Zone}
         hidden={activeGraph !== i}
         key={i}
       />

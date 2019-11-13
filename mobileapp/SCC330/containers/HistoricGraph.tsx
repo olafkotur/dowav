@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 
-import { HistoricData, Sensor, Zone, SensorData } from '../types';
+import Loader from './Loader';
+import { HistoricData, Sensor, Zone, ZoneData } from '../types';
 import theme from '../theme';
 
 interface Props {
@@ -12,11 +13,33 @@ interface Props {
   style?: ViewStyle,
 }
 
-// moisture?from=1&to=1573149830&zone=1
-const HISTORIC_ENDPOINT = 'https://danmiz.net/api/historic.json';
-const svgStyle = {
-  stroke: theme.accentColor,
-  strokeWidth: theme.graph.lineWidth,
+const HISTORIC_ENDPOINT = 'https://dowav-api.herokuapp.com/api/historic/';
+
+// Function which maps historic data to charts on a graph
+const mapDataToCharts = (data: HistoricData, zone: Zone) => {
+  return data.map((zoneData: ZoneData, i) => {
+    const graphData = zoneData.map(point => point.value);
+    const chartSvgStyle = {
+      stroke: theme.graph.chartColors[zone ? (zone - 1) : i % 3],
+      strokeWidth: theme.graph.lineWidth,
+    };
+    const gridSvgStyle = {
+      stroke: 'grey',
+    };
+    
+    return (
+      <LineChart
+        data={graphData}
+        style={StyleSheet.absoluteFill}
+        svg={chartSvgStyle}
+        key={i}
+      >
+        {i === 0 ? (
+          <Grid svg={gridSvgStyle} />
+        ) : null}
+      </LineChart>
+    );
+  });
 }
 
 const HistoricGraph = (props: Props) => {
@@ -27,21 +50,27 @@ const HistoricGraph = (props: Props) => {
   const [ data, setData ] = useState([]) as [ HistoricData, Function ];
   const [ loading, setLoading ] = useState(true);
 
-  // On mount, fetch data for given sensor and filter by zone if specified
+  // On mount, fetch data for given sensor
   useEffect(() => {
+    // Init request
     let doUpdate = true;
-    const toTime = Date.now();
-    const fromTime = toTime - (5 * 60 * 1000);
+    const toTime = Math.floor(Date.now() / 1000);
+    const fromTime = toTime - (360 * 60);
 
-    // let endpoint = `${HISTORIC_ENDPOINT}${sensor}?from=${fromTime}&to=${toTime}`;
-    let endpoint = HISTORIC_ENDPOINT; // TESTING
-    // if (zone) endpoint += `&zone=${zone}`;
+    let endpoint = `${HISTORIC_ENDPOINT}${sensor}?from=${fromTime}&to=${toTime}`;
     const pData = fetch(endpoint);
 
     pData.then(res => {
+      // Check request payload
       if (res && doUpdate) {
         res.json().then((histData: HistoricData) => {
           if (histData) {
+            // Filter out unnecessary zones if zone prop specified
+            if (zone) {
+              histData = histData.filter((zoneData, i) => i === (zone - 1));
+            }
+
+            // Update component
             setData(histData);
             setLoading(false);
           }
@@ -58,14 +87,13 @@ const HistoricGraph = (props: Props) => {
   }, []);
 
   const loadingStyle: ViewStyle = {
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1,
     ...style,
     display: hidden ? 'none' : 'flex',
   }
   const displayStyle: ViewStyle = {
-    position: 'relative',
     flex: 1,
+    position: 'relative',
     ...style,
     display: hidden ? 'none' : 'flex',
   }
@@ -73,29 +101,14 @@ const HistoricGraph = (props: Props) => {
   if (loading) {
     return (
       <View style={loadingStyle}>
-        <Text style={{ fontSize: 24 }}>Loading...</Text>
+        <Loader />
       </View>
     );
   }
 
   return (
     <View style={displayStyle}>
-      {data.map((zoneData: Array<SensorData>, i) => {
-        const graphData = zoneData.map(point => point.value);
-        
-        return (
-          <LineChart
-            data={graphData}
-            style={StyleSheet.absoluteFill}
-            svg={svgStyle}
-            key={i}
-          >
-            {i === 0 ? (
-              <Grid />
-            ) : null}
-          </LineChart>
-        );
-      })}
+      {mapDataToCharts(data, zone)}
     </View>
   );
 }

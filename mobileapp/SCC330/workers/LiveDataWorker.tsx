@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Sensor, SensorData, ZoneData } from '../types';
+import { Sensor, ZoneData } from '../types';
 
 const LIVE_ENDPOINT = 'https://dowav-api.herokuapp.com/api/live/';
 const DELAY = 5000;

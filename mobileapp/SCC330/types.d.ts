@@ -1,5 +1,5 @@
 export type Sensor = 'temperature' | 'moisture' | 'light';
-export type Zone = 1 | 2 | 3;
+export type Zone = 1 | 2 | 3| null | undefined;
 
 // Data for one sensor in one zone
 export type SensorData = {
