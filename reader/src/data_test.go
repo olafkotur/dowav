@@ -19,8 +19,8 @@ func TestFilterDataInRange(t *testing.T) {
 
 func TestCalcAverage(t *testing.T) {
 	avg = calcAverage(filteredData)
-	if avg[0] != 30 || avg[1] != 248 || avg[2] != 47 {
-		t.Error("Expected the average calculation to be 30, 248, 47")
+	if avg[0] != 30.963636363636365 || avg[1] != 248.5090909090909 || avg[2] != 47.56363636363636 {
+		t.Error("Expected the average calculation to be 30.963636363636365, 248.5090909090909, 47.56363636363636")
 	}
 }
 
