@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-var lastLiveRefresh int64
 var previousLocation int
 var locationAccuracy []int
 
@@ -65,18 +64,18 @@ func filterDataInRange(data string, start, end int64) (f []string) {
 	return filtered
 }
 
-func calcAverage(data []string) (a []int) {
+func calcAverage(data []string) (a []float64) {
 	// Store sum of all values
-	temp, moist, light := 0, 0, 0
+	temp, moist, light := 0.0, 0.0, 0.0
 	for _, d := range data {
 		values := strings.Split(d, " ")
-		temp += toInt(values[2])
-		moist += toInt(values[3])
-		light += toInt(values[4])
+		temp += toFloat(values[2])
+		moist += toFloat(values[3])
+		light += toFloat(values[4])
 	}
 
-	var average []int
-	total := len(data)
+	var average []float64
+	total := float64(len(data))
 	average = append(average, temp/total)
 	average = append(average, moist/total)
 	average = append(average, light/total)
@@ -138,7 +137,7 @@ func calcMax(data []string) (m []int) {
 	return max
 }
 
-func formatHistoricData(avg, min, max []int, startTime, endTime, zone int) []byte {
+func formatHistoricData(avg []float64, min, max []int, startTime, endTime, zone int) []byte {
 	data := HistoricData{
 		zone,
 		startTime,
@@ -195,11 +194,10 @@ func uploadLiveData(data []byte) {
 		"moisture":    {toString(obj.Moisture.Value)},
 		"light":       {toString(obj.Light.Value)},
 	}
-	_, err := http.PostForm("http://dowav-api.herokuapp.com/api/live/upload", values)
+	_, err := http.PostForm("http://localhost:8080/api/live/upload", values)
 	if err != nil {
 		return
 	}
-	lastLiveRefresh = time.Now().Unix()
 }
 
 func uploadLocationData(data []byte) {
@@ -222,15 +220,15 @@ func uploadLocationData(data []byte) {
 	}
 
 	// Upload only if the data is accurate and there is a change
-	if isAccurate && obj.Location.Value != previousLocation {
+	if (isAccurate) && obj.Location.Value != previousLocation {
 		previousLocation = obj.Location.Value
-		fmt.Println("Change in zone detected, updating location in database")
+		fmt.Println("Change in zone detected, updating location in database to zone:", obj.Location.Value)
 
 		values := url.Values{
 			"time": {toString(int(obj.Location.Time))},
 			"zone": {toString(obj.Location.Value)},
 		}
-		_, err := http.PostForm("http://dowav-api.herokuapp.com/api/location/upload", values)
+		_, err := http.PostForm("http://localhost:8080/api/location/upload", values)
 		if err != nil {
 			return
 		}
@@ -242,16 +240,18 @@ func uploadHistoricData(data []byte) {
 	obj := HistoricData{}
 	_ = json.Unmarshal(data, &obj)
 
+	fmt.Println(obj.Temperature.Average, obj.Moisture.Average, obj.Light.Average)
+
 	// Define the form values
 	values := url.Values{
 		"zone":        {toString(obj.Zone)},
 		"startTime":   {toString(obj.StartTime)},
 		"endTime":     {toString(obj.EndTime)},
-		"temperature": {toString(obj.Temperature.Average)},
-		"moisture":    {toString(obj.Moisture.Average)},
-		"light":       {toString(obj.Light.Average)},
+		"temperature": {strconv.FormatFloat(obj.Temperature.Average, 'f', 6, 64)},
+		"moisture":    {strconv.FormatFloat(obj.Moisture.Average, 'f', 6, 64)},
+		"light":       {strconv.FormatFloat(obj.Light.Average, 'f', 6, 64)},
 	}
-	_, err := http.PostForm("http://dowav-api.herokuapp.com/api/historic/upload", values)
+	_, err := http.PostForm("http://localhost:8080/api/historic/upload", values)
 	if err != nil {
 		return
 	}

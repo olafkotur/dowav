@@ -6,7 +6,8 @@ import (
 )
 
 var filteredData []string
-var avg, min, max []int
+var avg []float64
+var min, max []int
 
 func TestFilterDataInRange(t *testing.T) {
 	data := getDataAsString("../_test.txt")

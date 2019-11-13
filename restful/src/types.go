@@ -6,7 +6,7 @@ type Message struct {
 
 type ReadingData struct {
 	Time  float64 `json:"time"`
-	Value int     `json:"value"`
+	Value float64 `json:"value"`
 }
 
 // type Readings struct {

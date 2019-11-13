@@ -178,7 +178,7 @@ func insertData(microbit string, temp, humidity, light, location int) {
 		log.Fatal(err)
 	}
 
-	n, err := result.RowsAffected()
+	n, _ := result.RowsAffected()
 	if n == 1 {
 		fmt.Println("1 row inserted.")
 	}

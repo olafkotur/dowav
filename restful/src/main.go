@@ -23,7 +23,7 @@ func main() {
 	database, _ = sql.Open("sqlite3", "./database.db")
 
 	// Create historic table in database
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL, endTime REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL, endTime REAL, temperature REAL, moisture REAL, light REAL)")
 	_, err := statement.Exec()
 	if err != nil {
 		panic(err)
