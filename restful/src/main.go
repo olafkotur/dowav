@@ -20,12 +20,28 @@ func main() {
 		port = "8080"
 	}
 
-	// Prepare database tables
 	database, _ = sql.Open("sqlite3", "./database.db")
+
+	// Create historic table in database
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL, endTime REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
-	statement.Exec()
+	_, err := statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+
+	// Create live table in database
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (zone INTEGER, time REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
-	statement.Exec()
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+
+	// Create location table in database
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS location (time REAL, zone INTEGER)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
 
 	historicData := generateMockHistoricData()
 	uploadMockHistoricData(historicData)
@@ -36,9 +52,11 @@ func main() {
 	router.HandleFunc("/api/historic/{sensor}", getHistoricData).Methods("GET")
 	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
 	router.HandleFunc("/api/live/{sensor}", getLiveData).Methods("GET")
+	router.HandleFunc("/api/location/upload", uploadLocationData).Methods("POST")
+	router.HandleFunc("/api/location/{type}", getLocationData).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
-	http.ListenAndServe(":"+port, router)
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func printRequest(request *http.Request) {
@@ -52,7 +70,10 @@ func sendResponse(res interface{}, writer http.ResponseWriter) {
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
 	writer.Header().Set("Access-Control-Max-Age", "2592000")
-	writer.Write(response)
+	_, err := writer.Write(response)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func getMuxVariable(target string, request *http.Request) (v string) {

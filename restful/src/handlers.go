@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-// TEST: curl -d "zone=3&startTime=11&endTime=24&temperature=29&moisture=233&light=110" localhost:8080/api/historic/upload
+// TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
 func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	// Get data from request
-	request.ParseForm()
+	_ = request.ParseForm()
 	zone := toInt(request.Form.Get("zone"))
 	startTime := toFloat(request.Form.Get("startTime"))
 	endTime := toFloat(request.Form.Get("endTime"))
@@ -64,7 +64,7 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 
 		// Populate response from the db
 		for rows.Next() {
-			rows.Scan(&endTime, &sensorData)
+			_ = rows.Scan(&endTime, &sensorData)
 			hisData = append(hisData, ReadingData{endTime * 1000, sensorData})
 		}
 		res = append(res, hisData)
@@ -77,7 +77,7 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 // TEST: curl -d "zone=1&temperature=26&moisture=220&light=98" localhost:8080/api/live/upload
 func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 	// Get data from request
-	request.ParseForm()
+	_ = request.ParseForm()
 	time := time.Now().Unix()
 	zone := toInt(request.Form.Get("zone"))
 	temperature := toInt(request.Form.Get("temperature"))
@@ -89,11 +89,11 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	statement, err := database.Prepare("INSERT INTO live (zone, time, temperature, moisture, light) VALUES (?, ?, ?, ?, ?)")
+	statement, _ := database.Prepare("INSERT INTO live (zone, time, temperature, moisture, light) VALUES (?, ?, ?, ?, ?)")
+	_, err := statement.Exec(zone, time, temperature, moisture, light)
 	if err != nil {
 		panic(err)
 	}
-	statement.Exec(zone, time, temperature, moisture, light)
 
 	res := Message{"Success"}
 	sendResponse(res, writer)
@@ -115,13 +115,74 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		for rows.Next() {
-			rows.Scan(&time, &sensorValue)
+			_ = rows.Scan(&time, &sensorValue)
 		}
 		rows.Close()
 
 		// Format data
 		data := ReadingData{time * 1000, sensorValue}
 		res = append(res, data)
+	}
+
+	sendResponse(res, writer)
+	printRequest(request)
+}
+
+func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
+	// Get data from request
+	_ = request.ParseForm()
+	time := toFloat(request.Form.Get("time"))
+	zone := toInt(request.Form.Get("zone"))
+
+	if zone <= 0 {
+		// TODO: Should send bad response
+		return
+	}
+
+	statement, _ := database.Prepare("INSERT INTO location (time, zone) VALUES (?, ?)")
+	_, err := statement.Exec(time, zone)
+	if err != nil {
+		panic(err)
+	}
+
+	res := Message{"Success"}
+	sendResponse(res, writer)
+	printRequest(request)
+}
+
+func getLocationData(writer http.ResponseWriter, request *http.Request) {
+	// Get parameters from request
+	dataType := getMuxVariable("type", request)
+
+	var res interface{}
+	var now float64
+	var location int
+
+	// Fetch and return live data
+	if dataType == "live" {
+		// Scan db and save to var
+		rows, _ := database.Query("SELECT * FROM location ORDER BY time DESC LIMIT 1")
+		for rows.Next() {
+			_ = rows.Scan(&now, &location)
+		}
+		rows.Close()
+		res = ReadingData{now * 1000, location}
+
+	}
+
+	// Fetch and return historic data
+	if dataType == "historic" {
+		timeRange := int(time.Now().Add(-time.Duration(time.Hour * 24)).Unix())
+
+		// Scan db and save to var
+		var data []ReadingData
+		rows, _ := database.Query("SELECT * FROM location WHERE time > " + toString(timeRange))
+		for rows.Next() {
+			_ = rows.Scan(&now, &location)
+			data = append(data, ReadingData{now * 1000, location})
+		}
+		rows.Close()
+		res = data
 	}
 
 	sendResponse(res, writer)

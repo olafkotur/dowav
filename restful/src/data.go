@@ -30,8 +30,8 @@ func generateMockHistoricData() [24 * 12][6]int {
 
 func uploadMockHistoricData(data [24 * 12][6]int) {
 	for _, d := range data {
-		statement, err := database.Prepare("INSERT INTO historic (zone, startTime, endTime, temperature, moisture, light) VALUES (?, ?, ?, ?, ?, ?)")
-		_, err = statement.Exec(d[0], float64(d[1]), float64(d[2]), d[3], d[4], d[5])
+		statement, _ := database.Prepare("INSERT INTO historic (zone, startTime, endTime, temperature, moisture, light) VALUES (?, ?, ?, ?, ?, ?)")
+		_, err := statement.Exec(d[0], float64(d[1]), float64(d[2]), d[3], d[4], d[5])
 		if err != nil {
 			panic(err)
 		}
