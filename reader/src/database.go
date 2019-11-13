@@ -17,7 +17,7 @@ func checkDeletion(start time.Time, lastHourDiff int) (hDiff int) {
 	hourDiff := int(diff.Hours())
 	if hourDiff >= 72 && lastHourDiff != hourDiff {
 		//fmt.Println(reflect.TypeOf(hourDiff))
-		deleteHr := intToString(hourDiff % 72)
+		deleteHr := (hourDiff % 72)
 		deleteHour("db", deleteHr) // *should add all microbit(DB)
 	}
 	return hourDiff
@@ -28,7 +28,7 @@ func checkDeletion(start time.Time, lastHourDiff int) (hDiff int) {
  * param microbit : name of DB (microbit number)
  * param hour     : name of table (hour)
  */
-func queryHourlyData(microbit, hour string) { //microbit = name of DB, hour = name of table
+func queryHourlyData(microbit string, hour int) (vals string) { //microbit = name of DB, hour = name of table
 	// Open database connection
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
@@ -36,9 +36,9 @@ func queryHourlyData(microbit, hour string) { //microbit = name of DB, hour = na
 		return
 	}
 	defer db.Close()
-
+	hr := intToString(hour)
 	// Execute the query
-	rows, err := db.Query("SELECT * FROM " + hour)
+	rows, err := db.Query("SELECT * FROM " + hr + "hour")
 	if err != nil {
 		log.Println(err)
 		return
@@ -66,7 +66,7 @@ func queryHourlyData(microbit, hour string) { //microbit = name of DB, hour = na
 		//fmt.Println(values[i])
 	}
 	//fmt.Println(reflect.TypeOf(scanArgs))
-
+	var val string //testing purpose
 	for rows.Next() {
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
@@ -86,69 +86,75 @@ func queryHourlyData(microbit, hour string) { //microbit = name of DB, hour = na
 			}
 			fmt.Println(columns[i], ": ", value)
 		}
+		val = value
 		fmt.Println("-----------------------------------")
 	}
 	if err = rows.Err(); err != nil {
 		log.Println(err)
 		return
 	}
+	return val
 }
 
-func queryMaxData(microbit, data string, hour string) {
+func queryMaxData(microbit, data string, hour int) (maxV string) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	var name string
-	err = db.QueryRow("SELECT MAX(" + data + ") FROM " + hour + ";").Scan(&name)
+	hr := intToString(hour)
+	var max string
+	err = db.QueryRow("SELECT MAX(" + data + ") FROM " + hr + "hour;").Scan(&max)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(name)
+	//fmt.Println(name)
+	return max
 }
 
-func queryMinData(microbit, data string, hour string) {
+func queryMinData(microbit, data string, hour int) (minV string) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
-	var name string
-	err = db.QueryRow("SELECT MIN(" + data + ") FROM " + hour + ";").Scan(&name)
+	hr := intToString(hour)
+	var min string
+	err = db.QueryRow("SELECT MIN(" + data + ") FROM " + hr + "hour;").Scan(&min)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(name)
+	//fmt.Println(min)
+	return min
 }
 
-func queryAvgData(microbit, data string, hour string) {
+func queryAvgData(microbit, data string, hour int) (avgV string) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
-	var name string
-	err = db.QueryRow("SELECT AVG(" + data + ") FROM " + hour + ";").Scan(&name)
+	hr := intToString(hour)
+	var avg string
+	err = db.QueryRow("SELECT AVG(" + data + ") FROM " + hr + "hour;").Scan(&avg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(name)
+	//fmt.Println(avg)
+	return avg
 }
 
 //delete data inside table
-func deleteHour(microbit, hour string) {
+func deleteHour(microbit string, hour int) {
 	db, err := sql.Open("mysql", "pi:pythones@tcp(127.0.0.1:3306)/"+microbit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
+	hr := intToString(hour)
 	var name string
-	err = db.QueryRow("DELETE FROM " + hour + "hour" + ";").Scan(&name)
+	err = db.QueryRow("DELETE FROM " + hr + "hour;").Scan(&name)
 	if err != nil {
 		log.Fatal(err)
 	}
