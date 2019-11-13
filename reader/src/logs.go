@@ -20,7 +20,7 @@ func createLogFile() (path string, f *os.File) {
 	}
 	log.Printf("New log file created in %s\n\n", logPath)
 
-	defer file.Close()
+	file.Close()
 	return logPath, file
 }
 
@@ -38,12 +38,13 @@ func logRawData(data, path string, file *os.File) {
 		log.Println(err)
 		return
 	}
+	file.Close()
 }
 
 func getLatestLog() (p string) {
 	files, err := ioutil.ReadDir("../logs/")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	path := ""
@@ -70,7 +71,7 @@ func getLatestLog() (p string) {
 func getDataAsString(path string) (d string) {
 	data, err := ioutil.ReadFile("../logs/" + path)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	return string(data)
 }
