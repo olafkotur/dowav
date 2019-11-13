@@ -21,10 +21,6 @@ int getLightLevel() {
   return uBit.display.readLightLevel();
 }
 
-int temperature = getTemperature();
-int moisture = getMoistureLevel();
-int light = getLightLevel();
-
 // Returns humidity level as percentage
 int getHumidityLevel() {
   int tempC = getTemperature();
@@ -58,6 +54,11 @@ int getMoistureLevel() {
   uBit.io.P1.setAnalogPeriod(250);
   return uBit.io.P1.getAnalogValue();
 }
+
+int temperature = getTemperature();
+int moisture = getMoistureLevel();
+int light = getLightLevel();
+
 
 void printzoneId() {
   if (zoneId > 0) {
