@@ -352,19 +352,24 @@ svg {
 // Location view
 
 .history-list {
-  overflow-y: auto;
-  overflow: -moz-scrollbars-none;
-  &::-webkit-scrollbar {
-    width: 0 !important;
+  padding: 0 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  .historic-item-list {
+    overflow-y: scroll;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      width: 0 !important;
+    }
+    .historic-item {
+      padding: 10px 5px;
+      color: black;
+      border-radius: 4px;
+      text-align: center;
+      margin-bottom: 3px;
+    }
   }
 
-  .historic-item {
-    padding: 10px 5px;
-    color: black;
-    border-radius: 4px;
-    text-align: center;
-    margin-bottom: 3px;
-  }
   h1 {
     text-align: center;
     margin-bottom: 5px;

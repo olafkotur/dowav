@@ -64,6 +64,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                     height: (size.height - 100) / 2
                   }}
                   conf={{
+                    title: "Zone 1",
                     name: currentOption,
                     id: currentOption + 1,
                     zone: 1
@@ -76,6 +77,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                     height: (size.height - 100) / 2
                   }}
                   conf={{
+                    title: "Zone 2",
                     name: currentOption,
                     id: currentOption + 2,
                     zone: 2
@@ -88,6 +90,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                     height: (size.height - 100) / 2
                   }}
                   conf={{
+                    title: "Zone 3",
                     name: currentOption,
                     id: currentOption + 3,
                     zone: 3
@@ -107,6 +110,7 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
                     height: (size.height - 100) / 2
                   }}
                   conf={{
+                    title: "Three Zones",
                     name: currentOption,
                     id: currentOption + 4
                   }}

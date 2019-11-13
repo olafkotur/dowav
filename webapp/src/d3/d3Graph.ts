@@ -88,6 +88,13 @@ export default class D3Graph {
         );
       }
     }
+    this.svg
+      .append("text")
+      .text(this.conf.title || "")
+      .attr("x", this.viewport.width / 2)
+      .attr("y", -this.margin.top / 2)
+      .attr("stroke", d3Colors[this.conf.name][1])
+      .attr("font-size", "20px");
     this.clip = this.svg
       .append("g")
       .attr("class", "clip")

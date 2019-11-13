@@ -29,6 +29,8 @@ export default class Lab3D {
     this.camera.position.set(-14, 10, -9);
     this.camera.lookAt(0, 0, 0);
     this.controls = new OrbitControls(this.camera, options.container);
+    this.controls.minDistance = 3;
+    this.controls.maxDistance = 60;
     this.renderer = new THREE.WebGLRenderer({ alpha: true });
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.setSize(options.viewport.width, options.viewport.height);
