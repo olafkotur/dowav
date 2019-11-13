@@ -14,9 +14,9 @@ type Readings struct {
 }
 
 type Calculations struct {
-	Average int `json:"average"`
-	Minimum int `json:"minimum"`
-	Maximum int `json:"maximum"`
+	Average float64 `json:"average"`
+	Minimum int     `json:"minimum"`
+	Maximum int     `json:"maximum"`
 }
 
 type HistoricData struct {

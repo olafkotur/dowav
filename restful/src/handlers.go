@@ -14,9 +14,9 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	zone := toInt(request.Form.Get("zone"))
 	startTime := toFloat(request.Form.Get("startTime"))
 	endTime := toFloat(request.Form.Get("endTime"))
-	temperature := toInt(request.Form.Get("temperature"))
-	moisture := toInt(request.Form.Get("moisture"))
-	light := toInt(request.Form.Get("light"))
+	temperature := toFloat(request.Form.Get("temperature"))
+	moisture := toFloat(request.Form.Get("moisture"))
+	light := toFloat(request.Form.Get("light"))
 
 	if zone <= 0 {
 		// TODO: Should send bad response
@@ -60,7 +60,7 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		var endTime float64
-		var sensorData int
+		var sensorData float64
 
 		// Populate response from the db
 		for rows.Next() {
@@ -108,7 +108,7 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	for i := 0; i < 3; i++ {
 		// Get data from db
 		var time float64
-		var sensorValue int
+		var sensorValue float64
 		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zone == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
 		if err != nil {
 			panic(err)
@@ -134,7 +134,7 @@ func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
 	time := toFloat(request.Form.Get("time"))
 	zone := toInt(request.Form.Get("zone"))
 
-	if zone <= 0 {
+	if zone < 0 {
 		// TODO: Should send bad response
 		return
 	}
@@ -156,7 +156,7 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 
 	var res interface{}
 	var now float64
-	var location int
+	var location float64
 
 	// Fetch and return live data
 	if dataType == "live" {

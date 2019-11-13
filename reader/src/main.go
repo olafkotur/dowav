@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/tarm/serial"
@@ -43,14 +44,15 @@ func startReadingSerial(name, baud string) {
 	path, file := createLogFile()
 	for {
 		data := listenToPort(sp)
-		if data[:1] != "R" {
+
+		if len(data) <= 0 || data[:1] != "R" {
 			log.Println("Unexpected data format read from serial port, skipping")
 			continue
 		}
 
 		// TODO: Enable database
-		// readedSlice := strings.Fields(data)
-		// insertData(readedSlice[0], toInt(readedSlice[1]), toInt(readedSlice[2]), toInt(readedSlice[3]), toInt(readedSlice[4]))
+		readedSlice := strings.Fields(data)
+		insertData(readedSlice[0], toInt(readedSlice[1]), toInt(readedSlice[2]), toInt(readedSlice[3]), toInt(readedSlice[4]))
 		logRawData(data, path, file)
 
 		formatted := formatLiveData(data)
@@ -79,4 +81,9 @@ func toInt(s string) (i int) {
 
 func toString(i int) (s string) {
 	return strconv.Itoa(i)
+}
+
+func toFloat(s string) (f float64) {
+	res, _ := strconv.ParseFloat(s, 64)
+	return res
 }
