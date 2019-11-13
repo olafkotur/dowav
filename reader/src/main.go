@@ -50,7 +50,6 @@ func startReadingSerial(name, baud string) {
 			continue
 		}
 
-		// TODO: Enable database
 		readedSlice := strings.Fields(data)
 		insertData(readedSlice[0], toInt(readedSlice[1]), toInt(readedSlice[2]), toInt(readedSlice[3]), toInt(readedSlice[4]))
 		logRawData(data, path, file)

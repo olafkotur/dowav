@@ -38,6 +38,7 @@ func logRawData(data, path string, file *os.File) {
 		log.Println(err)
 		return
 	}
+	file.Close()
 }
 
 func getLatestLog() (p string) {
