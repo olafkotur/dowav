@@ -10,6 +10,7 @@ type Readings struct {
 	Temperature Data `json:"temp"`
 	Moisture    Data `json:"moisture"`
 	Light       Data `json:"light"`
+	Location    Data `json:"location"`
 }
 
 type Calculations struct {

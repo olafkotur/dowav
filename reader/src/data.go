@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+var lastLiveRefresh int64
+var previousLocation int
+var locationAccuracy []int
+
 func startProcessingData(interval time.Duration) {
 	// DANGER: TESTING DATA ONLY
 	// endTime := time.Now().Unix()
@@ -153,7 +157,8 @@ func formatLiveData(d string) (r []byte) {
 	split := strings.Split(d, " ")
 	t := toInt(split[1])
 	m := toInt(split[2])
-	l := toInt(strings.Replace(split[3], "\r\n", "", 1))
+	l := toInt(split[3])
+	lc := toInt(strings.Replace(split[4], "\r\n", "", 1))
 
 	now := time.Now().Unix()
 	data := Readings{
@@ -161,6 +166,7 @@ func formatLiveData(d string) (r []byte) {
 		Data{now, t},
 		Data{now, m},
 		Data{now, l},
+		Data{now, lc},
 	}
 	res, _ := json.Marshal(data)
 	return res
@@ -179,10 +185,15 @@ func splitByZone(data []string) (z [3][]string) {
 
 // Uploads the live data via the rest api
 func uploadLiveData(data []byte) {
+	shouldSkipRefresh := lastLiveRefresh > time.Now().Add(-1*time.Second).Unix()
+	if shouldSkipRefresh {
+		return
+	}
+
 	obj := Readings{}
 	_ = json.Unmarshal(data, &obj)
 
-	// Define the form values
+	// Post live sensor data
 	values := url.Values{
 		"zone":        {toString(obj.Zone)},
 		"temperature": {toString(obj.Temperature.Value)},
@@ -192,6 +203,42 @@ func uploadLiveData(data []byte) {
 	_, err := http.PostForm("http://dowav-api.herokuapp.com/api/live/upload", values)
 	if err != nil {
 		return
+	}
+	lastLiveRefresh = time.Now().Unix()
+}
+
+func uploadLocationData(data []byte) {
+	obj := Readings{}
+	_ = json.Unmarshal(data, &obj)
+
+	// Add data to location accuracy array
+	if len(locationAccuracy) >= 4 {
+		_, locationAccuracy = locationAccuracy[0], locationAccuracy[1:]
+	}
+	locationAccuracy = append(locationAccuracy, obj.Location.Value)
+
+	// Check if location is accurate enough to update
+	isAccurate := true
+	for i := 0; i < len(locationAccuracy); i++ {
+		if locationAccuracy[i] != locationAccuracy[0] {
+			isAccurate = false
+			break
+		}
+	}
+
+	// Upload only if the data is accurate and there is a change
+	if isAccurate && obj.Location.Value != previousLocation {
+		previousLocation = obj.Location.Value
+		fmt.Println("Change in zone detected, updating location in database")
+
+		values := url.Values{
+			"time": {toString(int(obj.Location.Time))},
+			"zone": {toString(obj.Location.Value)},
+		}
+		_, err := http.PostForm("http://dowav-api.herokuapp.com/api/location/upload", values)
+		if err != nil {
+			return
+		}
 	}
 }
 
