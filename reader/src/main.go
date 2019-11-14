@@ -41,7 +41,7 @@ func startReadingSerial(name, baud string) {
 	}
 	log.Printf("Success - listening to %s\n\n", name)
 
-	path, file := createLogFile()
+	path := createLogFile()
 	for {
 		data := listenToPort(sp)
 
@@ -57,7 +57,6 @@ func startReadingSerial(name, baud string) {
 		formatted := formatLiveData(data)
 		uploadLiveData(formatted)
 		uploadLocationData(formatted)
-		file.Close()
 	}
 }
 

@@ -193,10 +193,11 @@ func uploadLiveData(data []byte) {
 		"moisture":    {toString(obj.Moisture.Value)},
 		"light":       {toString(obj.Light.Value)},
 	}
-	_, err := http.PostForm("http://dowav-api.herokuapp.com/api/live/upload", values)
+	res, err := http.PostForm("http://dowav-api.herokuapp.com/api/live/upload", values)
 	if err != nil {
 		return
 	}
+	res.Body.Close()
 }
 
 func uploadLocationData(data []byte) {
@@ -227,10 +228,11 @@ func uploadLocationData(data []byte) {
 			"time": {toString(int(obj.Location.Time))},
 			"zone": {toString(obj.Location.Value)},
 		}
-		_, err := http.PostForm("http://dowav-api.herokuapp.com/api/location/upload", values)
+		res, err := http.PostForm("http://dowav-api.herokuapp.com/api/location/upload", values)
 		if err != nil {
 			return
 		}
+		res.Body.Close()
 	}
 }
 
@@ -248,8 +250,9 @@ func uploadHistoricData(data []byte) {
 		"moisture":    {strconv.FormatFloat(obj.Moisture.Average, 'f', 6, 64)},
 		"light":       {strconv.FormatFloat(obj.Light.Average, 'f', 6, 64)},
 	}
-	_, err := http.PostForm("http://dowav-api.herokuapp.com/api/historic/upload", values)
+	res, err := http.PostForm("http://dowav-api.herokuapp.com/api/historic/upload", values)
 	if err != nil {
 		return
 	}
+	res.Body.Close()
 }
