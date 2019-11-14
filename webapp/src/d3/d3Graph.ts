@@ -566,6 +566,13 @@ export default class D3Graph {
     this.title
       .attr("x", this.viewport.width / 2)
       .attr("y", -this.margin.top / 2);
+    d3.select(this.svgHTML)
+      .select("foreignObject")
+      .attr(
+        "transform",
+        `translate(${this.viewport.width + this.margin.left}, ${this.viewport
+          .height / 2})`
+      );
     this.clip
       .attr("width", this.viewport.width)
       .attr("height", this.viewport.height);

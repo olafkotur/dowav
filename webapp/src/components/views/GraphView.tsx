@@ -38,7 +38,8 @@ const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
     }
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
-  }, [graphRef.current]);
+  }, []);
+
   return (
     <div ref={graphRef} className="graph-view">
       {size ? (
