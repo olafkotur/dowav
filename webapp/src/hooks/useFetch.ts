@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { UseFetchState } from "../types/index";
@@ -118,12 +119,13 @@ export default function useFetch(options: Options): UseFetchState {
         fetchData();
       }
     }
-  }, [fetchData, options.query.endpoint, options.refetch, options.useCache]);
+    // eslint:
+  }, [options.refetch]);
 
   useEffect(() => {
     if (!cache) {
       fetchData();
     }
-  }, [cache, fetchData]);
+  }, []);
   return { ...state };
 }
