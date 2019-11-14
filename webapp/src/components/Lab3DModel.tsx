@@ -32,7 +32,7 @@ const Lab3DModel: React.FC<Lab3DModelProps> = ({ viewport }) => {
       let id = setInterval(async () => {
         try {
           const response = await fetch(
-            "http://dowav-api.herokuapp.com/api/location/live"
+            "https://dowav-api.herokuapp.com/api/location/live"
           );
           const json = await response.json();
           console.log(json);

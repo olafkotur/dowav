@@ -29,6 +29,9 @@ export default class Lab3D {
     this.camera.position.set(-14, 10, -9);
     this.camera.lookAt(0, 0, 0);
     this.controls = new OrbitControls(this.camera, options.container);
+    this.controls.minDistance = 3;
+    this.controls.maxDistance = 60;
+    this.controls.maxPolarAngle = Math.PI / 2.1;
     this.renderer = new THREE.WebGLRenderer({ alpha: true });
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.setSize(options.viewport.width, options.viewport.height);
@@ -37,12 +40,12 @@ export default class Lab3D {
 
     // Add a light
     const sun = new THREE.PointLight(0xffffff, 1.6, 0);
-    sun.position.set(0, 50, 0);
+    sun.position.set(0, 40, 0);
     this.scene.add(sun);
-    const lightRight = new THREE.PointLight(0xffffff, 0.6, 0);
+    const lightRight = new THREE.PointLight(0xffffff, 0.8, 0);
     lightRight.position.set(-20, 12, -25);
     this.scene.add(lightRight);
-    const lightLeft = new THREE.PointLight(0xffffff, 0.6, 0);
+    const lightLeft = new THREE.PointLight(0xffffff, 0.8, 0);
     lightLeft.position.set(18, 12, 18);
     this.scene.add(lightLeft);
 
@@ -112,7 +115,7 @@ export default class Lab3D {
       })
     ];
     let cube = new THREE.Mesh(geometry, cubeMaterials);
-    cube.position.set(-14, 10, -100);
+    cube.position.set(-14, 10, -10000);
     return cube;
   };
 
@@ -133,8 +136,12 @@ export default class Lab3D {
   };
 
   public addLocationData = (data: LocationData) => {
-    this.locationData = data;
-    this.highlightZone();
+    if (data.value !== 0) {
+      this.locationData = data;
+      this.highlightZone();
+    } else {
+      this.scene.remove(this.cube);
+    }
   };
 
   private animate = () => {

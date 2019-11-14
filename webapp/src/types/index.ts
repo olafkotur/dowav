@@ -28,6 +28,7 @@ export type GraphConfiguration = {
   name: string;
   id: string;
   zone?: number;
+  margin?: { top: number; bottom: number; left: number; right: number };
 };
 
 export type TimePeriod = {

@@ -2,14 +2,10 @@ import React, { useState } from "react";
 import "./main.scss";
 import Dashboard from "./components/Dashboard";
 import NavigationContext from "./context/NavigationContext";
-import {
-  DASHBOARD,
-  MOVEMENT,
-  TEMPERATURE
-} from "./constants/MenuOptionConstants";
+import { TEMPERATURE } from "./constants/MenuOptionConstants";
 
 const App: React.FC = () => {
-  const [navigation, setNavigation] = useState(MOVEMENT);
+  const [navigation, setNavigation] = useState(TEMPERATURE);
 
   return (
     <NavigationContext.Provider

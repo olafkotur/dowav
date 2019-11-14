@@ -40,10 +40,18 @@ export default class D3Graph {
   private clip: any;
   private dashedLines: any;
   private live: boolean;
+  private legend: any;
+  private title: any;
   public constructor(options: D3GraphProps) {
     this.live = false;
     this.svgHTML = options.svg;
-    this.margin = { top: 40, bottom: 40, left: 40, right: 40 };
+    this.margin = {
+      top: 40,
+      bottom: 40,
+      left: 40,
+      right: 40,
+      ...(options.conf.margin || {})
+    };
     this.viewport = {
       width: options.viewport.width - this.margin.left - this.margin.right,
       height: options.viewport.height - this.margin.top - this.margin.bottom
@@ -51,10 +59,7 @@ export default class D3Graph {
     this.svg = d3
       .select(options.svg)
       .append("g")
-      .attr(
-        "transform",
-        `translate(${this.margin.left}, ${this.margin.right})`
-      );
+      .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
     this.conf = options.conf;
     this.data = this.scaleData(options.data);
     this.liveData = [];
@@ -64,6 +69,18 @@ export default class D3Graph {
       .select(this.svgHTML.parentNode as any)
       .append("div")
       .attr("class", "tooltip");
+    this.legend = d3
+      .select(options.svg)
+      .append("foreignObject")
+      .attr("width", this.margin.right)
+      .attr("height", "50%")
+      .attr(
+        "transform",
+        `translate(${this.viewport.width + this.margin.left}, ${this.viewport
+          .height / 2})`
+      )
+      .append("xhtml:div")
+      .classed("svg-legend", true);
     if (this.data instanceof Array) {
       this.line = this.svg
         .append("path")
@@ -80,6 +97,13 @@ export default class D3Graph {
       let keys = Object.keys(this.data);
       this.line = [];
       for (let i = 0; i < keys.length; i++) {
+        this.legend
+          .append("div")
+          .classed("legend", true)
+          .append("div")
+          .classed("legend-item", true)
+          .style("border-left", `15px solid ${colors[i]}`)
+          .text("Zone " + (i + 1));
         this.line.push(
           this.svg
             .append("path")
@@ -88,6 +112,14 @@ export default class D3Graph {
         );
       }
     }
+    console.log(this.viewport);
+    this.title = this.svg
+      .append("text")
+      .text(this.conf.title || "")
+      .attr("x", this.viewport.width / 2)
+      .attr("y", -this.margin.top / 2)
+      .attr("stroke", d3Colors[this.conf.name][1])
+      .attr("font-size", "20px");
     this.clip = this.svg
       .append("g")
       .attr("class", "clip")
@@ -262,7 +294,7 @@ export default class D3Graph {
 
   private plotLive() {
     function getTranslate(this: D3Graph): number {
-      if (this.liveData.length >= 30) {
+      if (this.liveData.length >= 90) {
         let n =
           this.xScale(this.liveData[0].time) -
           this.xScale(this.liveData[1].time);
@@ -531,6 +563,9 @@ export default class D3Graph {
     ) {
       d3LineGradients.drawGradient(this.svg, this.viewport, this.conf.name);
     }
+    this.title
+      .attr("x", this.viewport.width / 2)
+      .attr("y", -this.margin.top / 2);
     this.clip
       .attr("width", this.viewport.width)
       .attr("height", this.viewport.height);
