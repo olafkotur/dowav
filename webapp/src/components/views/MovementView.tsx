@@ -17,7 +17,7 @@ const MovementView: React.FC = () => {
     query: {
       endpoint: `/api/location/historic`
     },
-    refetch: count
+    refetch: 0
   });
   const updateSize = () => {
     if (ref.current) {
@@ -32,7 +32,7 @@ const MovementView: React.FC = () => {
     }
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
-  }, [ref.current]);
+  }, []);
 
   useEffect(() => {
     if (data) {

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { UseFetchState } from "../types/index";
@@ -51,7 +52,6 @@ export default function useFetch(options: Options): UseFetchState {
   });
 
   function fetchData() {
-    console.log("useFetc", state);
     new Promise(async (resolve, reject) => {
       const time = Date.now();
       const id = setTimeout(() => {
@@ -119,6 +119,7 @@ export default function useFetch(options: Options): UseFetchState {
         fetchData();
       }
     }
+    // eslint:
   }, [options.refetch]);
 
   useEffect(() => {

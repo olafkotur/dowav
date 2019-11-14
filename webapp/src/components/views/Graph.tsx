@@ -50,7 +50,7 @@ const Graph: React.FC<GraphProps> = ({
         data
       );
     }
-  }, [timePeriod]);
+  }, [conf, d3chart, data, timePeriod]);
 
   useEffect(() => {
     if (d3chart) {
@@ -65,7 +65,7 @@ const Graph: React.FC<GraphProps> = ({
         container.current.removeChild(el);
       }
     };
-  }, []);
+  }, [conf.id]);
   useEffect(() => {
     if (container.current) {
       let el = container.current;
@@ -96,7 +96,7 @@ const Graph: React.FC<GraphProps> = ({
         };
       }
     }
-  }, [container.current]);
+  }, [conf, d3chart, data, timePeriod, viewport]);
 
   useEffect(() => {
     if (container.current) {
@@ -110,7 +110,7 @@ const Graph: React.FC<GraphProps> = ({
         }
       }
     }
-  }, [viewport]);
+  }, [conf.id, d3chart, viewport]);
 
   useEffect(() => {
     if (d3chart) {
@@ -134,7 +134,7 @@ const Graph: React.FC<GraphProps> = ({
         };
       }
     }
-  }, [d3chart, live]);
+  }, [conf.name, conf.zone, d3chart, live]);
 
   return (
     <div className={`graph ${conf.name} ${live ? "live" : ""}`}>
@@ -148,7 +148,16 @@ const Graph: React.FC<GraphProps> = ({
             }
             setLive(!live);
           }}
-          setTimePeriod={setTimePeriod}
+          setTimePeriod={(d: TimePeriod[]) => {
+            let se = 5;
+            d.forEach(z => {
+              if (z.selected) {
+                se = z.timePeriod;
+              }
+            });
+            let k = se / 5;
+            if (data.length > k * 2) setTimePeriod(d);
+          }}
           conf={{ ...conf, timePeriod: timePeriod }}
         />
       </div>
