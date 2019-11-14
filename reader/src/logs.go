@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func createLogFile() (path string, f *os.File) {
+func createLogFile() (path string) {
 	t := time.Now().Unix()
 	logPath := "../logs/log-" + strconv.FormatInt(t, 10) + ".txt"
 
@@ -21,7 +21,7 @@ func createLogFile() (path string, f *os.File) {
 	log.Printf("New log file created in %s\n\n", logPath)
 
 	file.Close()
-	return logPath, file
+	return logPath
 }
 
 func logRawData(data, path string) {

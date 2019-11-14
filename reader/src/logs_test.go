@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateLogFile(t *testing.T) {
-	path, _ := createLogFile()
+	path := createLogFile()
 	if strings.Contains(path, "../logs/log-") == false {
 		t.Error("Expected log file to be in dir ../logs with name log-*")
 	}
