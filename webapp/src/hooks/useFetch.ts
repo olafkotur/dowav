@@ -51,7 +51,6 @@ export default function useFetch(options: Options): UseFetchState {
   });
 
   function fetchData() {
-    console.log("useFetc", state);
     new Promise(async (resolve, reject) => {
       const time = Date.now();
       const id = setTimeout(() => {
@@ -119,12 +118,12 @@ export default function useFetch(options: Options): UseFetchState {
         fetchData();
       }
     }
-  }, [options.refetch]);
+  }, [fetchData, options.query.endpoint, options.refetch, options.useCache]);
 
   useEffect(() => {
     if (!cache) {
       fetchData();
     }
-  }, []);
+  }, [cache, fetchData]);
   return { ...state };
 }
