@@ -40,12 +40,12 @@ export default class Lab3D {
 
     // Add a light
     const sun = new THREE.PointLight(0xffffff, 1.6, 0);
-    sun.position.set(0, 50, 0);
+    sun.position.set(0, 40, 0);
     this.scene.add(sun);
-    const lightRight = new THREE.PointLight(0xffffff, 0.6, 0);
+    const lightRight = new THREE.PointLight(0xffffff, 0.8, 0);
     lightRight.position.set(-20, 12, -25);
     this.scene.add(lightRight);
-    const lightLeft = new THREE.PointLight(0xffffff, 0.6, 0);
+    const lightLeft = new THREE.PointLight(0xffffff, 0.8, 0);
     lightLeft.position.set(18, 12, 18);
     this.scene.add(lightLeft);
 

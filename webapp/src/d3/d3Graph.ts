@@ -173,17 +173,9 @@ export default class D3Graph {
       }
     } else {
       const k = timePeriod.timePeriod / 5;
-      this.fillGaps(data, k);
       return this.computeData(data, k);
     }
     return data;
-  }
-
-  private fillGaps(data: HistoryData, k: number) {
-    // console.log(data, k);
-    // if(data.length > 2){
-    //   const startTime = data[0]
-    // }
   }
 
   private computeData(data: HistoryData, k: number): HistoryData {
