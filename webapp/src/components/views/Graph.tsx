@@ -156,7 +156,7 @@ const Graph: React.FC<GraphProps> = ({
               }
             });
             let k = se / 5;
-            if (data.length > k * 5 * 2) setTimePeriod(d);
+            if (data.length > k * 2) setTimePeriod(d);
           }}
           conf={{ ...conf, timePeriod: timePeriod }}
         />
