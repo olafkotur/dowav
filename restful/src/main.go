@@ -51,6 +51,7 @@ func main() {
 	router.HandleFunc("/api/live/{sensor}", getLiveData).Methods("GET")
 	router.HandleFunc("/api/location/upload", uploadLocationData).Methods("POST")
 	router.HandleFunc("/api/location/{type}", getLocationData).Methods("GET")
+	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
