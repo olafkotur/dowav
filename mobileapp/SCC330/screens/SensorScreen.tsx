@@ -29,6 +29,7 @@ const TempScreen = (props: Props) => {
         <GraphButton
           active={isLive}
           label="Live"
+          style={theme.liveBtnStyle}
           onPress={() => setIsLive(!isLive)}
         />
         <Text style={styles.title}>All Zones</Text>
@@ -68,7 +69,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     color: 'white',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    textAlign: 'center',
   }
 });
 

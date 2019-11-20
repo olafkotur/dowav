@@ -53,7 +53,7 @@ const ZoneLocation = (props: Props) => {
   if (screenState === 'error') {
     component = <Text style={textStyle}>No movement data was received from the server</Text>;
   } else if (screenState === 'displaying') {
-    component = <Text style={textStyle}>User is {zone === 0 ? 'not online' : `in zone ${zone}`}</Text>
+    component = <Text style={textStyle}>The user is {zone === 0 ? 'not online' : `in zone ${zone}`}</Text>
   }
 
   return component;

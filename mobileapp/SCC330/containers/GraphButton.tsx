@@ -13,7 +13,7 @@ interface Props {
 const GraphButton = (props: Props) => {
   const { active, label, style, onPress } = props;
 
-  const btnStyle = {
+  const btnStyle: ViewStyle = {
     backgroundColor: active ? theme.accentColor : 'transparent',
     padding: 6,
     paddingLeft: 8,
