@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
 )
 
 // TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
@@ -187,4 +191,38 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 
 	sendResponse(res, writer)
 	printRequest(request)
+}
+
+func postTweet(writer http.ResponseWriter, request *http.Request) {
+	msg := request.Form.Get("message")
+	if msg == "" {
+		return
+	}
+
+	config := oauth1.NewConfig("MThFJvVlV5zgpM52v0v9WriM6", "gv4ypIp5G5QaxsGVAXNVxJSRrwb5ednzumk3fWD2917fO9B5WM")
+	token := oauth1.NewToken("1196375364907470848-3VNKCnMblHl306D20PW3jJTwq6ZXOn", "Tm0hFLXmusLKCXwnlJi4w7QTIQdzNTKeehEi5wBaI7pDV")
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
+
+	_, res, err := client.Statuses.Update(msg, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	res.Body.Close()
+}
+
+func getTweets(writer http.ResponseWriter, request *http.Request) {
+	config := oauth1.NewConfig("MThFJvVlV5zgpM52v0v9WriM6", "gv4ypIp5G5QaxsGVAXNVxJSRrwb5ednzumk3fWD2917fO9B5WM")
+	token := oauth1.NewToken("1196375364907470848-3VNKCnMblHl306D20PW3jJTwq6ZXOn", "Tm0hFLXmusLKCXwnlJi4w7QTIQdzNTKeehEi5wBaI7pDV")
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
+
+	list, res, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{UserID: 1196375364907470848})
+	if err != nil {
+		log.Println(err)
+	}
+	res.Body.Close()
+
+	printRequest(request)
+	sendResponse(list, writer)
 }
