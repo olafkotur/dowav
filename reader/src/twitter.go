@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-func checkTweetValidity(d []byte) {
+func checkEnvironmentTweet(d []byte) {
 	var data Environment
 	_ = json.Unmarshal(d, &data)
 
@@ -28,6 +28,24 @@ func checkTweetValidity(d []byte) {
 
 	} else if data.Light.Value >= 225 {
 		postTweet("The light level seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #light")
+	}
+}
+
+func checkLocationTweet(d []byte) {
+	var data Location
+	_ = json.Unmarshal(d, &data)
+
+	if data.Zone != 0 && previousLocation != 0 {
+		postTweet("A user has entered the green house and is now in zone " + toString(data.Zone) + " #wearefamily")
+	}
+}
+
+func checkWaterTweet(d []byte) {
+	var data Water
+	_ = json.Unmarshal(d, &data)
+
+	if data.Depth <= 0 {
+		postTweet("The watering can has ran out of water! #warning #low #water")
 	}
 }
 

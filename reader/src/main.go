@@ -52,11 +52,11 @@ func startReadingSerial(name, baud string) {
 		// Check which handler should be used
 		if data[:1] == "R" {
 			logRawData(data, path)
-			handleEnvironment(data, path)
+			handleEnvironment(data)
 		} else if data[:1] == "L" {
-			handleLocation()
+			handleLocation(data)
 		} else if data[:1] == "W" {
-			handleWater()
+			handleWater(data)
 		} else {
 			log.Println("Unexpected data format read from serial port, skipping")
 		}

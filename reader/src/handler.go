@@ -3,15 +3,16 @@ package main
 func handleEnvironment(data string) {
 	formatted := formatEnvironmentData(data)
 	uploadLiveData(formatted)
-	checkTweetValidity(formatted)
+	checkEnvironmentTweet(formatted)
 }
 
 func handleLocation(data string) {
 	formatted := formatLocationData(data)
-	checkTweetValidity(formatted)
+	uploadLocationData(formatted)
+	checkLocationTweet(formatted)
 }
 
 func handleWater(data string) {
 	formatted := formatWaterData(data)
-	checkTweetValidity(formatted)
+	checkWaterTweet(formatted)
 }
