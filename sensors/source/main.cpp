@@ -2,7 +2,7 @@
 #include "time.h"
 
 MicroBit uBit;
-int zoneId = -2;
+int zoneId = 0;
 int signalStrength = -128;
 char currentLocation = '0';
 int userLocationLastUpdateTime = 0;
@@ -80,17 +80,17 @@ int water = getWaterLevel();
 
 void printzoneId() {
   if(on == 0){
-    uBit.display.setBrightness(55);
+    uBit.display.setBrightness(25);
   } else if (on == 1){
     uBit.display.setBrightness(255);
   }
-  if (zoneId > 0) {
-      uBit.display.print(zoneId);
+  if (zoneId > 2) {
+      uBit.display.print(zoneId-2);
   }
-  else if (zoneId == 0) {
+  else if (zoneId == 2) {
     uBit.display.printAsync("R");
   }
-  else if (zoneId == -1){
+  else if (zoneId == 1){
     uBit.display.printAsync("U");
   }
   else {
@@ -99,18 +99,15 @@ void printzoneId() {
 }
 
 void onButtonEvent(MicroBitEvent e) {
-  int maxZones = 3;
-  if (e.source == MICROBIT_ID_BUTTON_A && zoneId > -2) {
+  int maxZones = 5;
+  if (e.source == MICROBIT_ID_BUTTON_A && zoneId > 0) {
     zoneId--;
-    //on = 0;
   }
   else if (e.source == MICROBIT_ID_BUTTON_B && zoneId < maxZones) {
     zoneId++;
-    //on = 0;
   }
   else if (e.source == MICROBIT_ID_BUTTON_AB) {
     if(on == 0){
-      on = 1;
       on = 1;
     } else if (on == 1){
       on = 0;
@@ -119,20 +116,7 @@ void onButtonEvent(MicroBitEvent e) {
   printzoneId();
 }
 
-void sendMessage(int t, int m, int l, int w) {
-  ManagedString zone(zoneId);
-  ManagedString temp(t);
-  ManagedString moist(m);
-  ManagedString light(l);
-  ManagedString water(w);
-  ManagedString space(" ");
-
-  ManagedString msg = zone + space
-    + temp + space
-    + moist + space
-    + light + space
-    + water;
-
+void sendMessage(ManagedString msg) {
   uBit.radio.datagram.send(msg);
   uBit.serial.printf("S%s\r\n", msg.toCharArray());
 }
@@ -143,7 +127,7 @@ void receiveMessage(MicroBitEvent) {
 
   // Receiver
   if(on == 1){
-    if (zoneId == 0) {
+    if (zoneId == 2) {
       // Change zone each time it changes
       if (msg[0] == 'U') {
         currentLocation = msg[1];
@@ -159,7 +143,7 @@ void receiveMessage(MicroBitEvent) {
     }
 
   //User
-    if(msg[0] != 'U' && zoneId == -1) {
+    if(msg[0] != 'U' && zoneId == 1) {
       if (msg[0] == currentLocation) {
         signalStrength = uBit.radio.getRSSI();
       }
@@ -191,13 +175,17 @@ int main() {
   while(true) {
     if (on==1){
       // Senders
-      if (zoneId > 0) {
+      if (zoneId-2 > 0) {
         temperature = getTemperature();
         moisture = getMoistureLevel();
         light = getLightLevel();
         water = getWaterLevel();
 
-        sendMessage(temperature, moisture, light, water);
+        sendMessage(ManagedString(ManagedString(zoneId-2) + ManagedString(' ') +
+                                  ManagedString(temperature) + ManagedString(' ') +
+                                  ManagedString(moisture) + ManagedString(' ') +
+                                  ManagedString(light) + ManagedString(' ') +
+                                  ManagedString(water)));
       }
     }
     currentTime = currentTime + 1;
