@@ -210,3 +210,19 @@ func postTweet(writer http.ResponseWriter, request *http.Request) {
 	}
 	res.Body.Close()
 }
+
+func getTweets(writer http.ResponseWriter, request *http.Request) {
+	config := oauth1.NewConfig("MThFJvVlV5zgpM52v0v9WriM6", "gv4ypIp5G5QaxsGVAXNVxJSRrwb5ednzumk3fWD2917fO9B5WM")
+	token := oauth1.NewToken("1196375364907470848-3VNKCnMblHl306D20PW3jJTwq6ZXOn", "Tm0hFLXmusLKCXwnlJi4w7QTIQdzNTKeehEi5wBaI7pDV")
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
+
+	list, res, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{UserID: 1196375364907470848})
+	if err != nil {
+		log.Println(err)
+	}
+	res.Body.Close()
+
+	printRequest(request)
+	sendResponse(list, writer)
+}
