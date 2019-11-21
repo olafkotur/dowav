@@ -150,21 +150,51 @@ func formatHistoricData(avg []float64, min, max []int, startTime, endTime, zone 
 	return res
 }
 
-func formatLiveData(d string) (r []byte) {
+func formatEnvironmentData(d string) (r []byte) {
 	zone := toInt(d[1:2])
 	split := strings.Split(d, " ")
 	t := toInt(split[1])
 	m := toInt(split[2])
-	l := toInt(split[3])
-	lc := toInt(strings.Replace(split[4], "\r\n", "", 1))
+	l := toInt(strings.Replace(split[3], "\r\n", "", 1))
 
 	now := time.Now().Unix()
-	data := Readings{
+	data := Environment{
 		zone,
 		Data{now, t},
 		Data{now, m},
 		Data{now, l},
-		Data{now, lc},
+	}
+	res, _ := json.Marshal(data)
+	return res
+}
+
+func formatLocationData(d string) (r []byte) {
+	userId := toInt(d[1:2])
+	split := strings.Split(d, " ")
+	zone := toInt(strings.Replace(split[1], "\r\n", "", 1))
+
+	data := Location{
+		userId,
+		zone,
+	}
+	res, _ := json.Marshal(data)
+	return res
+}
+
+func formatWaterData(d string) (r []byte) {
+	zone := toInt(d[1:2])
+	split := strings.Split(d, " ")
+	x := toInt(split[1])
+	y := toInt(split[2])
+	z := toInt(split[3])
+	depth := toInt(strings.Replace(split[4], "\r\n", "", 1))
+
+	data := Water{
+		zone,
+		x,
+		y,
+		z,
+		depth,
 	}
 	res, _ := json.Marshal(data)
 	return res
@@ -183,7 +213,7 @@ func splitByZone(data []string) (z [3][]string) {
 
 // Uploads the live data via the rest api
 func uploadLiveData(data []byte) {
-	obj := Readings{}
+	obj := Environment{}
 	_ = json.Unmarshal(data, &obj)
 
 	// Post live sensor data
@@ -201,14 +231,14 @@ func uploadLiveData(data []byte) {
 }
 
 func uploadLocationData(data []byte) {
-	obj := Readings{}
+	obj := Location{}
 	_ = json.Unmarshal(data, &obj)
 
 	// Add data to location accuracy array
 	if len(locationAccuracy) >= 4 {
 		_, locationAccuracy = locationAccuracy[0], locationAccuracy[1:]
 	}
-	locationAccuracy = append(locationAccuracy, obj.Location.Value)
+	locationAccuracy = append(locationAccuracy, obj.Zone)
 
 	// Check if location is accurate enough to update
 	isAccurate := true
@@ -220,13 +250,13 @@ func uploadLocationData(data []byte) {
 	}
 
 	// Upload only if the data is accurate and there is a change
-	if (isAccurate) && obj.Location.Value != previousLocation {
-		previousLocation = obj.Location.Value
+	if (isAccurate) && obj.Zone != previousLocation {
+		previousLocation = obj.Zone
 		fmt.Println("Change in zone detected, updating location in database")
 
 		values := url.Values{
-			"time": {toString(int(obj.Location.Time))},
-			"zone": {toString(obj.Location.Value)},
+			"time": {toString(int(obj.Zone))},
+			"zone": {toString(obj.Zone)},
 		}
 		res, err := http.PostForm("http://dowav-api.herokuapp.com/api/location/upload", values)
 		if err != nil {

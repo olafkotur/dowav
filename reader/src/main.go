@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/tarm/serial"
@@ -45,19 +44,22 @@ func startReadingSerial(name, baud string) {
 	for {
 		data := listenToPort(sp)
 
-		if len(data) <= 0 || data[:1] != "R" {
+		if len(data) <= 0 {
 			log.Println("Unexpected data format read from serial port, skipping")
 			continue
 		}
 
-		readedSlice := strings.Fields(data)
-		insertData(readedSlice[0], toInt(readedSlice[1]), toInt(readedSlice[2]), toInt(readedSlice[3]), toInt(readedSlice[4]))
-		logRawData(data, path)
-
-		formatted := formatLiveData(data)
-		uploadLiveData(formatted)
-		uploadLocationData(formatted)
-		checkTweetValidity(formatted)
+		// Check which handler should be used
+		if data[:1] == "R" {
+			logRawData(data, path)
+			handleEnvironment(data, path)
+		} else if data[:1] == "L" {
+			handleLocation()
+		} else if data[:1] == "W" {
+			handleWater()
+		} else {
+			log.Println("Unexpected data format read from serial port, skipping")
+		}
 	}
 }
 

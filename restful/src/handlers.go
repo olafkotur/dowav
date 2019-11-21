@@ -194,6 +194,7 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 }
 
 func postTweet(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
 	msg := request.Form.Get("message")
 	if msg == "" {
 		return
@@ -209,6 +210,9 @@ func postTweet(writer http.ResponseWriter, request *http.Request) {
 		log.Println(err)
 	}
 	res.Body.Close()
+
+	printRequest(request)
+	sendResponse(res, writer)
 }
 
 func getTweets(writer http.ResponseWriter, request *http.Request) {
