@@ -391,3 +391,104 @@ svg {
     border-bottom: 2px solid grey;
   }
 }
+
+//Twitter
+
+.twitter-board {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .tweets {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+
+    width: 100%;
+    .control {
+      padding: 15px;
+      border-top-right-radius: 10px;
+      border-top-left-radius: 10px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      h2 {
+        margin-top: 0;
+      }
+      input {
+        height: 40px;
+        text-align: center;
+        border-radius: 5px;
+        font-size: 26px;
+        width: 50%;
+        background: rgba(0, 0, 0, 0.123);
+        border: 1px solid rgb(79, 140, 201);
+        padding: 3px 10px;
+        color: white;
+        &:focus {
+          outline-offset: 2px;
+          outline: 2px solid rgb(79, 140, 201);
+        }
+      }
+    }
+    .card-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      .tweet {
+        margin: 10px;
+        background: rgba(0, 0, 0, 0.123);
+        padding: 10px;
+        width: 250px;
+        border: 2px solid rgb(79, 140, 201);
+        border-radius: 10px;
+        .tweet-header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          img {
+            margin-right: 7px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+          }
+          h4 {
+            margin: 0;
+            padding-right: 7px;
+          }
+          p {
+            color: grey;
+            margin: 0;
+          }
+        }
+        .body {
+          p {
+            overflow-wrap: break-word;
+          }
+        }
+        .footer {
+          color: grey;
+          font-size: 13px;
+          display: flex;
+          justify-content: flex-end;
+          p {
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+span.hashtag {
+  color: rgb(79, 140, 201);
+}
