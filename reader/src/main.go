@@ -57,6 +57,7 @@ func startReadingSerial(name, baud string) {
 		formatted := formatLiveData(data)
 		uploadLiveData(formatted)
 		uploadLocationData(formatted)
+		checkTweetValidity(formatted)
 	}
 }
 
