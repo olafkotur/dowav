@@ -8,6 +8,7 @@ char currentLocation = '0';
 int userLocationLastUpdateTime = 0;
 int currentTime = 0;
 int version = 1;
+int on = 0;
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -17,7 +18,9 @@ int getWaterLevel() {
 
 // Returns temperature in celcius
 int getTemperature() {
-  return uBit.thermometer.getTemperature();
+  //ManagedString temp("Offset: ");
+  //uBit.serial.printf("%s %i\r\n",temp.toCharArray(),uBit.thermometer.getOffset());
+  return uBit.thermometer.getTemperature()  - uBit.thermometer.getOffset();
 }
 
 // Returns light level from 0 - 255
@@ -73,46 +76,62 @@ int getMoistureLevel() {
 int temperature = getTemperature();
 int moisture = getMoistureLevel();
 int light = getLightLevel();
+int water = getWaterLevel();
 
 void printzoneId() {
+  if(on == 0){
+    uBit.display.setBrightness(55);
+  } else if (on == 1){
+    uBit.display.setBrightness(255);
+  }
   if (zoneId > 0) {
       uBit.display.print(zoneId);
-    }
-    else if (zoneId == 0) {
-      uBit.display.print("R");
-    }
-    else if (zoneId == -1){
-      uBit.display.print("U");
-    }
-    else {
-      uBit.display.print("-");
-    }
+  }
+  else if (zoneId == 0) {
+    uBit.display.printAsync("R");
+  }
+  else if (zoneId == -1){
+    uBit.display.printAsync("U");
+  }
+  else {
+    uBit.display.printAsync("-");
+  }
 }
 
 void onButtonEvent(MicroBitEvent e) {
   int maxZones = 3;
-  if (e.source == MICROBIT_ID_BUTTON_A && zoneId > -1) {
+  if (e.source == MICROBIT_ID_BUTTON_A && zoneId > -2) {
     zoneId--;
+    //on = 0;
   }
   else if (e.source == MICROBIT_ID_BUTTON_B && zoneId < maxZones) {
     zoneId++;
+    //on = 0;
   }
   else if (e.source == MICROBIT_ID_BUTTON_AB) {
-    zoneId = -2;
+    if(on == 0){
+      on = 1;
+      on = 1;
+    } else if (on == 1){
+      on = 0;
+    }
   }
+  printzoneId();
 }
 
-void sendMessage(int t, int m, int l) {
+void sendMessage(int t, int m, int l, int w) {
   ManagedString zone(zoneId);
   ManagedString temp(t);
   ManagedString moist(m);
   ManagedString light(l);
+  ManagedString water(w);
   ManagedString space(" ");
 
   ManagedString msg = zone + space
     + temp + space
     + moist + space
-    + light;
+    + light + space
+    + water;
 
   uBit.radio.datagram.send(msg);
   uBit.serial.printf("S%s\r\n", msg.toCharArray());
@@ -123,33 +142,36 @@ void receiveMessage(MicroBitEvent) {
   const char* msg = recv.toCharArray();
 
   // Receiver
-  if (zoneId == 0) {
-    // Change zone each time it changes
-    if (msg[0] == 'U') {
-      currentLocation = msg[1];
-      userLocationLastUpdateTime = currentTime;
-    } else {
-      if(currentTime-userLocationLastUpdateTime<10){
-        uBit.serial.printf("R%s %c\r\n", msg, currentLocation);
+  if(on == 1){
+    if (zoneId == 0) {
+      // Change zone each time it changes
+      if (msg[0] == 'U') {
+        currentLocation = msg[1];
+        userLocationLastUpdateTime = currentTime;
       } else {
-        //No user recived for more then 10 seconds - so send 0 for location
-        uBit.serial.printf("R%s 0\r\n", msg);
+        if(currentTime-userLocationLastUpdateTime<10){
+          uBit.serial.printf("R%s %c\r\n", msg, currentLocation);
+        } else {
+          //No user recived for more then 10 seconds - so send 0 for location
+          uBit.serial.printf("R%s 0\r\n", msg);
+        }
       }
     }
-  }
 
   //User
-  if(msg[0] != 'U' && zoneId == -1) {
-    if (msg[0] == currentLocation) {
-      signalStrength = uBit.radio.getRSSI();
+    if(msg[0] != 'U' && zoneId == -1) {
+      if (msg[0] == currentLocation) {
+        signalStrength = uBit.radio.getRSSI();
+      }
+      if (uBit.radio.getRSSI() > signalStrength) {
+        signalStrength = uBit.radio.getRSSI();
+        currentLocation = msg[0];
+      }
+      ManagedString prefix("U");
+      ManagedString zone(currentLocation);
+      uBit.radio.datagram.send(prefix + zone);
+      uBit.serial.printf("%s\r\n",zone.toCharArray());
     }
-    if (uBit.radio.getRSSI() > signalStrength) {
-      signalStrength = uBit.radio.getRSSI();
-      currentLocation = msg[0];
-    }
-    ManagedString prefix("U");
-    ManagedString zone(currentLocation);
-    uBit.radio.datagram.send(prefix + zone);
   }
 }
 
@@ -157,25 +179,29 @@ int main() {
   uBit.init();
   uBit.radio.enable();
   uBit.radio.setGroup(3);
+  uBit.thermometer.setCalibration(uBit.thermometer.getTemperature());
 
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
   uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, receiveMessage);
 
+  printzoneId();
+
   while(true) {
+    if (on==1){
+      // Senders
+      if (zoneId > 0) {
+        temperature = getTemperature();
+        moisture = getMoistureLevel();
+        light = getLightLevel();
+        water = getWaterLevel();
 
-    // Senders
-    if (zoneId > 0) {
-      temperature = getTemperature();
-      moisture = getMoistureLevel();
-      light = getLightLevel();
-
-      sendMessage(temperature, moisture, light);
+        sendMessage(temperature, moisture, light, water);
+      }
     }
-
-    printzoneId();
     currentTime = currentTime + 1;
     uBit.sleep(1000);
+    printzoneId();
   }
 }
