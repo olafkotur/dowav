@@ -64,7 +64,6 @@ export default function useFetch(options: Options): UseFetchState {
           }${generateQueryString(options.query.params)}`
         );
         const json = await response.json();
-        console.log(json);
         clearTimeout(id);
         if (json === null) reject(fetchErrorMessages.noData);
         if (options.useCache) {

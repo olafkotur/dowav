@@ -14,7 +14,6 @@ const TwitterBoard: React.FC = () => {
     refetch: 0
   });
   const [filter, setFilter] = useState<Function | null>(null);
-  console.log(filter);
   return (
     <div className="twitter-board">
       {loading ? (
