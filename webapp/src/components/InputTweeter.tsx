@@ -8,31 +8,32 @@ function throtleOnChange() {
     setFilter: React.Dispatch<React.SetStateAction<Function | null>>
   ) => {
     const now = Date.now();
-    if (now - time > 800) {
-      time = now;
-      clearTimeout(id);
+
+    function createFilterFunc() {
       const val = e.target.value;
       const arr = val
         .split(" ")
         .filter((d: string) => d.charAt(0) === "#")
-        .map(d => d.slice(1));
-      setFilter((prev: any) => (d: any) => {
-        return d.entities.hashtags.some((e: any) => arr.includes(e.text));
+        .map(str => str.slice(1));
+      setFilter((prev: any) => (tweet: any) => {
+        return tweet.entities.hashtags.some((tag: any) => {
+          let regex = arr.map(str => new RegExp(str, "g"));
+          return regex.some(reg => (tag.text as string).match(reg));
+        });
       });
+    }
+
+    if (now - time > 500) {
+      time = now;
+      clearTimeout(id);
+      createFilterFunc();
     } else {
       e.persist();
       clearTimeout(id);
       id = setTimeout(() => {
         time = Date.now();
-        const val = e.target.value;
-        const arr = val
-          .split(" ")
-          .filter((d: string) => d.charAt(0) === "#")
-          .map(d => d.slice(1));
-        setFilter((prev: any) => (d: any) => {
-          return d.entities.hashtags.some((e: any) => arr.includes(e.text));
-        });
-      }, 800);
+        createFilterFunc();
+      }, 500);
     }
   };
 }
@@ -49,8 +50,13 @@ const InputTwitter: React.FC<InputTwitterProps> = ({ setFilter }) => {
       placeholder="Ask a question or filter using #"
       value={value}
       onChange={e => {
-        setValue(e.target.value);
-        onChange(e, setFilter);
+        const val = e.target.value;
+        setValue(val);
+        if (val === "") {
+          setFilter(null);
+        } else {
+          onChange(e, setFilter);
+        }
       }}
     />
   );
