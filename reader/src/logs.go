@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func createLogFile() (path string, f *os.File) {
+func createLogFile() (path string) {
 	t := time.Now().Unix()
 	logPath := "../logs/log-" + strconv.FormatInt(t, 10) + ".txt"
 
@@ -20,11 +20,11 @@ func createLogFile() (path string, f *os.File) {
 	}
 	log.Printf("New log file created in %s\n\n", logPath)
 
-	defer file.Close()
-	return logPath, file
+	file.Close()
+	return logPath
 }
 
-func logRawData(data, path string, file *os.File) {
+func logRawData(data, path string) {
 	existingData, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println(err)
@@ -43,7 +43,7 @@ func logRawData(data, path string, file *os.File) {
 func getLatestLog() (p string) {
 	files, err := ioutil.ReadDir("../logs/")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	path := ""
@@ -70,7 +70,7 @@ func getLatestLog() (p string) {
 func getDataAsString(path string) (d string) {
 	data, err := ioutil.ReadFile("../logs/" + path)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	return string(data)
 }

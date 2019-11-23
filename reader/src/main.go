@@ -40,22 +40,26 @@ func startReadingSerial(name, baud string) {
 	}
 	log.Printf("Success - listening to %s\n\n", name)
 
-	path, file := createLogFile()
+	path := createLogFile()
 	for {
 		data := listenToPort(sp)
-		if data[:1] != "R" {
+
+		if len(data) <= 0 {
 			log.Println("Unexpected data format read from serial port, skipping")
 			continue
 		}
 
-		// TODO: Enable database
-		// readedSlice := strings.Fields(data)
-		// insertData(readedSlice[0], toInt(readedSlice[1]), toInt(readedSlice[2]), toInt(readedSlice[3]), toInt(readedSlice[4]))
-		logRawData(data, path, file)
-
-		formatted := formatLiveData(data)
-		uploadLiveData(formatted)
-		uploadLocationData(formatted)
+		// Check which handler should be used
+		if data[:1] == "R" {
+			logRawData(data, path)
+			handleEnvironment(data)
+		} else if data[:1] == "L" {
+			handleLocation(data)
+		} else if data[:1] == "W" {
+			handleWater(data)
+		} else {
+			log.Println("Unexpected data format read from serial port, skipping")
+		}
 	}
 }
 
@@ -79,4 +83,9 @@ func toInt(s string) (i int) {
 
 func toString(i int) (s string) {
 	return strconv.Itoa(i)
+}
+
+func toFloat(s string) (f float64) {
+	res, _ := strconv.ParseFloat(s, 64)
+	return res
 }

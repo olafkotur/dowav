@@ -12,3 +12,9 @@ func TestToString(t *testing.T) {
 		t.Error("Expected int conversion of 42 to string to be '42'")
 	}
 }
+
+func TestToFloat(t *testing.T) {
+	if toFloat("42.6") != 42.6 {
+		t.Error("Expected string conversion of 42.6 to float to be '42.6'")
+	}
+}

@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
 )
 
 // TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
@@ -14,9 +18,9 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	zone := toInt(request.Form.Get("zone"))
 	startTime := toFloat(request.Form.Get("startTime"))
 	endTime := toFloat(request.Form.Get("endTime"))
-	temperature := toInt(request.Form.Get("temperature"))
-	moisture := toInt(request.Form.Get("moisture"))
-	light := toInt(request.Form.Get("light"))
+	temperature := toFloat(request.Form.Get("temperature"))
+	moisture := toFloat(request.Form.Get("moisture"))
+	light := toFloat(request.Form.Get("light"))
 
 	if zone <= 0 {
 		// TODO: Should send bad response
@@ -60,7 +64,7 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		var endTime float64
-		var sensorData int
+		var sensorData float64
 
 		// Populate response from the db
 		for rows.Next() {
@@ -108,7 +112,7 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	for i := 0; i < 3; i++ {
 		// Get data from db
 		var time float64
-		var sensorValue int
+		var sensorValue float64
 		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zone == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
 		if err != nil {
 			panic(err)
@@ -134,7 +138,7 @@ func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
 	time := toFloat(request.Form.Get("time"))
 	zone := toInt(request.Form.Get("zone"))
 
-	if zone <= 0 {
+	if zone < 0 {
 		// TODO: Should send bad response
 		return
 	}
@@ -156,7 +160,7 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 
 	var res interface{}
 	var now float64
-	var location int
+	var location float64
 
 	// Fetch and return live data
 	if dataType == "live" {
@@ -187,4 +191,42 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 
 	sendResponse(res, writer)
 	printRequest(request)
+}
+
+func postTweet(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
+	msg := request.Form.Get("message")
+	if msg == "" {
+		return
+	}
+
+	config := oauth1.NewConfig("MThFJvVlV5zgpM52v0v9WriM6", "gv4ypIp5G5QaxsGVAXNVxJSRrwb5ednzumk3fWD2917fO9B5WM")
+	token := oauth1.NewToken("1196375364907470848-3VNKCnMblHl306D20PW3jJTwq6ZXOn", "Tm0hFLXmusLKCXwnlJi4w7QTIQdzNTKeehEi5wBaI7pDV")
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
+
+	_, res, err := client.Statuses.Update(msg, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	res.Body.Close()
+
+	printRequest(request)
+	sendResponse(res, writer)
+}
+
+func getTweets(writer http.ResponseWriter, request *http.Request) {
+	config := oauth1.NewConfig("MThFJvVlV5zgpM52v0v9WriM6", "gv4ypIp5G5QaxsGVAXNVxJSRrwb5ednzumk3fWD2917fO9B5WM")
+	token := oauth1.NewToken("1196375364907470848-3VNKCnMblHl306D20PW3jJTwq6ZXOn", "Tm0hFLXmusLKCXwnlJi4w7QTIQdzNTKeehEi5wBaI7pDV")
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
+
+	list, res, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{UserID: 1196375364907470848})
+	if err != nil {
+		log.Println(err)
+	}
+	res.Body.Close()
+
+	printRequest(request)
+	sendResponse(list, writer)
 }

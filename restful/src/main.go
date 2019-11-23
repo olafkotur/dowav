@@ -23,7 +23,7 @@ func main() {
 	database, _ = sql.Open("sqlite3", "./database.db")
 
 	// Create historic table in database
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL, endTime REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL, endTime REAL, temperature REAL, moisture REAL, light REAL)")
 	_, err := statement.Exec()
 	if err != nil {
 		panic(err)
@@ -51,6 +51,8 @@ func main() {
 	router.HandleFunc("/api/live/{sensor}", getLiveData).Methods("GET")
 	router.HandleFunc("/api/location/upload", uploadLocationData).Methods("POST")
 	router.HandleFunc("/api/location/{type}", getLocationData).Methods("GET")
+	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
+	router.HandleFunc("/api/tweets", getTweets).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

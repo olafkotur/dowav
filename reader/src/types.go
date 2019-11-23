@@ -5,18 +5,30 @@ type Data struct {
 	Value int   `json:"value"`
 }
 
-type Readings struct {
+type Environment struct {
 	Zone        int  `json:"zone"`
 	Temperature Data `json:"temp"`
 	Moisture    Data `json:"moisture"`
 	Light       Data `json:"light"`
-	Location    Data `json:"location"`
+}
+
+type Location struct {
+	UserId int `json:"userId"`
+	Zone   int `json:"zone"`
+}
+
+type Water struct {
+	Zone           int `json:"zone"`
+	AccelerometerX int `json:"accelerometerX"`
+	AccelerometerY int `json:"accelerometerY"`
+	AccelerometerZ int `json:"accelerometerZ"`
+	Depth          int `json:"depth"`
 }
 
 type Calculations struct {
-	Average int `json:"average"`
-	Minimum int `json:"minimum"`
-	Maximum int `json:"maximum"`
+	Average float64 `json:"average"`
+	Minimum int     `json:"minimum"`
+	Maximum int     `json:"maximum"`
 }
 
 type HistoricData struct {
