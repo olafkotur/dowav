@@ -409,7 +409,7 @@ svg {
     flex-direction: column;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
-
+    height: 100%;
     width: 100%;
     .control {
       padding: 15px;
@@ -468,6 +468,11 @@ svg {
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
+      overflow-y: auto;
+      scrollbar-width: none;
+      &::-webkit-scrollbar {
+        width: 0 !important;
+      }
       .tweet {
         margin: 10px;
         background: rgba(0, 0, 0, 0.123);
@@ -496,6 +501,7 @@ svg {
         }
         .body {
           p {
+            white-space: pre-wrap;
             overflow-wrap: break-word;
           }
         }

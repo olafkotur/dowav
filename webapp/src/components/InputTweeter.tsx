@@ -31,7 +31,6 @@ function throtleOnChange() {
       e.persist();
       clearTimeout(id);
       id = setTimeout(() => {
-        console.log("HELLLo");
         time = Date.now();
         createFilterFunc();
       }, 300);
@@ -41,9 +40,13 @@ function throtleOnChange() {
 
 type InputTwitterProps = {
   setFilter: React.Dispatch<React.SetStateAction<Function | null>>;
+  setCounter: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const InputTwitter: React.FC<InputTwitterProps> = ({ setFilter }) => {
+const InputTwitter: React.FC<InputTwitterProps> = ({
+  setFilter,
+  setCounter
+}) => {
   const [value, setValue] = useState("");
   const [send, setSend] = useState(false);
   const onChange = useCallback(throtleOnChange(), []);
@@ -62,12 +65,28 @@ const InputTwitter: React.FC<InputTwitterProps> = ({ setFilter }) => {
             setSend(true);
           } else {
             if (send) setSend(false);
-
             setTimeout(() => setFilter(null), 300);
           }
         }}
       />
-      <button className="question-send" disabled={!send}>
+      <button
+        className="question-send"
+        disabled={!send}
+        onClick={async () => {
+          const data = new URLSearchParams();
+          data.append("message", value);
+          let response = await fetch(
+            "http://localhost:8080/api/tweet/question",
+            {
+              method: "POST",
+              body: data
+            }
+          );
+          if (response.status === 200) {
+            setCounter(prev => prev + 1);
+          }
+        }}
+      >
         Ask
       </button>
     </div>

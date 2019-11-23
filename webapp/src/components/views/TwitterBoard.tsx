@@ -6,12 +6,13 @@ import InputTwitter from "../InputTweeter";
 import Tweet from "../Tweet";
 
 const TwitterBoard: React.FC = () => {
+  const [counter, setCounter] = useState(0);
   const { data, loading, error } = useFetch({
     query: {
       endpoint: "/api/tweets"
     },
     useCache: false,
-    refetch: 0
+    refetch: counter
   });
   const [filter, setFilter] = useState<Function | null>(null);
   const filterData = filter
@@ -27,7 +28,7 @@ const TwitterBoard: React.FC = () => {
         <div className="tweets">
           <div className="control">
             <h2>Tweets</h2>
-            <InputTwitter setFilter={setFilter} />
+            <InputTwitter setFilter={setFilter} setCounter={setCounter} />
             {filterData ? (
               <p className="stats">{`${filterData.length} out of ${data.length} shown.`}</p>
             ) : null}
