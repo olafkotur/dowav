@@ -7,6 +7,7 @@ $gradient-end: #0f2027;
 $temperature: #ff7521;
 $moisture: #0c8eeb;
 $light: #d1d1d1;
+$niceBlue: rgb(79, 140, 201);
 
 * {
   box-sizing: border-box;
@@ -422,20 +423,43 @@ svg {
       h2 {
         margin-top: 0;
       }
-      input {
-        height: 40px;
-        text-align: center;
-        border-radius: 5px;
-        font-size: 26px;
-        width: 50%;
-        background: rgba(0, 0, 0, 0.123);
-        border: 1px solid rgb(79, 140, 201);
-        padding: 3px 10px;
-        color: white;
-        &:focus {
-          outline-offset: 2px;
-          outline: 2px solid rgb(79, 140, 201);
+      .input-bar {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        input {
+          height: 40px;
+          text-align: center;
+          border-top-left-radius: 5px;
+          border-bottom-left-radius: 5px;
+          font-size: 26px;
+          width: 50%;
+          background: rgba(0, 0, 0, 0.123);
+          border: 1px solid rgb(79, 140, 201);
+          padding: 3px 10px;
+          color: white;
+          &:focus {
+            outline: 2px solid $niceBlue;
+          }
         }
+        button {
+          padding: 0 15px;
+          background: $niceBlue;
+          border: 1px solid $niceBlue;
+          border-top-right-radius: 5px;
+          border-bottom-right-radius: 5px;
+          color: white;
+          font-size: 1.5em;
+          &:disabled {
+            background: darkgrey;
+            color: lightgrey;
+          }
+        }
+      }
+      .stats {
+        color: grey;
+        margin: 0;
+        margin-top: 5px;
       }
     }
     .card-list {

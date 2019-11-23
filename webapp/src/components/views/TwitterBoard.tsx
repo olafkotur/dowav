@@ -14,6 +14,11 @@ const TwitterBoard: React.FC = () => {
     refetch: 0
   });
   const [filter, setFilter] = useState<Function | null>(null);
+  const filterData = filter
+    ? data.filter(filter).map((d: any) => {
+        return <Tweet data={d} />;
+      })
+    : null;
   return (
     <div className="twitter-board">
       {loading ? (
@@ -23,12 +28,13 @@ const TwitterBoard: React.FC = () => {
           <div className="control">
             <h2>Tweets</h2>
             <InputTwitter setFilter={setFilter} />
+            {filterData ? (
+              <p className="stats">{`${filterData.length} out of ${data.length} shown.`}</p>
+            ) : null}
           </div>
           <div className="card-list">
-            {filter
-              ? data.filter(filter).map((d: any) => {
-                  return <Tweet data={d} />;
-                })
+            {filterData
+              ? filterData
               : data.map((d: any) => {
                   return <Tweet data={d} />;
                 })}

@@ -23,7 +23,7 @@ function throtleOnChange() {
       });
     }
 
-    if (now - time > 500) {
+    if (now - time > 300) {
       time = now;
       clearTimeout(id);
       createFilterFunc();
@@ -31,9 +31,10 @@ function throtleOnChange() {
       e.persist();
       clearTimeout(id);
       id = setTimeout(() => {
+        console.log("HELLLo");
         time = Date.now();
         createFilterFunc();
-      }, 500);
+      }, 300);
     }
   };
 }
@@ -44,21 +45,32 @@ type InputTwitterProps = {
 
 const InputTwitter: React.FC<InputTwitterProps> = ({ setFilter }) => {
   const [value, setValue] = useState("");
+  const [send, setSend] = useState(false);
   const onChange = useCallback(throtleOnChange(), []);
   return (
-    <input
-      placeholder="Ask a question or filter using #"
-      value={value}
-      onChange={e => {
-        const val = e.target.value;
-        setValue(val);
-        if (val === "") {
-          setFilter(null);
-        } else {
-          onChange(e, setFilter);
-        }
-      }}
-    />
+    <div className="input-bar">
+      <input
+        placeholder="Ask a question or filter using #"
+        value={value}
+        onChange={e => {
+          const val = e.target.value;
+          setValue(val);
+          if (val.includes("#")) {
+            onChange(e, setFilter);
+            if (send) setSend(false);
+          } else if (val.charAt(val.length - 1) === "?") {
+            setSend(true);
+          } else {
+            if (send) setSend(false);
+
+            setTimeout(() => setFilter(null), 300);
+          }
+        }}
+      />
+      <button className="question-send" disabled={!send}>
+        Ask
+      </button>
+    </div>
   );
 };
 
