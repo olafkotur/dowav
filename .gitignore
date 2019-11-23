@@ -5,6 +5,8 @@ webapp/node_modules
 server/main
 server/logs/*
 reader/logs/*
+restful/pkg
+server/pkg
 
 .vscode/
 *.DS_Store

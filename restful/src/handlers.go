@@ -194,6 +194,7 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 }
 
 func postTweet(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
 	msg := request.Form.Get("message")
 	if msg == "" {
 		return
@@ -209,6 +210,9 @@ func postTweet(writer http.ResponseWriter, request *http.Request) {
 		log.Println(err)
 	}
 	res.Body.Close()
+
+	printRequest(request)
+	sendResponse(res, writer)
 }
 
 func getTweets(writer http.ResponseWriter, request *http.Request) {
@@ -225,4 +229,31 @@ func getTweets(writer http.ResponseWriter, request *http.Request) {
 
 	printRequest(request)
 	sendResponse(list, writer)
+}
+
+func postQuestionTweet(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
+	msg := request.Form.Get("message")
+	if msg == "" {
+		http.Error(writer, "Please provide message", http.StatusBadRequest)
+		return
+	}
+
+	result, err, code := getMessageTweet(msg)
+	if err != nil {
+		http.Error(writer, err.Error(), code)
+		return
+	}
+
+	config := oauth1.NewConfig("MThFJvVlV5zgpM52v0v9WriM6", "gv4ypIp5G5QaxsGVAXNVxJSRrwb5ednzumk3fWD2917fO9B5WM")
+	token := oauth1.NewToken("1196375364907470848-3VNKCnMblHl306D20PW3jJTwq6ZXOn", "Tm0hFLXmusLKCXwnlJi4w7QTIQdzNTKeehEi5wBaI7pDV")
+	httpClient := config.Client(oauth1.NoContext, token)
+	client := twitter.NewClient(httpClient)
+
+	_, res, err := client.Statuses.Update(result, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	res.Body.Close()
+	writer.Write([]byte("Success"))
 }

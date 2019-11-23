@@ -53,6 +53,7 @@ func main() {
 	router.HandleFunc("/api/location/{type}", getLocationData).Methods("GET")
 	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
 	router.HandleFunc("/api/tweets", getTweets).Methods("GET")
+	router.HandleFunc("/api/tweet/question", postQuestionTweet).Methods("POST")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

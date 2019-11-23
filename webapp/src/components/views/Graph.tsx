@@ -156,7 +156,18 @@ const Graph: React.FC<GraphProps> = ({
               }
             });
             let k = se / 5;
-            if (data.length > k * 2) setTimePeriod(d);
+            if (data instanceof Array) {
+              if (data.length > k * 2) setTimePeriod(d);
+            } else if (typeof data === "object") {
+              let keys = Object.keys(data);
+              if (
+                keys.every(i => {
+                  return data[i].length > k * 2;
+                })
+              ) {
+                setTimePeriod(d);
+              }
+            }
           }}
           conf={{ ...conf, timePeriod: timePeriod }}
         />

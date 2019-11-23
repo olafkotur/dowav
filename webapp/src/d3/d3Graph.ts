@@ -112,7 +112,6 @@ export default class D3Graph {
         );
       }
     }
-    console.log(this.viewport);
     this.title = this.svg
       .append("text")
       .text(this.conf.title || "")
@@ -577,7 +576,6 @@ export default class D3Graph {
       .attr("width", this.viewport.width)
       .attr("height", this.viewport.height);
     if (this.liveData.length !== 0) {
-      console.log(this.liveData);
       this.getXScale(this.liveData);
       this.getYScale(this.liveData);
       this.plotLive();

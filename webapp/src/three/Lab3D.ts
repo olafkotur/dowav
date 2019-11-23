@@ -60,6 +60,7 @@ export default class Lab3D {
         this.labModelLoaded = true;
         this.scene.add(gltf.scene);
         this.controls.update();
+        this.scene.add(this.cube);
       },
       xhr => {
         console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
@@ -140,16 +141,18 @@ export default class Lab3D {
       this.locationData = data;
       this.highlightZone();
     } else {
-      this.scene.remove(this.cube);
+      this.cube.position.set(-14, 10, -10000);
     }
   };
 
   private animate = () => {
     requestAnimationFrame(this.animate);
-    if (this.labModelLoaded) {
-      this.scene.remove(this.cube);
-      this.scene.add(this.cube);
-    }
+    // if (this.labModelLoaded) {
+    //   this.scene.remove(this.cube);
+    //   if (this.locationData && this.locationData.value !== 0) {
+    //     this.scene.add(this.cube);
+    //   }
+    // }
     this.controls.update();
 
     this.renderer.render(this.scene, this.camera);

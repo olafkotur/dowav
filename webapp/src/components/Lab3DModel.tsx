@@ -14,7 +14,6 @@ const Lab3DModel: React.FC<Lab3DModelProps> = ({ viewport }) => {
 
   useEffect(() => {
     if (container.current && !lab3d) {
-      console.log("Creating new lab");
       setLab3d(new Lab3D({ viewport, container: container.current }));
     }
   }, [container.current]);
@@ -35,7 +34,6 @@ const Lab3DModel: React.FC<Lab3DModelProps> = ({ viewport }) => {
             "https://dowav-api.herokuapp.com/api/location/live"
           );
           const json = await response.json();
-          console.log(json);
           appendData(json);
         } catch (err) {
           console.log(err);
