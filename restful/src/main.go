@@ -52,7 +52,7 @@ func main() {
 	}
 
 	// Create notification table in database
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS notification (time REAL, message TEXT)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS notification (time REAL, message TEXT, messageType TEXT)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)

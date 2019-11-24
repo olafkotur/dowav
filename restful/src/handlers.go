@@ -282,11 +282,11 @@ func wsNotifications(w http.ResponseWriter, r *http.Request){
 		var notification Notification
 
 		for rows.Next() {
-			rows.Scan(&notification.Time, &notification.Message)
+			rows.Scan(&notification.Time, &notification.Message, &notification.Type)
 		}
 		rows.Close()
 
-		if notification.Time != 0 && notification.Message != "" {
+		if notification.Time != 0 && notification.Message != "" && notification.Type != "" {
 			notification.Time *= 1000
 			err = ch.WriteJSON(notification)
 			if err != nil {
@@ -306,14 +306,15 @@ func pushNotification(w http.ResponseWriter, r *http.Request){
 	_ = r.ParseForm()
 	time := time.Now().Unix()
 	message := r.Form.Get("message")
+	messageType := r.Form.Get("type")
 
 	if message == "" {
 		http.Error(w, "Provide a message field in a form", http.StatusBadRequest)
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO notification (time, message) VALUES (?, ?)")
-	_, err := statement.Exec( time, message)
+	statement, _ := database.Prepare("INSERT INTO notification (time, message, messageType) VALUES (?, ?, ?)")
+	_, err := statement.Exec( time, message, messageType)
 	if err != nil {
 		http.Error(w, "Database failed to execute command", http.StatusInternalServerError)
 		return
