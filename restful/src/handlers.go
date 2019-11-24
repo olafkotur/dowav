@@ -294,10 +294,7 @@ func wsNotifications(w http.ResponseWriter, r *http.Request){
 				break
 			}
 			connTime = time.Now()
-		} else {
-			fmt.Println("No Data")
 		}
-
 		
 		time.Sleep(2 * time.Second)
 	}
