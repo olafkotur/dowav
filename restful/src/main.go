@@ -10,9 +10,17 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/gorilla/websocket"
+
 )
 
 var database *sql.DB
+
+var upgrader = websocket.Upgrader{ 
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -43,6 +51,13 @@ func main() {
 		panic(err)
 	}
 
+	// Create notification table in database
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS notification (time REAL, message TEXT)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
@@ -54,6 +69,9 @@ func main() {
 	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
 	router.HandleFunc("/api/tweets", getTweets).Methods("GET")
 	router.HandleFunc("/api/tweet/question", postQuestionTweet).Methods("POST")
+	router.HandleFunc("/api/notifications", wsNotifications)
+	// For testing could be deleted or left for future needs
+	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

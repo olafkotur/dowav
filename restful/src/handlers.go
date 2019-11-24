@@ -9,6 +9,7 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+
 )
 
 // TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
@@ -256,4 +257,72 @@ func postQuestionTweet(writer http.ResponseWriter, request *http.Request) {
 	}
 	res.Body.Close()
 	writer.Write([]byte("Success"))
+}
+
+func wsNotifications(w http.ResponseWriter, r *http.Request){
+	fmt.Println("Get a request")
+	ch, errCh := upgrader.Upgrade(w, r, nil)
+
+	if errCh != nil {
+		fmt.Println("Upgrader error: " + errCh.Error())
+		return
+	}
+
+	connTime := time.Now()
+
+	defer ch.Close()
+
+	for {
+		rows, err := database.Query("SELECT * FROM notification WHERE time > " + toString(int(connTime.Unix())) + " ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			fmt.Println("Database error")
+			ch.Close()
+		}
+		
+		var notification Notification
+
+		for rows.Next() {
+			rows.Scan(&notification.Time, &notification.Message)
+		}
+		rows.Close()
+
+		if notification.Time != 0 && notification.Message != "" {
+			notification.Time *= 1000
+			err = ch.WriteJSON(notification)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+			connTime = time.Now()
+		} else {
+			fmt.Println("No Data")
+		}
+
+		
+		time.Sleep(2 * time.Second)
+	}
+
+}
+
+func pushNotification(w http.ResponseWriter, r *http.Request){
+	fmt.Println("POST /api/notifications")
+	_ = r.ParseForm()
+	time := time.Now().Unix()
+	message := r.Form.Get("message")
+
+	if message == "" {
+		http.Error(w, "Provide a message field in a form", http.StatusBadRequest)
+		return
+	}
+
+	statement, _ := database.Prepare("INSERT INTO notification (time, message) VALUES (?, ?)")
+	_, err := statement.Exec( time, message)
+	if err != nil {
+		http.Error(w, "Database failed to execute command", http.StatusInternalServerError)
+		return
+	}
+
+	res := Message{"Success"}
+	sendResponse(res, w)
+	printRequest(r)
 }

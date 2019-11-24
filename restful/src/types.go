@@ -4,6 +4,10 @@ type Message struct {
 	Message string `json:"message"`
 }
 
+type Notification struct {
+	Time float64 `json:"time"`
+	Message string `json:"message"`
+}
 type ReadingData struct {
 	Time  float64 `json:"time"`
 	Value float64 `json:"value"`
