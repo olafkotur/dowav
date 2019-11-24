@@ -76,7 +76,7 @@ const InputTwitter: React.FC<InputTwitterProps> = ({
           const data = new URLSearchParams();
           data.append("message", value);
           let response = await fetch(
-            "http://localhost:8080/api/tweet/question",
+            "http://dowav-api.herokuapp.com/api/tweet/question",
             {
               method: "POST",
               body: data
@@ -84,6 +84,8 @@ const InputTwitter: React.FC<InputTwitterProps> = ({
           );
           if (response.status === 200) {
             setCounter(prev => prev + 1);
+          } else{
+            // TODO: error handler.
           }
         }}
       >

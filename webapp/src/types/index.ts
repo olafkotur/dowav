@@ -56,3 +56,9 @@ export type LocationData = {
   time: number;
   value: number;
 };
+
+export type Notification = {
+  time: number;
+  message: string;
+  type: "info" | "success" | "warning" | "error" | "default" | undefined;
+};
