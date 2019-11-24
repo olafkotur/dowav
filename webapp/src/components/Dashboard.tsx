@@ -7,14 +7,16 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Dashboard: React.FC = () => {
   useEffect(() => {
-    let ws = new WebSocket("ws://localhost:8080/api/notifications");
+    let ws = new WebSocket("ws://dowav-api.herokuapp.com/api/notifications");
 
-    ws.onmessage = function(event) {
-      let json: Notification = JSON.parse(event.data);
-      toast(json.message, {
-        type: json.type
-      });
-    };
+    if (ws) {
+      ws.onmessage = function(event) {
+        let json: Notification = JSON.parse(event.data);
+        toast(json.message, {
+          type: json.type
+        });
+      };
+    }
 
     return () => {
       ws.close();
