@@ -338,3 +338,42 @@ func uploadWaterData(writer http.ResponseWriter, request *http.Request) {
 	_, _ = writer.Write([]byte("Success"))
 	printRequest(request)
 }
+
+func getWaterWs(writer http.ResponseWriter, request *http.Request) {
+	ch, errCh := upgrader.Upgrade(writer, request, nil)
+
+	if errCh != nil {
+		fmt.Println("Upgrader error: " + errCh.Error())
+		return
+	}
+	defer ch.Close()
+
+	for {
+		rows, err := database.Query("SELECT * FROM water ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			fmt.Println("Database error")
+			ch.Close()
+		}
+
+		var water WaterData
+
+		for rows.Next() {
+			_ = rows.Scan(&water.Time, &water.Volume, &water.Tilt)
+		}
+		rows.Close()
+
+		if water.Time != 0 {
+			water.Time *= 1000
+			err = ch.WriteJSON(water)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+
+		time.Sleep(500 * time.Millisecond)
+	}
+	res := Message{"Success"}
+	sendResponse(res, writer)
+	printRequest(request)
+}

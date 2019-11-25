@@ -78,6 +78,7 @@ func main() {
 	router.HandleFunc("/api/notifications", getNotificationsWs).Methods("GET")
 	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
 	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
+	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
