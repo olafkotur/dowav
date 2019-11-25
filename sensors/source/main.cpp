@@ -15,7 +15,17 @@ int on = 0;
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
     MicroBitPin P0(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG);
-    return P0.getAnalogValue();
+    if(((-7.4286 * (P0.getAnalogValue()))+1006.3) < 0){
+      //Wire not connected
+      return 0;
+    } else if (((-7.4286 * (P0.getAnalogValue()))+1006.3) > 1002 &&  ((-7.4286 * (P0.getAnalogValue()))+1006.3) < 1005){
+      //No water
+      return 0;
+    } else if(((-7.4286 * (P0.getAnalogValue()))+1006.3) > 12){
+      return 12;
+    } else {
+      return (-7.4286 * (P0.getAnalogValue()))+1006.3;
+    }
 }
 
 // Returns temperature in celcius
@@ -95,8 +105,8 @@ void setDeviceId(){
     }
 
     if(deviceID != oldDeviceID){
-      ManagedString deivceIDmsg("ID:");
-      uBit.display.scrollAsync(deivceIDmsg + deviceID);
+      //ManagedString deivceIDmsg("ID:");
+      //uBit.display.scrollAsync(deivceIDmsg + deviceID);
       oldDeviceID = deviceID;
     }
   }
@@ -233,7 +243,11 @@ int main() {
       }
     }
     currentTime = currentTime + 1;
-    uBit.sleep(1000);
+    if (zoneId == 3){
+      uBit.sleep(500);
+    } else {
+      uBit.sleep(1000);
+    }
     printzoneId();
     setDeviceId();
   }
