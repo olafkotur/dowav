@@ -9,14 +9,13 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/gorilla/websocket"
-
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var database *sql.DB
 
-var upgrader = websocket.Upgrader{ 
+var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},

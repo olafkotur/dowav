@@ -286,3 +286,33 @@ func uploadHistoricData(data []byte) {
 	}
 	res.Body.Close()
 }
+
+func uploadWaterData(data []byte) {
+	obj := Water{}
+	_ = json.Unmarshal(data, &obj)
+
+	if obj.AccelerometerY < 0 {
+		return
+	}
+
+	gPercent := float64(obj.AccelerometerY) / 1048.0
+	tilt := int(90.0 * gPercent)
+	volume := int(float64(obj.Depth) / 12.0 * 100.0)
+
+	if tilt > 90 {
+		tilt = 90
+	}
+
+	// Define the form values
+	// values := url.Values{
+	// 	"zone":   {toString(obj.Zone)},
+	// 	"tilt":   {toString(tilt)},
+	// 	"volume": {toString(volume)},
+	// }
+	fmt.Println(tilt, volume)
+	// res, err := http.PostForm("http://dowav-api.herokuapp.com/api/water/upload", values)
+	// if err != nil {
+	// 	return
+	// }
+	// res.Body.Close()
+}
