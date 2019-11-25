@@ -303,16 +303,5 @@ func uploadWaterData(data []byte) {
 		tilt = 90
 	}
 
-	// Define the form values
-	// values := url.Values{
-	// 	"zone":   {toString(obj.Zone)},
-	// 	"tilt":   {toString(tilt)},
-	// 	"volume": {toString(volume)},
-	// }
 	fmt.Println(tilt, volume)
-	// res, err := http.PostForm("http://dowav-api.herokuapp.com/api/water/upload", values)
-	// if err != nil {
-	// 	return
-	// }
-	// res.Body.Close()
 }
