@@ -17,7 +17,7 @@ function throtleOnChange() {
         .map(str => str.slice(1));
       setFilter((prev: any) => (tweet: any) => {
         return tweet.entities.hashtags.some((tag: any) => {
-          let regex = arr.map(str => new RegExp(str, "g"));
+          let regex = arr.map(str => new RegExp(encodeURI(str), "g"));
           return regex.some(reg => (tag.text as string).match(reg));
         });
       });

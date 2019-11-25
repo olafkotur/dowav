@@ -17,7 +17,7 @@ const TwitterBoard: React.FC = () => {
   const [filter, setFilter] = useState<Function | null>(null);
   const filterData = filter
     ? data.filter(filter).map((d: any) => {
-        return <Tweet data={d} />;
+        return <Tweet key={d.time} data={d} />;
       })
     : null;
   return (
@@ -37,7 +37,7 @@ const TwitterBoard: React.FC = () => {
             {filterData
               ? filterData
               : data.map((d: any) => {
-                  return <Tweet data={d} />;
+                  return <Tweet key={d.time} data={d} />;
                 })}
           </div>
         </div>

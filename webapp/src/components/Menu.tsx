@@ -3,6 +3,7 @@ import { MdDashboard, MdSettings, MdLocationSearching } from "react-icons/md";
 import { FaTemperatureLow, FaTwitter } from "react-icons/fa";
 import { IoIosWater } from "react-icons/io";
 import { GoLightBulb } from "react-icons/go";
+import { GiWateringCan } from "react-icons/gi";
 import * as MENU_OPTIONS from "../constants/MenuOptionConstants";
 import NavigationContext from "../context/NavigationContext";
 
@@ -39,6 +40,11 @@ export const menuOptions: Array<IMenuOption> = [
     name: MENU_OPTIONS.MOVEMENT,
     indented: true,
     icon: <MdLocationSearching size={20} color={iconColor} />
+  },
+  {
+    name: MENU_OPTIONS.WATERING_CAN,
+    indented: true,
+    icon: <GiWateringCan size={20} color={iconColor} />
   },
   {
     name: MENU_OPTIONS.TWITTER,

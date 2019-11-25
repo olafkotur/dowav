@@ -6,6 +6,7 @@ import GraphView from "./views/GraphView";
 import TwitterBoard from "./views/TwitterBoard";
 import MovementView from "./views/MovementView";
 import { IoIosConstruct } from "react-icons/io";
+import Settings from "./views/Settings";
 
 const Switch: React.FC = () => {
   const { currentOption } = useContext(NavigationContext);
@@ -27,6 +28,9 @@ const Switch: React.FC = () => {
       break;
     case MENU_OPTIONS.TWITTER:
       component = <TwitterBoard />;
+      break;
+    case MENU_OPTIONS.SETTINGS:
+      component = <Settings />;
       break;
     default:
       component = (

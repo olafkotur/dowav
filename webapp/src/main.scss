@@ -522,3 +522,51 @@ svg {
 span.hashtag {
   color: rgb(79, 140, 201);
 }
+
+// Settings
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  .checkbox-bar {
+    display: flex;
+    width: 30%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+input.switch-checkbox {
+  position: relative;
+  appearance: none;
+  outline: none;
+  width: 50px;
+  height: 30px;
+  background-color: #ffffff;
+  border: 1px solid #d9dadc;
+  border-radius: 50px;
+  box-shadow: inset -20px 0 0 0 #ffffff;
+  transition-duration: 200ms;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 26px;
+    height: 26px;
+    background-color: transparent;
+    border-radius: 50%;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  &:checked {
+    border-color: rgb(79, 140, 201);
+    box-shadow: inset 20px 0 0 0 rgb(79, 140, 201);
+  }
+  &:checked:after {
+    left: 20px;
+    box-shadow: -2px 4px 3px rgba(0, 0, 0, 0.05);
+  }
+}
