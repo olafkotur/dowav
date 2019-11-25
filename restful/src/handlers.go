@@ -9,7 +9,6 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-
 )
 
 // TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
@@ -256,10 +255,10 @@ func postQuestionTweet(writer http.ResponseWriter, request *http.Request) {
 		log.Println(err)
 	}
 	res.Body.Close()
-	writer.Write([]byte("Success"))
+	_, _ = writer.Write([]byte("Success"))
 }
 
-func wsNotifications(w http.ResponseWriter, r *http.Request){
+func wsNotifications(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Get a request")
 	ch, errCh := upgrader.Upgrade(w, r, nil)
 
@@ -278,11 +277,11 @@ func wsNotifications(w http.ResponseWriter, r *http.Request){
 			fmt.Println("Database error")
 			ch.Close()
 		}
-		
+
 		var notification Notification
 
 		for rows.Next() {
-			rows.Scan(&notification.Time, &notification.Message, &notification.Type)
+			_ = rows.Scan(&notification.Time, &notification.Message, &notification.Type)
 		}
 		rows.Close()
 
@@ -295,14 +294,13 @@ func wsNotifications(w http.ResponseWriter, r *http.Request){
 			}
 			connTime = time.Now()
 		}
-		
+
 		time.Sleep(2 * time.Second)
 	}
 
 }
 
-func pushNotification(w http.ResponseWriter, r *http.Request){
-	fmt.Println("POST /api/notifications")
+func pushNotification(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	time := time.Now().Unix()
 	message := r.Form.Get("message")
@@ -314,7 +312,7 @@ func pushNotification(w http.ResponseWriter, r *http.Request){
 	}
 
 	statement, _ := database.Prepare("INSERT INTO notification (time, message, messageType) VALUES (?, ?, ?)")
-	_, err := statement.Exec( time, message, messageType)
+	_, err := statement.Exec(time, message, messageType)
 	if err != nil {
 		http.Error(w, "Database failed to execute command", http.StatusInternalServerError)
 		return

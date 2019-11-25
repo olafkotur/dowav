@@ -286,3 +286,22 @@ func uploadHistoricData(data []byte) {
 	}
 	res.Body.Close()
 }
+
+func uploadWaterData(data []byte) {
+	obj := Water{}
+	_ = json.Unmarshal(data, &obj)
+
+	if obj.AccelerometerY < 0 {
+		return
+	}
+
+	gPercent := float64(obj.AccelerometerY) / 1048.0
+	tilt := int(90.0 * gPercent)
+	volume := int(float64(obj.Depth) / 12.0 * 100.0)
+
+	if tilt > 90 {
+		tilt = 90
+	}
+
+	fmt.Println(tilt, volume)
+}

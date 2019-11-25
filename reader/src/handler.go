@@ -14,5 +14,6 @@ func handleLocation(data string) {
 
 func handleWater(data string) {
 	formatted := formatWaterData(data)
+	uploadWaterData(formatted)
 	checkWaterTweet(formatted)
 }
