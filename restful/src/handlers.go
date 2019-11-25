@@ -258,7 +258,7 @@ func postQuestionTweet(writer http.ResponseWriter, request *http.Request) {
 	_, _ = writer.Write([]byte("Success"))
 }
 
-func wsNotifications(w http.ResponseWriter, r *http.Request) {
+func getNotificationsWs(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Get a request")
 	ch, errCh := upgrader.Upgrade(w, r, nil)
 
@@ -297,7 +297,6 @@ func wsNotifications(w http.ResponseWriter, r *http.Request) {
 
 		time.Sleep(2 * time.Second)
 	}
-
 }
 
 func pushNotification(w http.ResponseWriter, r *http.Request) {
@@ -321,4 +320,60 @@ func pushNotification(w http.ResponseWriter, r *http.Request) {
 	res := Message{"Success"}
 	sendResponse(res, w)
 	printRequest(r)
+}
+
+func uploadWaterData(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
+	now := time.Now().Unix()
+	volume := request.Form.Get("volume")
+	tilt := request.Form.Get("tilt")
+
+	statement, _ := database.Prepare("INSERT INTO water (time, volume, tilt) VALUES (?, ?, ?)")
+	_, err := statement.Exec(now, volume, tilt)
+	if err != nil {
+		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = writer.Write([]byte("Success"))
+	printRequest(request)
+}
+
+func getWaterWs(writer http.ResponseWriter, request *http.Request) {
+	ch, errCh := upgrader.Upgrade(writer, request, nil)
+
+	if errCh != nil {
+		fmt.Println("Upgrader error: " + errCh.Error())
+		return
+	}
+	defer ch.Close()
+
+	for {
+		rows, err := database.Query("SELECT * FROM water ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			fmt.Println("Database error")
+			ch.Close()
+		}
+
+		var water WaterData
+
+		for rows.Next() {
+			_ = rows.Scan(&water.Time, &water.Volume, &water.Tilt)
+		}
+		rows.Close()
+
+		if water.Time != 0 {
+			water.Time *= 1000
+			err = ch.WriteJSON(water)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+
+		time.Sleep(500 * time.Millisecond)
+	}
+	res := Message{"Success"}
+	sendResponse(res, writer)
+	printRequest(request)
 }

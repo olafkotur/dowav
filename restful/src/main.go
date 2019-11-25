@@ -57,6 +57,13 @@ func main() {
 		panic(err)
 	}
 
+	// Create water table in database
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS water (time REAL, volume INT, tilt INT)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
@@ -68,9 +75,10 @@ func main() {
 	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
 	router.HandleFunc("/api/tweets", getTweets).Methods("GET")
 	router.HandleFunc("/api/tweet/question", postQuestionTweet).Methods("POST")
-	router.HandleFunc("/api/notifications", wsNotifications)
-	// For testing could be deleted or left for future needs
+	router.HandleFunc("/api/notifications", getNotificationsWs).Methods("GET")
 	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
+	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
+	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
