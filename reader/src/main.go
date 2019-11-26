@@ -21,6 +21,7 @@ func main() {
 	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
 
 	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
+	go listenUserSettings()
 	startScheduler()
 }
 

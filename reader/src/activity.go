@@ -3,13 +3,34 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/rgamba/evtwebsocket"
 )
 
 var previousTweet string
 var previousNotification string
+
+func listenUserSettings() {
+	conn := evtwebsocket.Conn{
+		OnConnected: func(w *evtwebsocket.Conn) {
+			fmt.Println("Connected user setting websocket")
+		},
+		OnMessage: func(msg []byte, w *evtwebsocket.Conn) {
+			fmt.Println("Received new user setting:", msg)
+		},
+		OnError: func(err error) {
+			fmt.Println(err.Error())
+		},
+	}
+	err := conn.Dial("ws://localhost:8080/api/setting", "GET")
+	if err != nil {
+		log.Println(err)
+	}
+}
 
 func checkEnvironmentTweet(d []byte) {
 	var data Environment
