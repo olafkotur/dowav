@@ -64,6 +64,13 @@ func main() {
 		panic(err)
 	}
 
+	// Create setting table in database
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS settings (time REAL, type TEXT, value TEXT)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
@@ -79,6 +86,8 @@ func main() {
 	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
 	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
 	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
+	router.HandleFunc("/api/setting", setUserSetting).Methods("POST")
+	router.HandleFunc("/api/setting", getUserSettingWs).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

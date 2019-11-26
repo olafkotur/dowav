@@ -20,6 +20,12 @@ type WaterData struct {
 	Tilt   float64 `json:"tilt"`
 }
 
+type Setting struct {
+	Time  float64 `json:"time"`
+	Type  string  `json:"type"`
+	Value string  `json:"Value"`
+}
+
 // type Readings struct {
 // 	Temperature ReadingData `json:"temperature"`
 // 	Moisture    ReadingData `json:"moisture"`

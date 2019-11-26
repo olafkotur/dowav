@@ -381,3 +381,64 @@ func getWaterWs(writer http.ResponseWriter, request *http.Request) {
 	sendResponse(res, writer)
 	printRequest(request)
 }
+
+func setUserSetting(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
+	time := time.Now().Unix()
+	settingType := request.Form.Get("type")
+	value := request.Form.Get("value")
+
+	if settingType == "" || value == "" {
+		http.Error(writer, "Provide a type and setting field in a form", http.StatusBadRequest)
+		return
+	}
+
+	statement, _ := database.Prepare("INSERT INTO settings (time, type, value) VALUES (?, ?, ?)")
+	_, err := statement.Exec(time, settingType, value)
+	if err != nil {
+		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
+		return
+	}
+
+	res := Message{"Success"}
+	sendResponse(res, writer)
+	printRequest(request)
+}
+
+func getUserSettingWs(writer http.ResponseWriter, request *http.Request) {
+	ch, errCh := upgrader.Upgrade(writer, request, nil)
+
+	if errCh != nil {
+		fmt.Println("Upgrader error: " + errCh.Error())
+		return
+	}
+	connTime := time.Now()
+	defer ch.Close()
+
+	for {
+		rows, err := database.Query("SELECT * FROM settings WHERE time > " + toString(int(connTime.Unix())) + " ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			fmt.Println("Database error")
+			ch.Close()
+		}
+
+		var settings Setting
+
+		for rows.Next() {
+			_ = rows.Scan(&settings.Time, &settings.Type, &settings.Value)
+		}
+		rows.Close()
+
+		if settings.Time != 0 && settings.Type != "" && settings.Value != "" {
+			settings.Time *= 1000
+			err = ch.WriteJSON(settings)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+			connTime = time.Now()
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+}
