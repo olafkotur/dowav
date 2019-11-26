@@ -20,6 +20,8 @@ func main() {
 	SERIAL_PORT_NAME := os.Getenv("SERIAL_PORT_NAME")
 	SERIAL_PORT_BAUD := os.Getenv("SERIAL_PORT_BAUD")
 
+	setDefaultSettings()
+
 	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 	go listenUserSettings()
 	startScheduler()
@@ -62,6 +64,10 @@ func startReadingSerial(name, baud string) {
 			log.Println("Unexpected data format read from serial port, skipping")
 		}
 	}
+}
+
+func setDefaultSettings() {
+	shouldSendTweets = true
 }
 
 func listenToPort(sp *serial.Port) (b string) {

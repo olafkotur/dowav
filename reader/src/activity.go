@@ -11,6 +11,7 @@ import (
 	"github.com/rgamba/evtwebsocket"
 )
 
+var shouldSendTweets bool
 var previousTweet string
 var previousNotification string
 
@@ -20,7 +21,9 @@ func listenUserSettings() {
 			fmt.Println("Connected user setting websocket")
 		},
 		OnMessage: func(msg []byte, w *evtwebsocket.Conn) {
-			fmt.Println("Received new user setting:", msg)
+			var data Setting
+			_ = json.Unmarshal(msg, &data)
+			handleUserSetting(data)
 		},
 		OnError: func(err error) {
 			fmt.Println(err.Error())
@@ -87,7 +90,7 @@ func checkWaterTweet(d []byte) {
 }
 
 func postTweet(msg string) {
-	if msg == previousTweet {
+	if msg == previousTweet || !shouldSendTweets {
 		return
 	}
 	previousTweet = msg

@@ -39,3 +39,9 @@ type HistoricData struct {
 	Moisture    Calculations `json:"moisture"`
 	Light       Calculations `json:"light"`
 }
+
+type Setting struct {
+	Time    float64 `json:"time"`
+	Type    string  `json:"type"`
+	Setting string  `json:"setting"`
+}
