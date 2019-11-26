@@ -23,7 +23,7 @@ type WaterData struct {
 type Setting struct {
 	Time  float64 `json:"time"`
 	Type  string  `json:"type"`
-	Value string  `json:"Value"`
+	Value string  `json:"value"`
 }
 
 // type Readings struct {
