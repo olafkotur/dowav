@@ -45,6 +45,7 @@ func startProcessingData(interval time.Duration) {
 		min := calcMin(zone)
 		max := calcMax(zone)
 		formatted := formatHistoricData(average, min, max, int(startTime), int(endTime), i+1)
+		fmt.Printf("Uploading historic data for zone: %d\n", i+1)
 		uploadHistoricData(formatted)
 	}
 }
