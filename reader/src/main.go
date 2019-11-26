@@ -67,6 +67,11 @@ func startReadingSerial(name, baud string) {
 }
 
 func setDefaultSettings() {
+	minTemperature = 18
+	maxTemperature = 35
+	minMoisture = 50
+	minLight = 20
+	maxLight = 225
 	shouldSendTweets = true
 }
 

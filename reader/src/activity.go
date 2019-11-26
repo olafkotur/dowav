@@ -15,6 +15,12 @@ var shouldSendTweets bool
 var previousTweet string
 var previousNotification string
 
+var minTemperature int
+var minMoisture int
+var minLight int
+var maxTemperature int
+var maxLight int
+
 func listenUserSettings() {
 	conn := evtwebsocket.Conn{
 		OnConnected: func(w *evtwebsocket.Conn) {
@@ -41,22 +47,22 @@ func checkEnvironmentTweet(d []byte) {
 	_ = json.Unmarshal(d, &data)
 
 	// Temperature
-	if data.Temperature.Value <= 18 {
+	if data.Temperature.Value <= minTemperature {
 		msg = "The temperature seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #temperature"
-	} else if data.Temperature.Value >= 35 {
+	} else if data.Temperature.Value >= maxTemperature {
 		msg = "The temperature seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #temperature"
 	}
 
 	// Moisture
-	if data.Moisture.Value <= 50 {
+	if data.Moisture.Value <= minMoisture {
 		msg = "The moisture level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #moisture"
 	}
 
 	// Light
-	if data.Light.Value <= 20 {
+	if data.Light.Value <= minLight {
 		msg = "The light level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #light"
 
-	} else if data.Light.Value >= 225 {
+	} else if data.Light.Value >= maxLight {
 		msg = "The light level seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #light"
 	}
 

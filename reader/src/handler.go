@@ -24,11 +24,21 @@ func handleUserSetting(data Setting) {
 	fmt.Printf("Received new user setting of type %s with value of %s\n", data.Type, data.Setting)
 
 	switch data.Type {
-	case "lowTemperature":
-	case "lowMoisture":
-	case "lowLight":
+	case "minTemperature":
+		minTemperature = toInt(data.Setting)
+
+	case "minMoisture":
+		minMoisture = toInt(data.Setting)
+
+	case "minLight":
+		minLight = toInt(data.Setting)
+
 	case "maxTemperature":
+		maxTemperature = toInt(data.Setting)
+
 	case "maxLight":
+		maxTemperature = toInt(data.Setting)
+
 	case "shouldSendTweets":
 		if data.Setting == "true" {
 			shouldSendTweets = true
