@@ -65,7 +65,7 @@ func main() {
 	}
 
 	// Create setting table in database
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS settings (time REAL, type TEXT, setting TEXT)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS settings (time REAL, type TEXT, value TEXT)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)

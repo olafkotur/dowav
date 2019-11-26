@@ -21,28 +21,28 @@ func handleWater(data string) {
 }
 
 func handleUserSetting(data Setting) {
-	fmt.Printf("Received new user setting of type %s with value of %s\n", data.Type, data.Setting)
+	fmt.Printf("Received new user setting of type %s with value of %s\n", data.Type, data.Value)
 
 	switch data.Type {
 	case "minTemperature":
-		minTemperature = toInt(data.Setting)
+		minTemperature = toInt(data.Value)
 
 	case "minMoisture":
-		minMoisture = toInt(data.Setting)
+		minMoisture = toInt(data.Value)
 
 	case "minLight":
-		minLight = toInt(data.Setting)
+		minLight = toInt(data.Value)
 
 	case "maxTemperature":
-		maxTemperature = toInt(data.Setting)
+		maxTemperature = toInt(data.Value)
 
 	case "maxLight":
-		maxTemperature = toInt(data.Setting)
+		maxTemperature = toInt(data.Value)
 
 	case "shouldSendTweets":
-		if data.Setting == "true" {
+		if data.Value == "true" {
 			shouldSendTweets = true
-		} else if data.Setting == "false" {
+		} else if data.Value == "false" {
 			shouldSendTweets = false
 		}
 	case "trackObject":

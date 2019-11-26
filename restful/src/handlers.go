@@ -386,15 +386,15 @@ func setUserSetting(writer http.ResponseWriter, request *http.Request) {
 	_ = request.ParseForm()
 	time := time.Now().Unix()
 	settingType := request.Form.Get("type")
-	setting := request.Form.Get("setting")
+	value := request.Form.Get("value")
 
-	if settingType == "" || setting == "" {
+	if settingType == "" || value == "" {
 		http.Error(writer, "Provide a type and setting field in a form", http.StatusBadRequest)
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO settings (time, type, setting) VALUES (?, ?, ?)")
-	_, err := statement.Exec(time, settingType, setting)
+	statement, _ := database.Prepare("INSERT INTO settings (time, type, value) VALUES (?, ?, ?)")
+	_, err := statement.Exec(time, settingType, value)
 	if err != nil {
 		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
 		return
@@ -425,11 +425,11 @@ func getUserSettingWs(writer http.ResponseWriter, request *http.Request) {
 		var settings Setting
 
 		for rows.Next() {
-			_ = rows.Scan(&settings.Time, &settings.Type, &settings.Setting)
+			_ = rows.Scan(&settings.Time, &settings.Type, &settings.Value)
 		}
 		rows.Close()
 
-		if settings.Time != 0 && settings.Type != "" && settings.Setting != "" {
+		if settings.Time != 0 && settings.Type != "" && settings.Value != "" {
 			settings.Time *= 1000
 			err = ch.WriteJSON(settings)
 			if err != nil {

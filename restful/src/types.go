@@ -21,9 +21,9 @@ type WaterData struct {
 }
 
 type Setting struct {
-	Time    float64 `json:"time"`
-	Type    string  `json:"type"`
-	Setting string  `json:"setting"`
+	Time  float64 `json:"time"`
+	Type  string  `json:"type"`
+	Value string  `json:"Value"`
 }
 
 // type Readings struct {

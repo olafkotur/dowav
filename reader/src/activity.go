@@ -35,7 +35,7 @@ func listenUserSettings() {
 			fmt.Println(err.Error())
 		},
 	}
-	err := conn.Dial("ws://localhost:8080/api/setting", "GET")
+	err := conn.Dial("ws://dowav-api.herokuapp.com/api/setting", "GET")
 	if err != nil {
 		log.Println(err)
 	}
