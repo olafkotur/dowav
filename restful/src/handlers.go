@@ -393,8 +393,8 @@ func setUserSetting(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO settings (time, type, value) VALUES (?, ?, ?)")
-	_, err := statement.Exec(time, settingType, value)
+	statement, _ := database.Prepare("UPDATE settings SET time=?, value=? WHERE type == ?")
+	_, err := statement.Exec(toString(int(time)), value, settingType)
 	if err != nil {
 		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
 		return
@@ -441,4 +441,18 @@ func getUserSettingWs(writer http.ResponseWriter, request *http.Request) {
 
 		time.Sleep(2 * time.Second)
 	}
+}
+
+func getAllUserSettings(writer http.ResponseWriter, request *http.Request) {
+	var res []Setting
+	rows, _ := database.Query("SELECT * FROM settings")
+	for rows.Next() {
+		var setting Setting
+		_ = rows.Scan(&setting.Time, &setting.Type, &setting.Value)
+		res = append(res, setting)
+	}
+	rows.Close()
+
+	printRequest(request)
+	sendResponse(res, writer)
 }

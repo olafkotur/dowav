@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -70,6 +71,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	setDefaultSettings()
 
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
@@ -88,9 +90,26 @@ func main() {
 	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
 	router.HandleFunc("/api/setting", setUserSetting).Methods("POST")
 	router.HandleFunc("/api/setting", getUserSettingWs).Methods("GET")
+	router.HandleFunc("/api/setting/all", getAllUserSettings).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
+}
+
+func setDefaultSettings() {
+	// Clear the table from previous settings
+	statement, _ := database.Prepare("DELETE FROM settings")
+	_, _ = statement.Exec()
+
+	types := []string{"shouldSendTweets", "minTemperature", "minMoisture", "minLight", "maxTemperature", "maxLight"}
+	values := []string{"true", "18", "50", "20", "35", "225"}
+
+	// Set each user setting
+	now := time.Now().Unix()
+	statement, _ = database.Prepare("INSERT INTO settings (time, type, value) VALUES (?, ?, ?)")
+	for i := range types {
+		_, _ = statement.Exec(now, types[i], values[i])
+	}
 }
 
 func printRequest(request *http.Request) {

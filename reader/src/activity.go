@@ -23,16 +23,13 @@ var maxLight int
 
 func listenUserSettings() {
 	conn := evtwebsocket.Conn{
-		OnConnected: func(w *evtwebsocket.Conn) {
-			fmt.Println("Connected user setting websocket")
-		},
 		OnMessage: func(msg []byte, w *evtwebsocket.Conn) {
 			var data Setting
 			_ = json.Unmarshal(msg, &data)
 			handleUserSetting(data)
 		},
 		OnError: func(err error) {
-			fmt.Println(err.Error())
+			listenUserSettings() // Reconnect
 		},
 	}
 	err := conn.Dial("ws://dowav-api.herokuapp.com/api/setting", "GET")
