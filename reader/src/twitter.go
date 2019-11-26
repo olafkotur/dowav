@@ -63,7 +63,7 @@ func postTweet(msg string) {
 	values := url.Values{
 		"message": {msg},
 	}
-	res, err := http.PostForm("http://localhost:8080/api/tweet", values)
+	res, err := http.PostForm("http://dowav-api.herokuapp.com/api/tweet", values)
 	if err != nil {
 		return
 	}
