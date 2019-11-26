@@ -2,7 +2,11 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -67,12 +71,34 @@ func startReadingSerial(name, baud string) {
 }
 
 func setDefaultSettings() {
-	minTemperature = 18
-	maxTemperature = 35
-	minMoisture = 50
-	minLight = 20
-	maxLight = 225
-	shouldSendTweets = true
+	res, err := http.Get("http://dowav-api.herokuapp.com/api/setting/all")
+	if err != nil {
+		log.Println("Failed to set default user settings")
+	}
+	defer res.Body.Close()
+
+	var settings []Setting
+	body, _ := ioutil.ReadAll(res.Body)
+	_ = json.Unmarshal(body, &settings)
+
+	for _, s := range settings {
+		switch s.Type {
+		case "minTemperature":
+			minTemperature = toInt(s.Value)
+		case "minMoisture":
+			minMoisture = toInt(s.Value)
+		case "minLight":
+			minLight = toInt(s.Value)
+		case "maxTemperature":
+			maxTemperature = toInt(s.Value)
+		case "maxLight":
+			maxLight = toInt(s.Value)
+		case "shouldSendTweets":
+			shouldSendTweets = s.Value == "true"
+		}
+	}
+
+	fmt.Println("Set default user settings to:", minTemperature, minMoisture, minLight, maxTemperature, maxLight, shouldSendTweets)
 }
 
 func listenToPort(sp *serial.Port) (b string) {
