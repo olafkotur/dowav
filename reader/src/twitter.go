@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 )
+
+var previousMessage string
 
 func checkEnvironmentTweet(d []byte) {
 	var data Environment
@@ -50,6 +53,12 @@ func checkWaterTweet(d []byte) {
 }
 
 func postTweet(msg string) {
+	if msg == previousMessage {
+		return
+	}
+	previousMessage = msg
+	fmt.Println("Tweeting: ", msg)
+
 	// Define the form values
 	values := url.Values{
 		"message": {msg},

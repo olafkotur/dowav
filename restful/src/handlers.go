@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -204,6 +205,9 @@ func postTweet(writer http.ResponseWriter, request *http.Request) {
 	token := oauth1.NewToken("1196375364907470848-3VNKCnMblHl306D20PW3jJTwq6ZXOn", "Tm0hFLXmusLKCXwnlJi4w7QTIQdzNTKeehEi5wBaI7pDV")
 	httpClient := config.Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
+
+	id := rand.Intn(5000)
+	msg = msg + " #T" + toString(id)
 
 	_, res, err := client.Statuses.Update(msg, nil)
 	if err != nil {
