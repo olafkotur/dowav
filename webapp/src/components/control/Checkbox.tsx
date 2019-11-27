@@ -15,7 +15,6 @@ const Checkbox: React.FC<CheckboxProps> = ({ value, label, onChange }) => {
         type="checkbox"
         checked={value}
         onChange={e => {
-          console.log(e.target.checked);
           onChange(e.target.checked);
         }}
       />

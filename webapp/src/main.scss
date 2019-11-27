@@ -13,6 +13,10 @@ $niceBlue: rgb(79, 140, 201);
   box-sizing: border-box;
 }
 
+button {
+  font-family: "Montserrat", sans-serif;
+}
+
 html {
   font-family: "Montserrat", sans-serif;
   color: white;
@@ -527,15 +531,49 @@ span.hashtag {
 
 .settings {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex-wrap: wrap;
-  .checkbox-bar {
+  h2 {
+    color: rgb(79, 140, 201);
+    text-decoration: underline;
+    text-align: center;
+  }
+  .column {
+    width: 40%;
     display: flex;
-    width: 30%;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    .checkbox-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.1);
+
+      input[type="number"] {
+        width: 50px;
+      }
+    }
+  }
+  button {
+    font-size: 16px;
+    width: 20%;
+    background: none;
+    border: 2px solid rgb(79, 140, 201);
+    color: white;
+    border-radius: 5px;
     padding: 15px;
-    background: rgba(0, 0, 0, 0.1);
+    &:disabled {
+      background: darkgrey;
+      border: 2px solid darkgrey;
+      &:hover {
+        background: darkgrey;
+      }
+    }
+    &:hover {
+      background: rgb(79, 140, 201);
+    }
   }
 }
 

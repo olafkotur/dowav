@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./main.scss";
 import Dashboard from "./components/Dashboard";
 import NavigationContext from "./context/NavigationContext";
 import SettingsContext from "./context/SettingsContext";
 import { SettingsState } from "./types";
 import initialSettings, { cacheKey } from "./constants/SettingsContstants";
-import {
-  TEMPERATURE,
-  TWITTER,
-  SETTINGS,
-  WATERING_CAN
-} from "./constants/MenuOptionConstants";
+import { SETTINGS } from "./constants/MenuOptionConstants";
 
 function getSettings(): SettingsState {
   let cache = window.localStorage.getItem(cacheKey);
@@ -23,10 +18,8 @@ function getSettings(): SettingsState {
 }
 
 const App: React.FC = () => {
-  const [navigation, setNavigation] = useState(WATERING_CAN);
+  const [navigation, setNavigation] = useState(SETTINGS);
   const [settings, setSettings] = useState<SettingsState>(getSettings());
-
-  useEffect(() => {}, []);
 
   return (
     <NavigationContext.Provider

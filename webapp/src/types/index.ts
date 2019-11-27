@@ -65,7 +65,7 @@ export type Notification = {
 
 export type SettingsStateValue = {
   value: any;
-  type: "checkbox";
+  type: string;
   label: string;
 };
 

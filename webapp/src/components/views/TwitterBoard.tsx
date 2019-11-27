@@ -1,7 +1,6 @@
 import React, { ReactElement, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import Loader from "../styled/Loader";
-import moment from "moment";
 import InputTwitter from "../InputTweeter";
 import Tweet from "../Tweet";
 
