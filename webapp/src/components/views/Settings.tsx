@@ -26,7 +26,12 @@ const Settings: React.FC = () => {
     });
   }
 
-  return <div className="settings">{createControls(settings)}</div>;
+  return (
+    <div className="settings">
+      <h2>Client Side</h2>
+      {createControls(settings)}
+    </div>
+  );
 };
 
 export default Settings;

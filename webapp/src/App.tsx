@@ -8,7 +8,8 @@ import initialSettings, { cacheKey } from "./constants/SettingsContstants";
 import {
   TEMPERATURE,
   TWITTER,
-  SETTINGS
+  SETTINGS,
+  WATERING_CAN
 } from "./constants/MenuOptionConstants";
 
 function getSettings(): SettingsState {
@@ -22,7 +23,7 @@ function getSettings(): SettingsState {
 }
 
 const App: React.FC = () => {
-  const [navigation, setNavigation] = useState(SETTINGS);
+  const [navigation, setNavigation] = useState(WATERING_CAN);
   const [settings, setSettings] = useState<SettingsState>(getSettings());
 
   useEffect(() => {}, []);

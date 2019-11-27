@@ -570,3 +570,46 @@ input.switch-checkbox {
     box-shadow: -2px 4px 3px rgba(0, 0, 0, 0.05);
   }
 }
+
+// Watering can
+
+.watering-can {
+  display: flex;
+  justify-content: center;
+}
+
+.st0 {
+  fill: url(#SVGID_1_);
+  stroke: #000000;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-miterlimit: 10;
+}
+.st1 {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 10;
+  stroke-linejoin: round;
+  stroke-miterlimit: 10;
+}
+.st2 {
+  fill: url(#SVGID_2_);
+  stroke: #000000;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-miterlimit: 10;
+}
+
+.st3 {
+  fill: #5371b7;
+}
+.st4 {
+  fill: #2c4f97;
+}
+.st5 {
+  fill: #5371b7;
+  stroke: #ffffff;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-miterlimit: 10;
+}
