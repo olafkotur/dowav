@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -30,16 +29,23 @@ func main() {
 
 	database, _ = sql.Open("sqlite3", "./database.db?_foreign_keys=on")
 	
-	// Create zones table in database
-	_, err := database.Exec("DROP TABLE zone")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant TEXT)")
+	// Create plant table in database
+	_, err := database.Exec("DROP TABLE plant")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT , plant TEXT, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
 	}
-	database.Exec("INSERT INTO zone(id,plant) VALUES (1, 'Tomatoes')")
-	database.Exec("INSERT INTO zone(id,plant) VALUES (2, 'Staff')")
-	database.Exec("INSERT INTO zone(id,plant) VALUES (3, 'Cucumbers')")
+
+	
+	// Create zones table in database
+	_, err = database.Exec("DROP TABLE zone")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant INTEGER REFERENCES plant(id))")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+	
 
 	// Create historic table in database
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS historic (zoneId INTEGER REFERENCES zone(id), startTime REAL, endTime REAL, temperature REAL, moisture REAL, light REAL)")
@@ -82,7 +88,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	setDefaultSettings()
+
+	setDefault()
+
 
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
@@ -107,19 +115,22 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
-func setDefaultSettings() {
+func setDefault() {
 	// Clear the table from previous settings
-	statement, _ := database.Prepare("DELETE FROM settings")
+	database.Exec("DELETE FROM zone")
+	statement, _ := database.Prepare("DELETE FROM plant")
 	_, _ = statement.Exec()
 
-	types := []string{"shouldSendTweets", "minTemperature", "minMoisture", "minLight", "maxTemperature", "maxLight"}
-	values := []string{"true", "18", "50", "20", "35", "225"}
+	plants := []string{"Tomatoes", "Staff", "Cucumbers"}
+	values := []interface{}{"true", 18, 50, 20, 35, 225}
 
 	// Set each user setting
-	now := time.Now().Unix()
-	statement, _ = database.Prepare("INSERT INTO settings (time, type, value) VALUES (?, ?, ?)")
-	for i := range types {
-		_, _ = statement.Exec(now, types[i], values[i])
+	statement, _ = database.Prepare("INSERT INTO plant ( plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	for i := range plants {
+		r, _ := statement.Exec(plants[i], values[0],values[1],values[2],values[3],values[4],values[5])
+		id, _ := r.LastInsertId()
+		st, _ := database.Prepare("INSERT INTO zone(id,plant) VALUES (?, ?)")
+		st.Exec(i + 1, id)
 	}
 }
 

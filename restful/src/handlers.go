@@ -14,6 +14,8 @@ import (
 
 // TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
 func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
 	// Get data from request
 	_ = request.ParseForm()
 	zone := toInt(request.Form.Get("zone"))
@@ -39,11 +41,11 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 
 	res := Message{"Success"}
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 // /api/historic/temperature?from=1573398000&to=1573398300
 func getHistoricData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
 	// Safety in case no paramters are entered
 	if !strings.Contains(request.URL.String(), "from=") || !strings.Contains(request.URL.String(), "to=") {
 		// TODO: Add a bad request here
@@ -78,11 +80,11 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 // TEST: curl -d "zone=1&temperature=26&moisture=220&light=98" localhost:8080/api/live/upload
 func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
 	// Get data from request
 	_ = request.ParseForm()
 	time := time.Now().Unix()
@@ -104,10 +106,11 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 
 	res := Message{"Success"}
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 func getLiveData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
 	// Get parameters from request
 	sensor := getMuxVariable("sensor", request)
 
@@ -132,7 +135,6 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
