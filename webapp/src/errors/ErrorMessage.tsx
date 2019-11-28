@@ -8,7 +8,7 @@ const ErrorMessage: React.FC<{
   size?: { width: number | string; height: number | string };
 }> = ({
   error,
-  onRefetch = () => console.warn("You haven't passed a fucntion"),
+  onRefetch = () => console.error("You haven't passed a function"),
   size = { width: "100%", height: "100%" }
 }) => {
   return (

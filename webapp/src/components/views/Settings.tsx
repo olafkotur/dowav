@@ -5,6 +5,8 @@ import SettingsContext from "../../context/SettingsContext";
 import useFetch from "../../hooks/useFetch";
 import Range from "../control/Range";
 import { toast } from "react-toastify";
+import Loader from "../styled/Loader";
+import ErrorMessage from "../../errors/ErrorMessage";
 
 type FetchedSettings = { time: number; type: string; value: any };
 
@@ -42,12 +44,12 @@ function compare(
 }
 
 const Settings: React.FC = () => {
-  const [counter] = useState(0);
+  const [counter, setCounter] = useState(0);
   const { settings, setSettings } = useContext(SettingsContext);
   const [serverSettings, setServerSettings] = useState<SettingsState | null>(
     null
   );
-  const { data } = useFetch({
+  const { data, loading, error } = useFetch({
     useCache: false,
     query: { endpoint: "/api/setting/all" },
     refetch: counter
@@ -125,7 +127,20 @@ const Settings: React.FC = () => {
       </div>
       <div className="column">
         <h2>Server Side</h2>
-        {serverSettings ? (
+        {loading ? (
+          <Loader size={{ width: "100%", height: "100%" }} />
+        ) : error ? (
+          <ErrorMessage
+            error={{
+              title: "Something Wrong",
+              message: "Can't load settings",
+              actions: ["refetch"]
+            }}
+            onRefetch={() => {
+              setCounter(prev => prev + 1);
+            }}
+          />
+        ) : serverSettings ? (
           <>
             {createControls(serverSettings, (key: any, value: any) => {
               const newState = {
