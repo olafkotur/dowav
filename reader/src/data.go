@@ -45,6 +45,7 @@ func startProcessingData(interval time.Duration) {
 		min := calcMin(zone)
 		max := calcMax(zone)
 		formatted := formatHistoricData(average, min, max, int(startTime), int(endTime), i+1)
+		fmt.Printf("Uploading historic data for zone: %d\n", i+1)
 		uploadHistoricData(formatted)
 	}
 }
@@ -281,6 +282,34 @@ func uploadHistoricData(data []byte) {
 		"light":       {strconv.FormatFloat(obj.Light.Average, 'f', 6, 64)},
 	}
 	res, err := http.PostForm("http://dowav-api.herokuapp.com/api/historic/upload", values)
+	if err != nil {
+		return
+	}
+	res.Body.Close()
+}
+
+func uploadWaterData(data []byte) {
+	obj := Water{}
+	_ = json.Unmarshal(data, &obj)
+
+	if obj.AccelerometerY < 0 {
+		return
+	}
+
+	gPercent := float64(obj.AccelerometerY) / 1048.0
+	tilt := int(90.0 * gPercent)
+	volume := int(float64(obj.Depth) / 12.0 * 100.0)
+
+	if tilt > 90 {
+		tilt = 90
+	}
+
+	// Define the form values
+	values := url.Values{
+		"volume": {toString(volume)},
+		"tilt":   {toString(tilt)},
+	}
+	res, err := http.PostForm("http://dowav-api.herokuapp.com/api/water/upload", values)
 	if err != nil {
 		return
 	}

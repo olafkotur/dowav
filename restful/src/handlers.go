@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-
 )
 
 // TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
@@ -208,6 +208,9 @@ func postTweet(writer http.ResponseWriter, request *http.Request) {
 	httpClient := config.Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
+	id := rand.Intn(5000)
+	msg = msg + " #T" + toString(id)
+
 	_, res, err := client.Statuses.Update(msg, nil)
 	if err != nil {
 		log.Println(err)
@@ -258,10 +261,10 @@ func postQuestionTweet(writer http.ResponseWriter, request *http.Request) {
 		log.Println(err)
 	}
 	res.Body.Close()
-	writer.Write([]byte("Success"))
+	_, _ = writer.Write([]byte("Success"))
 }
 
-func wsNotifications(w http.ResponseWriter, r *http.Request){
+func getNotificationsWs(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Get a request")
 	ch, errCh := upgrader.Upgrade(w, r, nil)
 
@@ -280,11 +283,11 @@ func wsNotifications(w http.ResponseWriter, r *http.Request){
 			fmt.Println("Database error:", err)
 			ch.Close()
 		}
-		
+
 		var notification Notification
 
 		for rows.Next() {
-			rows.Scan(&notification.Time, &notification.Message, &notification.Type)
+			_ = rows.Scan(&notification.Time, &notification.Message, &notification.Type)
 		}
 		rows.Close()
 
@@ -297,14 +300,12 @@ func wsNotifications(w http.ResponseWriter, r *http.Request){
 			}
 			connTime = time.Now()
 		}
-		
+
 		time.Sleep(2 * time.Second)
 	}
-
 }
 
-func pushNotification(w http.ResponseWriter, r *http.Request){
-	fmt.Println("POST /api/notifications")
+func pushNotification(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	time := time.Now().Unix()
 	message := r.Form.Get("message")
@@ -316,7 +317,7 @@ func pushNotification(w http.ResponseWriter, r *http.Request){
 	}
 
 	statement, _ := database.Prepare("INSERT INTO notification (time, message, messageType) VALUES (?, ?, ?)")
-	_, err := statement.Exec( time, message, messageType)
+	_, err := statement.Exec(time, message, messageType)
 	if err != nil {
 		http.Error(w, "Database failed to execute command", http.StatusInternalServerError)
 		return
@@ -325,4 +326,135 @@ func pushNotification(w http.ResponseWriter, r *http.Request){
 	res := Message{"Success"}
 	sendResponse(res, w)
 	printRequest(r)
+}
+
+func uploadWaterData(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
+	now := time.Now().Unix()
+	volume := request.Form.Get("volume")
+	tilt := request.Form.Get("tilt")
+
+	statement, _ := database.Prepare("INSERT INTO water (time, volume, tilt) VALUES (?, ?, ?)")
+	_, err := statement.Exec(now, volume, tilt)
+	if err != nil {
+		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = writer.Write([]byte("Success"))
+	printRequest(request)
+}
+
+func getWaterWs(writer http.ResponseWriter, request *http.Request) {
+	ch, errCh := upgrader.Upgrade(writer, request, nil)
+
+	if errCh != nil {
+		fmt.Println("Upgrader error: " + errCh.Error())
+		return
+	}
+	defer ch.Close()
+
+	for {
+		rows, err := database.Query("SELECT * FROM water ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			fmt.Println("Database error")
+			ch.Close()
+		}
+
+		var water WaterData
+
+		for rows.Next() {
+			_ = rows.Scan(&water.Time, &water.Volume, &water.Tilt)
+		}
+		rows.Close()
+
+		if water.Time != 0 {
+			water.Time *= 1000
+			err = ch.WriteJSON(water)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+
+		time.Sleep(500 * time.Millisecond)
+	}
+	res := Message{"Success"}
+	sendResponse(res, writer)
+	printRequest(request)
+}
+
+func setUserSetting(writer http.ResponseWriter, request *http.Request) {
+	_ = request.ParseForm()
+	time := time.Now().Unix()
+	settingType := request.Form.Get("type")
+	value := request.Form.Get("value")
+
+	if settingType == "" || value == "" {
+		http.Error(writer, "Provide a type and setting field in a form", http.StatusBadRequest)
+		return
+	}
+
+	statement, _ := database.Prepare("UPDATE settings SET time=?, value=? WHERE type == ?")
+	_, err := statement.Exec(toString(int(time)), value, settingType)
+	if err != nil {
+		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
+		return
+	}
+
+	res := Message{"Success"}
+	sendResponse(res, writer)
+	printRequest(request)
+}
+
+func getUserSettingWs(writer http.ResponseWriter, request *http.Request) {
+	ch, errCh := upgrader.Upgrade(writer, request, nil)
+
+	if errCh != nil {
+		fmt.Println("Upgrader error: " + errCh.Error())
+		return
+	}
+	connTime := time.Now()
+	defer ch.Close()
+
+	for {
+		rows, err := database.Query("SELECT * FROM settings WHERE time > " + toString(int(connTime.Unix())) + " ORDER BY time DESC LIMIT 1")
+		if err != nil {
+			fmt.Println("Database error")
+			ch.Close()
+		}
+
+		var settings Setting
+
+		for rows.Next() {
+			_ = rows.Scan(&settings.Time, &settings.Type, &settings.Value)
+		}
+		rows.Close()
+
+		if settings.Time != 0 && settings.Type != "" && settings.Value != "" {
+			settings.Time *= 1000
+			err = ch.WriteJSON(settings)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+			connTime = time.Now()
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+}
+
+func getAllUserSettings(writer http.ResponseWriter, request *http.Request) {
+	var res []Setting
+	rows, _ := database.Query("SELECT * FROM settings")
+	for rows.Next() {
+		var setting Setting
+		_ = rows.Scan(&setting.Time, &setting.Type, &setting.Value)
+		res = append(res, setting)
+	}
+	rows.Close()
+
+	printRequest(request)
+	sendResponse(res, writer)
 }

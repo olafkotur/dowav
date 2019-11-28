@@ -13,7 +13,7 @@ import (
 )
 
 func checkDeletion(start time.Time, lastHourDiff int) (hDiff int) {
-	diff := time.Now().Sub(start)
+	diff := time.Since(start)
 	hourDiff := int(diff.Hours())
 	if hourDiff >= 24 && lastHourDiff != hourDiff {
 		//fmt.Println(reflect.TypeOf(hourDiff))

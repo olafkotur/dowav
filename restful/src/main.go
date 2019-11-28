@@ -7,16 +7,16 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/gorilla/websocket"
-
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var database *sql.DB
 
-var upgrader = websocket.Upgrader{ 
+var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
@@ -69,6 +69,21 @@ func main() {
 		panic(err)
 	}
 
+	// Create water table in database
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS water (time REAL, volume INT, tilt INT)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+
+	// Create setting table in database
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS settings (time REAL, type TEXT, value TEXT)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+	setDefaultSettings()
+
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
@@ -80,12 +95,32 @@ func main() {
 	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
 	router.HandleFunc("/api/tweets", getTweets).Methods("GET")
 	router.HandleFunc("/api/tweet/question", postQuestionTweet).Methods("POST")
-	router.HandleFunc("/api/notifications", wsNotifications)
-	// For testing could be deleted or left for future needs
+	router.HandleFunc("/api/notifications", getNotificationsWs).Methods("GET")
 	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
+	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
+	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
+	router.HandleFunc("/api/setting", setUserSetting).Methods("POST")
+	router.HandleFunc("/api/setting", getUserSettingWs).Methods("GET")
+	router.HandleFunc("/api/setting/all", getAllUserSettings).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
+}
+
+func setDefaultSettings() {
+	// Clear the table from previous settings
+	statement, _ := database.Prepare("DELETE FROM settings")
+	_, _ = statement.Exec()
+
+	types := []string{"shouldSendTweets", "minTemperature", "minMoisture", "minLight", "maxTemperature", "maxLight"}
+	values := []string{"true", "18", "50", "20", "35", "225"}
+
+	// Set each user setting
+	now := time.Now().Unix()
+	statement, _ = database.Prepare("INSERT INTO settings (time, type, value) VALUES (?, ?, ?)")
+	for i := range types {
+		_, _ = statement.Exec(now, types[i], values[i])
+	}
 }
 
 func printRequest(request *http.Request) {

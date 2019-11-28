@@ -5,13 +5,25 @@ type Message struct {
 }
 
 type Notification struct {
-	Time float64 `json:"time"`
-	Message string `json:"message"`
-	Type string `json:"type"`
+	Time    float64 `json:"time"`
+	Message string  `json:"message"`
+	Type    string  `json:"type"`
 }
 type ReadingData struct {
 	Time  float64 `json:"time"`
 	Value float64 `json:"value"`
+}
+
+type WaterData struct {
+	Time   float64 `json:"time"`
+	Volume float64 `json:"volume"`
+	Tilt   float64 `json:"tilt"`
+}
+
+type Setting struct {
+	Time  float64 `json:"time"`
+	Type  string  `json:"type"`
+	Value string  `json:"value"`
 }
 
 // type Readings struct {
