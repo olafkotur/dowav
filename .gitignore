@@ -1,13 +1,19 @@
 sensors/build
 sensors/yotta_targets
 sensors/yotta_modules
+
 webapp/node_modules
 webapp/build
+
 server/main
 server/logs/*
-reader/logs/*
-restful/pkg
 server/pkg
+
+reader/logs/*
+
+restful/pkg
+restful/src/database.db
+
 
 .vscode/
 *.DS_Store

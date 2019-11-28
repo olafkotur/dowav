@@ -29,7 +29,7 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	// Insert values into db
-	statement, err := database.Prepare("INSERT INTO historic (zone, startTime, endTime, temperature, moisture, light) VALUES (?, ?, ?, ?, ?, ?)")
+	statement, err := database.Prepare("INSERT INTO historic (zoneId, startTime, endTime, temperature, moisture, light) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		panic(err)
 	}
@@ -59,9 +59,11 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	for i := 0; i < 3; i++ {
 		var hisData []ReadingData
 		// Fetch from the db
-		rows, err := database.Query("SELECT endTime, " + sensor + " FROM historic WHERE zone == " + toString(i+1) + " AND startTime >= " + from + " AND endTime <= " + to + " ORDER BY zone ASC")
+		rows, err := database.Query("SELECT endTime, " + sensor + " FROM historic WHERE zoneId == " + toString(i+1) + " AND startTime >= " + from + " AND endTime <= " + to + " ORDER BY zoneId ASC")
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			http.Error(writer, "Database failed", http.StatusInternalServerError)
+			return
 		}
 
 		var endTime float64
@@ -94,7 +96,7 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO live (zone, time, temperature, moisture, light) VALUES (?, ?, ?, ?, ?)")
+	statement, _ := database.Prepare("INSERT INTO live (zoneId, time, temperature, moisture, light) VALUES (?, ?, ?, ?, ?)")
 	_, err := statement.Exec(zone, time, temperature, moisture, light)
 	if err != nil {
 		panic(err)
@@ -114,7 +116,7 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 		// Get data from db
 		var time float64
 		var sensorValue float64
-		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zone == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
+		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zoneId == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
 		if err != nil {
 			panic(err)
 		}
@@ -140,11 +142,11 @@ func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
 	zone := toInt(request.Form.Get("zone"))
 
 	if zone < 0 {
-		// TODO: Should send bad response
+		http.Error(writer, "Zone can't be less than 0", http.StatusBadRequest)
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO location (time, zone) VALUES (?, ?)")
+	statement, _ := database.Prepare("INSERT INTO location (time, zoneId) VALUES (?, ?)")
 	_, err := statement.Exec(time, zone)
 	if err != nil {
 		panic(err)
@@ -275,7 +277,7 @@ func wsNotifications(w http.ResponseWriter, r *http.Request){
 	for {
 		rows, err := database.Query("SELECT * FROM notification WHERE time > " + toString(int(connTime.Unix())) + " ORDER BY time DESC LIMIT 1")
 		if err != nil {
-			fmt.Println("Database error")
+			fmt.Println("Database error:", err)
 			ch.Close()
 		}
 		

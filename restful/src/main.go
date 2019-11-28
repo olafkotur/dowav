@@ -28,24 +28,35 @@ func main() {
 		port = "8080"
 	}
 
-	database, _ = sql.Open("sqlite3", "./database.db")
+	database, _ = sql.Open("sqlite3", "./database.db?_foreign_keys=on")
+	
+	// Create zones table in database
+	_, err := database.Exec("DROP TABLE zone")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant TEXT)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+	database.Exec("INSERT INTO zone(id,plant) VALUES (1, 'Tomatoes')")
+	database.Exec("INSERT INTO zone(id,plant) VALUES (2, 'Staff')")
+	database.Exec("INSERT INTO zone(id,plant) VALUES (3, 'Cucumbers')")
 
 	// Create historic table in database
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS historic (zone INTEGER, startTime REAL, endTime REAL, temperature REAL, moisture REAL, light REAL)")
-	_, err := statement.Exec()
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS historic (zoneId INTEGER REFERENCES zone(id), startTime REAL, endTime REAL, temperature REAL, moisture REAL, light REAL)")
+	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
 	}
 
 	// Create live table in database
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (zone INTEGER, time REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS live (zoneId INTEGER REFERENCES zone(id), time REAL, temperature INTEGER, moisture INTEGER, light INTEGER)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
 	}
 
 	// Create location table in database
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS location (time REAL, zone INTEGER)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS location (time REAL, zoneId INTEGER REFERENCES zone(id))")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)

@@ -45,7 +45,7 @@ func getLiveDataBySensor(sensor string, symbol string) (string, error, int) {
 		// Get data from db
 		var time float64
 		var sensorValue float64
-		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zone == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
+		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zoneId == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
 		if err != nil {
 			return "", errors.New("Database read error occured."), http.StatusInternalServerError
 		}
