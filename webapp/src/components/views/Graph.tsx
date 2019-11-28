@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   IViewport,
   HistoryData,
-  IHistoryData,
   GraphConfiguration,
   TimePeriod
 } from "../../types";
@@ -62,6 +61,7 @@ const Graph: React.FC<GraphProps> = ({
     return () => {
       let el = document.getElementById(conf.id);
       if (el && container.current) {
+        // eslint-disable-next-line
         container.current.removeChild(el);
       }
     };

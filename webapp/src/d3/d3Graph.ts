@@ -3,14 +3,12 @@ import {
   IViewport,
   IMargin,
   IHistoryData,
-  MultipleHistoryData,
   HistoryData,
   GraphConfiguration,
   TimePeriod
 } from "../types";
 import * as MENU_OPTIONS from "../constants/MenuOptionConstants";
 import d3LineGradients from "../d3/d3LineGradients";
-import moment from "moment";
 import d3Colors from "./d3Colors";
 
 type D3GraphProps = {
@@ -509,7 +507,7 @@ export default class D3Graph {
       let i = 0;
       for (let key in this.data) {
         //path
-        this.line[i].datum(this.data[key]).attr("d", <any>line);
+        this.line[i].datum(this.data[key]).attr("d",line as any);
         if (on === "update") {
           this.line[i]
             .attr(
@@ -526,7 +524,7 @@ export default class D3Graph {
         if (on === "start") {
           this.svg
             .attr("opacity", 0)
-            .transition(<any>t)
+            .transition(t as any)
             .attr("opacity", 1);
         }
         // circles
@@ -609,7 +607,7 @@ export default class D3Graph {
     if (data instanceof Array) {
       this.yScale = d3
         .scaleLinear()
-        .domain(<[number, number]>d3.extent(data, d => d.value))
+        .domain(d3.extent(data, d => d.value) as [number, number])
         .range([this.viewport.height, 0]);
     } else if (typeof data === "object") {
       let minmax: (number | undefined)[] = [];

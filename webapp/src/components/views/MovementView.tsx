@@ -8,7 +8,6 @@ import Loader from "../styled/Loader";
 import ErrorMessage from "../../errors/ErrorMessage";
 
 const MovementView: React.FC = () => {
-  const [count, setCount] = useState(0);
   const [savedData, setSavedData] = useState<LocationData[]>([]);
   const [size, setSize] = useState<IViewport | null>(null);
   const ref = useRef<HTMLDivElement>(null);

@@ -1,5 +1,5 @@
 import React from "react";
-import { FetchError, IViewport } from "../types";
+import { FetchError } from "../types";
 import { IoIosRefresh } from "react-icons/io";
 
 const ErrorMessage: React.FC<{

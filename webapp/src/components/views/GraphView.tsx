@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { IViewport, IHistoryData, MultipleHistoryData } from "../../types";
+import { IViewport } from "../../types";
 import Graph from "./Graph";
 import useFetch from "../../hooks/useFetch";
 import Loader from "../styled/Loader";

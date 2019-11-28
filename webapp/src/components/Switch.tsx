@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import NavigationContext from "../context/NavigationContext";
 import * as MENU_OPTIONS from "../constants/MenuOptionConstants";
-import DashboardView from "./views/DashboardView";
 import GraphView from "./views/GraphView";
 import TwitterBoard from "./views/TwitterBoard";
 import MovementView from "./views/MovementView";

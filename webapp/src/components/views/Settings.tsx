@@ -42,7 +42,7 @@ function compare(
 }
 
 const Settings: React.FC = () => {
-  const [counter, setCounter] = useState(0);
+  const [counter] = useState(0);
   const { settings, setSettings } = useContext(SettingsContext);
   const [serverSettings, setServerSettings] = useState<SettingsState | null>(
     null
@@ -57,29 +57,34 @@ const Settings: React.FC = () => {
     if (!settings) return null;
     const keys = Object.keys(settings);
 
-    return keys.map(k => {
-      const t = settings[k].type;
-      switch (t) {
-        case "checkbox": {
-          return (
-            <Checkbox
-              value={settings[k].value}
-              label={settings[k].label}
-              onChange={(newVal: any) => set(k, newVal)}
-            />
-          );
+    return keys
+      .map(k => {
+        const t = settings[k].type;
+        switch (t) {
+          case "checkbox": {
+            return (
+              <Checkbox
+                value={settings[k].value}
+                label={settings[k].label}
+                onChange={(newVal: any) => set(k, newVal)}
+              />
+            );
+          }
+          case "range": {
+            return (
+              <Range
+                label={settings[k].label}
+                value={settings[k].value}
+                onChange={(newVal: any) => set(k, +newVal)}
+              />
+            );
+          }
+          default: {
+            return undefined;
+          }
         }
-        case "range": {
-          return (
-            <Range
-              label={settings[k].label}
-              value={settings[k].value}
-              onChange={(newVal: any) => set(k, +newVal)}
-            />
-          );
-        }
-      }
-    });
+      })
+      .filter(k => k);
   }
 
   useEffect(() => {
