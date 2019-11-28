@@ -448,15 +448,39 @@ func getUserSettingWs(writer http.ResponseWriter, request *http.Request) {
 }
 
 func getAllUserSettings(writer http.ResponseWriter, request *http.Request) {
-	var res []Setting
-	rows, _ := database.Query("SELECT * FROM settings")
+	printRequest(request)
+
+	var res =  make(map[string]interface{})
+	rows, _ := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM plant INNER JOIN zone on zone.plant=plant.id")
 	for rows.Next() {
-		var setting Setting
-		_ = rows.Scan(&setting.Time, &setting.Type, &setting.Value)
-		res = append(res, setting)
+		var zone int
+		var plant string
+		var shouldSendTweets bool
+		var minTemperature int
+		var maxTemperature int
+		var minLight int
+		var maxLight int
+		var minMoisture int
+
+		err := rows.Scan(&zone, &plant, &shouldSendTweets, &minTemperature, &maxTemperature, &minLight, &maxLight, &minMoisture)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(writer, "Database failed to get settings", http.StatusInternalServerError)
+			return
+		}
+		res[plant] = make(map[string]interface{})
+		res[plant] = map[string]interface{}{
+			"zone": zone,
+			"shouldSendTweets": shouldSendTweets,
+			"minTemperature": minTemperature,
+			"maxTemperature": maxTemperature,
+			"minLight": minLight,
+			"maxLight": maxLight,
+			"minMoisture": minMoisture,
+		}
 	}
+
 	rows.Close()
 
-	printRequest(request)
 	sendResponse(res, writer)
 }
