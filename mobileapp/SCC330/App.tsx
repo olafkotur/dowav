@@ -3,12 +3,14 @@ import { StatusBar, View } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { Icon, IconProps } from 'react-native-elements';
+import { Provider } from 'react-redux';
 
 import TempScreen from './screens/TempScreen';
 import MoistureScreen from './screens/MoistureScreen';
 import LightScreen from './screens/LightScreen';
 import MovScreen from './screens/MovScreen';
 import theme from './theme';
+import store from './reducers';
 
 interface ScreenIcons<T> {
   [key: string]: T
@@ -62,7 +64,9 @@ const App: React.FunctionComponent = () => {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar backgroundColor={theme.statusBarColor} />
-      <AppContainer />
+      <Provider store={store}>
+        <AppContainer />
+      </Provider>
     </View>
   );
 };

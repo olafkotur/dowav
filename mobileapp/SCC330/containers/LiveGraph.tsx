@@ -1,40 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
+import { useSelector } from 'react-redux';
 
 import theme from '../theme';
-import { Sensor, Zone, ZoneData, GraphState } from '../types';
+import { Zone, ZoneData, GraphState, GlobalState } from '../types';
 import Loader from './Loader';
 
 interface Props {
-  sensor: Sensor,
   zone?: Zone,
   hidden?: boolean,
   style?: ViewStyle,
 }
 
-const LIVE_ENDPOINT = 'https://dowav-api.herokuapp.com/api/live/';
-const DELAY = 1000;
-
 // Function which maps live data to charts on a graph
 const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
-  const chartData: number[][] = [[], [], []];
-  data.forEach(zoneData => {
-    for (let i = 0; i < zoneData.length; i++) {
-      const point = zoneData[i];
-
-      if (zone && zone !== (i + 1)) continue;
-      chartData[i].push(point.value);
-    }
-  });
-
   const gridSvgStyle = {
     stroke: 'grey',
   };
 
-  const chartArray = chartData.map((curData, i) => {
+  const chartCount = (zone ? 1 : 3);
+  const chartData: number[][] = [];
+  for (let i = 0; i < chartCount; i++) {
+    chartData[i] = data.map(zoneData => zoneData[zone ? (zone - 1) : i].value);
+  }
+
+  const charts = chartData.map((curData, i) => {
     const chartSvgStyle = {
-      stroke: theme.graph.chartColors[zone ? zone : i % 3],
+      stroke: theme.graph.chartColors[zone ? (zone - 1) : i % 3],
       strokeWidth: theme.graph.lineWidth,
     };
 
@@ -52,50 +45,14 @@ const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
     </LineChart>
   });
 
-  return chartArray;
+  return charts;
 }
 
 const LiveGraph = (props: Props) => {
-  const { sensor, zone, hidden, style } = props;
+  const { zone, hidden, style } = props;
 
-  const [ data, setData ] = useState([] as ZoneData[]);
   const [ graphState, setGraphState ] = useState('loading' as GraphState);
-
-  // Upon mounting, start worker
-  useEffect(() => {
-    let doUpdate = true;
-
-    // Get new data every DELAY ms
-    const worker = setInterval(() => {
-      try {
-        const pData = fetch(`${LIVE_ENDPOINT}${sensor}`);
-  
-        pData.then(res => {
-          res.json().then((serverData: ZoneData) => {
-            if (serverData) {
-              if (doUpdate) {
-                if (data.length <= 15) {
-                  setData([ ...data, serverData ]);
-                } else {
-                  setData([ ...data.slice(1), serverData ]);
-                }
-                setGraphState('displaying');
-              }
-            }
-          });
-        });
-      } catch (err) {
-        console.log(err);
-        setGraphState('error');
-      }
-    }, DELAY);
-
-    // Upon unmounting, stop worker
-    return () => {
-      doUpdate = false;
-      clearInterval(worker);
-    }
-  }, [data]);
+  let liveData = useSelector((store: GlobalState) => store.liveData);
 
   const graphStyle: ViewStyle = {
     display: hidden ? 'none' : 'flex',
@@ -103,9 +60,11 @@ const LiveGraph = (props: Props) => {
     ...style,
   };
 
-  if (graphState === 'loading') {
+  if (liveData.length) {
     return (
-      <Loader />
+      <View style={graphStyle}>
+        {mapDataToCharts(liveData, zone)}
+      </View>
     );
   } else if (graphState === 'error') {
     return (
@@ -114,9 +73,7 @@ const LiveGraph = (props: Props) => {
   }
 
   return (
-    <View style={graphStyle}>
-      {mapDataToCharts(data, zone)}
-    </View>
+    <Loader />
   );
 }
 

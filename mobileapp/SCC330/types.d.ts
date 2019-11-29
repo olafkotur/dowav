@@ -2,6 +2,15 @@ export type Sensor = 'temperature' | 'moisture' | 'light';
 export type Zone = 1 | 2 | 3 | null | undefined;
 export type GraphState = 'loading' | 'displaying' | 'error';
 
+export type GlobalState = {
+  liveData: ZoneData[],
+};
+
+export type LiveDataAction = {
+  type: 'LIVE_DATA_RECV',
+  payload: ZoneData,
+};
+
 // Data for one sensor in one zone
 export type SensorData = {
   value: number,

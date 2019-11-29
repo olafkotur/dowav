@@ -55,7 +55,6 @@ const renderGraphs = (sensor: Sensor, activeGraph: number, liveStates: boolean[]
         </View>
         {liveStates[i] ? (
           <LiveGraph
-            sensor={sensor}
             zone={zone}
           />
         ) : (

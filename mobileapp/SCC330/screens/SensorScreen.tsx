@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import HistoricGraph from '../containers/HistoricGraph';
@@ -7,16 +7,28 @@ import GraphSet from '../containers/GraphSet';
 import GraphButton from '../containers/GraphButton';
 
 import theme from '../theme';
-import { Sensor } from '../types';
+import { Sensor, ZoneData } from '../types';
+import { fetchLiveData } from '../actions';
 
 interface Props {
   sensor: Sensor,
 }
+const LIVE_DATA_FETCH_DELAY = 1000;
 
-const TempScreen = (props: Props) => {
+const SensorScreen = (props: Props) => {
   const { sensor } = props;
 
   const [ isLive, setIsLive ] = useState(false) as [ boolean, Function ];
+
+  useEffect(() => {
+    const liveDataInterval = setInterval(() => {
+      fetchLiveData(sensor);
+    }, LIVE_DATA_FETCH_DELAY);
+
+    return () => {
+      clearInterval(liveDataInterval);
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -38,7 +50,6 @@ const TempScreen = (props: Props) => {
 
       {isLive ? (
         <LiveGraph
-          sensor={sensor}
           style={styles.mainGraphContainer}
         />
       ) : (
@@ -74,4 +85,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default TempScreen;
+export default SensorScreen;
