@@ -62,3 +62,14 @@ export type Notification = {
   message: string;
   type: "info" | "success" | "warning" | "error" | "default" | undefined;
 };
+
+export type SettingsStateValue = {
+  value: any;
+  type: string;
+  label: string;
+};
+
+export type SettingsState = {
+  [key: string]: SettingsStateValue;
+  showNotifications: SettingsStateValue;
+};

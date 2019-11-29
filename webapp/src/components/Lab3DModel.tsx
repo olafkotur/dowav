@@ -16,12 +16,14 @@ const Lab3DModel: React.FC<Lab3DModelProps> = ({ viewport }) => {
     if (container.current && !lab3d) {
       setLab3d(new Lab3D({ viewport, container: container.current }));
     }
+    // eslint-disable-next-line
   }, [container.current]);
 
   useEffect(() => {
     if (lab3d) {
       lab3d.updateViewport(viewport);
     }
+    // eslint-disable-next-line
   }, [viewport]);
 
   useEffect(() => {
@@ -43,6 +45,7 @@ const Lab3DModel: React.FC<Lab3DModelProps> = ({ viewport }) => {
         clearInterval(id);
       };
     }
+    // eslint-disable-next-line
   }, [data, lab3d]);
 
   return (

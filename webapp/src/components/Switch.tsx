@@ -1,11 +1,12 @@
 import React, { useContext } from "react";
 import NavigationContext from "../context/NavigationContext";
 import * as MENU_OPTIONS from "../constants/MenuOptionConstants";
-import DashboardView from "./views/DashboardView";
 import GraphView from "./views/GraphView";
 import TwitterBoard from "./views/TwitterBoard";
 import MovementView from "./views/MovementView";
 import { IoIosConstruct } from "react-icons/io";
+import Settings from "./views/Settings";
+import WateringCanView from "./views/WateringCanView";
 
 const Switch: React.FC = () => {
   const { currentOption } = useContext(NavigationContext);
@@ -27,6 +28,12 @@ const Switch: React.FC = () => {
       break;
     case MENU_OPTIONS.TWITTER:
       component = <TwitterBoard />;
+      break;
+    case MENU_OPTIONS.SETTINGS:
+      component = <Settings />;
+      break;
+    case MENU_OPTIONS.WATERING_CAN:
+      component = <WateringCanView />;
       break;
     default:
       component = (

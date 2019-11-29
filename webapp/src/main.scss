@@ -13,6 +13,10 @@ $niceBlue: rgb(79, 140, 201);
   box-sizing: border-box;
 }
 
+button {
+  font-family: "Montserrat", sans-serif;
+}
+
 html {
   font-family: "Montserrat", sans-serif;
   color: white;
@@ -521,4 +525,129 @@ svg {
 
 span.hashtag {
   color: rgb(79, 140, 201);
+}
+
+// Settings
+
+.settings {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  h2 {
+    color: rgb(79, 140, 201);
+    text-decoration: underline;
+    text-align: center;
+  }
+  .column {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .checkbox-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.1);
+
+      input[type="number"] {
+        width: 50px;
+      }
+    }
+  }
+  button {
+    font-size: 16px;
+    width: 20%;
+    background: none;
+    border: 2px solid rgb(79, 140, 201);
+    color: white;
+    border-radius: 5px;
+    padding: 15px;
+    &:disabled {
+      background: darkgrey;
+      border: 2px solid darkgrey;
+      &:hover {
+        background: darkgrey;
+      }
+    }
+    &:hover {
+      background: rgb(79, 140, 201);
+    }
+  }
+}
+
+input.switch-checkbox {
+  position: relative;
+  appearance: none;
+  outline: none;
+  width: 50px;
+  height: 30px;
+  background-color: #ffffff;
+  border: 1px solid #d9dadc;
+  border-radius: 50px;
+  box-shadow: inset -20px 0 0 0 #ffffff;
+  transition-duration: 200ms;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 26px;
+    height: 26px;
+    background-color: transparent;
+    border-radius: 50%;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  &:checked {
+    border-color: rgb(79, 140, 201);
+    box-shadow: inset 20px 0 0 0 rgb(79, 140, 201);
+  }
+  &:checked:after {
+    left: 20px;
+    box-shadow: -2px 4px 3px rgba(0, 0, 0, 0.05);
+  }
+}
+
+// Watering can
+
+.watering-can {
+  display: flex;
+  justify-content: center;
+}
+
+.st0 {
+  fill: url(#SVGID_1_);
+  stroke: #000000;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-miterlimit: 10;
+}
+.st1 {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 10;
+  stroke-linejoin: round;
+  stroke-miterlimit: 10;
+}
+.st2 {
+  fill: url(#SVGID_2_);
+  stroke: #000000;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-miterlimit: 10;
+}
+
+.st3 {
+  fill: #5371b7;
+}
+.st4 {
+  fill: #2c4f97;
+}
+.st5 {
+  fill: #5371b7;
+  stroke: #ffffff;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-miterlimit: 10;
 }

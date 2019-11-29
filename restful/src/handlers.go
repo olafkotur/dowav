@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +17,8 @@ import (
 
 // TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
 func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
 	// Get data from request
 	_ = request.ParseForm()
 	zone := toInt(request.Form.Get("zone"))
@@ -29,7 +34,7 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	// Insert values into db
-	statement, err := database.Prepare("INSERT INTO historic (zone, startTime, endTime, temperature, moisture, light) VALUES (?, ?, ?, ?, ?, ?)")
+	statement, err := database.Prepare("INSERT INTO historic (zoneId, startTime, endTime, temperature, moisture, light) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		panic(err)
 	}
@@ -39,11 +44,11 @@ func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 
 	res := Message{"Success"}
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 // /api/historic/temperature?from=1573398000&to=1573398300
 func getHistoricData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
 	// Safety in case no paramters are entered
 	if !strings.Contains(request.URL.String(), "from=") || !strings.Contains(request.URL.String(), "to=") {
 		// TODO: Add a bad request here
@@ -59,9 +64,11 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	for i := 0; i < 3; i++ {
 		var hisData []ReadingData
 		// Fetch from the db
-		rows, err := database.Query("SELECT endTime, " + sensor + " FROM historic WHERE zone == " + toString(i+1) + " AND startTime >= " + from + " AND endTime <= " + to + " ORDER BY zone ASC")
+		rows, err := database.Query("SELECT endTime, " + sensor + " FROM historic WHERE zoneId == " + toString(i+1) + " AND startTime >= " + from + " AND endTime <= " + to + " ORDER BY zoneId ASC")
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			http.Error(writer, "Database failed", http.StatusInternalServerError)
+			return
 		}
 
 		var endTime float64
@@ -76,11 +83,11 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 // TEST: curl -d "zone=1&temperature=26&moisture=220&light=98" localhost:8080/api/live/upload
 func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
 	// Get data from request
 	_ = request.ParseForm()
 	time := time.Now().Unix()
@@ -94,7 +101,7 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO live (zone, time, temperature, moisture, light) VALUES (?, ?, ?, ?, ?)")
+	statement, _ := database.Prepare("INSERT INTO live (zoneId, time, temperature, moisture, light) VALUES (?, ?, ?, ?, ?)")
 	_, err := statement.Exec(zone, time, temperature, moisture, light)
 	if err != nil {
 		panic(err)
@@ -102,10 +109,11 @@ func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 
 	res := Message{"Success"}
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 func getLiveData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
 	// Get parameters from request
 	sensor := getMuxVariable("sensor", request)
 
@@ -114,7 +122,7 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 		// Get data from db
 		var time float64
 		var sensorValue float64
-		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zone == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
+		rows, err := database.Query("SELECT time, " + sensor + " FROM live WHERE zoneId == " + toString(i+1) + " ORDER BY time DESC LIMIT 1")
 		if err != nil {
 			panic(err)
 		}
@@ -130,7 +138,6 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	sendResponse(res, writer)
-	printRequest(request)
 }
 
 func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
@@ -140,11 +147,11 @@ func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
 	zone := toInt(request.Form.Get("zone"))
 
 	if zone < 0 {
-		// TODO: Should send bad response
+		http.Error(writer, "Zone can't be less than 0", http.StatusBadRequest)
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO location (time, zone) VALUES (?, ?)")
+	statement, _ := database.Prepare("INSERT INTO location (time, zoneId) VALUES (?, ?)")
 	_, err := statement.Exec(time, zone)
 	if err != nil {
 		panic(err)
@@ -278,7 +285,7 @@ func getNotificationsWs(w http.ResponseWriter, r *http.Request) {
 	for {
 		rows, err := database.Query("SELECT * FROM notification WHERE time > " + toString(int(connTime.Unix())) + " ORDER BY time DESC LIMIT 1")
 		if err != nil {
-			fmt.Println("Database error")
+			fmt.Println("Database error:", err)
 			ch.Close()
 		}
 
@@ -382,77 +389,169 @@ func getWaterWs(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 }
 
-func setUserSetting(writer http.ResponseWriter, request *http.Request) {
-	_ = request.ParseForm()
-	time := time.Now().Unix()
-	settingType := request.Form.Get("type")
-	value := request.Form.Get("value")
-
-	if settingType == "" || value == "" {
-		http.Error(writer, "Provide a type and setting field in a form", http.StatusBadRequest)
-		return
-	}
-
-	statement, _ := database.Prepare("UPDATE settings SET time=?, value=? WHERE type == ?")
-	_, err := statement.Exec(toString(int(time)), value, settingType)
-	if err != nil {
-		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
-		return
-	}
-
-	res := Message{"Success"}
-	sendResponse(res, writer)
+func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
+
+	connTime := time.Now().Unix()
+	decoder := json.NewDecoder(request.Body)
+	var s []PlantSettings
+	err := decoder.Decode(&s)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't parse JSON", http.StatusBadRequest)
+		return
+	}
+
+	zones, zoneErr := queryAllZones()
+	if zoneErr != nil {
+		http.Error(writer, zoneErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, p := range s {
+		if *p.Zone > int64(len(*zones)) || *p.Zone < 1 {
+			http.Error(writer, "There is no such zone.", http.StatusBadRequest)
+			return
+		}
+	}
+
+	statement, statementError := database.Prepare("Update plant SET shouldSendTweets=?, minTemperature=?, maxTemperature=?, minLight=?, maxLight=?, minMoisture=?, lastUpdate=? WHERE plant=?")
+	updateStatement, updateStatError := database.Prepare("UPDATE zone SET plant=(SELECT id FROM plant WHERE plant=?) WHERE id=?")
+	if statementError != nil || updateStatError != nil {
+		fmt.Println(statementError)
+		http.Error(writer, "Database statement Error", http.StatusInternalServerError)
+		return
+	}
+
+	for _, plant := range s {
+		var plantName = plant.Plant
+		_, err := statement.Exec(&plant.ShouldSendTweets, &plant.MinTemperature, &plant.MaxTemperature, &plant.MinLight, &plant.MaxLight, &plant.MinMoisture, &connTime, plantName)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(writer, "Database can't execute statement", http.StatusInternalServerError)
+			return
+		}
+
+		if plant.Zone != nil {
+			_, err := updateStatement.Exec(plantName, plant.Zone)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(writer, "Database can't execute statement", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	res := Message{"Successfully changed row."}
+	sendResponse(res, writer)
 }
 
-func getUserSettingWs(writer http.ResponseWriter, request *http.Request) {
+func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 	ch, errCh := upgrader.Upgrade(writer, request, nil)
 
 	if errCh != nil {
 		fmt.Println("Upgrader error: " + errCh.Error())
 		return
 	}
-	connTime := time.Now()
+	connTime := time.Now().Unix()
+	timeStr := strconv.Itoa(int(connTime))
 	defer ch.Close()
 
 	for {
-		rows, err := database.Query("SELECT * FROM settings WHERE time > " + toString(int(connTime.Unix())) + " ORDER BY time DESC LIMIT 1")
-		if err != nil {
-			fmt.Println("Database error")
-			ch.Close()
+		var res []PlantSettings
+		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
+		if e != nil {
+			fmt.Println(e)
 		}
-
-		var settings Setting
-
 		for rows.Next() {
-			_ = rows.Scan(&settings.Time, &settings.Type, &settings.Value)
+			var plantSettings PlantSettings
+			var zone sql.NullInt64
+
+			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture)
+			fmt.Println(res)
+			if err != nil {
+				fmt.Println(err)
+				ch.Close()
+			}
+			if zone.Valid {
+				plantSettings.Zone = &zone.Int64
+			}
+			res = append(res, plantSettings)
 		}
 		rows.Close()
-
-		if settings.Time != 0 && settings.Type != "" && settings.Value != "" {
-			settings.Time *= 1000
-			err = ch.WriteJSON(settings)
+		if len(res) > 0 {
+			err := ch.WriteJSON(res)
 			if err != nil {
 				log.Println("write:", err)
 				break
 			}
-			connTime = time.Now()
+			connTime = time.Now().Unix()
+			timeStr = strconv.Itoa(int(connTime))
 		}
 
 		time.Sleep(2 * time.Second)
 	}
 }
 
-func getAllUserSettings(writer http.ResponseWriter, request *http.Request) {
-	var res []Setting
-	rows, _ := database.Query("SELECT * FROM settings")
-	for rows.Next() {
-		var setting Setting
-		_ = rows.Scan(&setting.Time, &setting.Type, &setting.Value)
-		res = append(res, setting)
-	}
-	rows.Close()
-
+func getAllPlantsSettings(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
-	sendResponse(res, writer)
+
+	res, err := queryAllPlantsSettings()
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sendResponse(*res, writer)
+}
+
+func createPlantSetting(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	connTime := time.Now().Unix()
+	decoder := json.NewDecoder(request.Body)
+	var s PlantSettings
+	err := decoder.Decode(&s)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't parse JSON", http.StatusBadRequest)
+		return
+	}
+
+	statement, err := database.Prepare("INSERT INTO plant(plant, shouldSendTweets, minTemperature, maxTemperature, minLight, maxLight, minMoisture, lastUpdate) VALUES (?,?,?,?,?,?,?,?)")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't prepare statement", http.StatusInternalServerError)
+		return
+	}
+	_, err = statement.Exec(s.Plant, &s.ShouldSendTweets, &s.MinTemperature, &s.MaxTemperature, &s.MinLight, &s.MaxLight, &s.MinMoisture, connTime)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't Execute SQL", http.StatusInternalServerError)
+		return
+	}
+	sendResponse(Message{"Success"}, writer)
+}
+
+func deletePlantSetting(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	plantName := getMuxVariable("plantName", request)
+
+	statement, err := database.Prepare("DELETE FROM plant WHERE plant=?")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't prepare statement", http.StatusInternalServerError)
+		return
+	}
+	res, err := statement.Exec(&plantName)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't Execute SQL", http.StatusInternalServerError)
+		return
+	}
+	if rows, _ := res.RowsAffected(); rows == 1 {
+		sendResponse(Message{"Success"}, writer)
+	} else {
+		http.Error(writer, "There is no "+plantName+" plant.", http.StatusBadRequest)
+	}
 }

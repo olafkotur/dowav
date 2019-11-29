@@ -30,7 +30,12 @@ const Tweet: React.FC<TweetProps> = ({ data }) => {
   return (
     <div key={data.created_at} className="tweet">
       <div className="tweet-header">
-        <img src={data.user.profile_image_url} width="24px" height="24px" />
+        <img
+          alt="tweeter logo"
+          src={data.user.profile_image_url}
+          width="24px"
+          height="24px"
+        />
         <h4>{data.user.name}</h4>
         <p>@{data.user.screen_name}</p>
       </div>
