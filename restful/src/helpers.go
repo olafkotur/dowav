@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -72,4 +74,46 @@ func getLiveDataBySensor(sensor string, symbol string) (string, error, int) {
 	}
 
 	return str, nil, 0
+}
+
+func queryAllPlantsSettings() (*[]PlantSettings, error) {
+	var res []PlantSettings
+	rows, _ := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM plant LEFT JOIN zone on zone.plant=plant.id")
+	for rows.Next() {
+		var plantSettings PlantSettings
+		var zone sql.NullInt64
+
+		err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture)
+		if err != nil {
+			fmt.Println(err)
+			return nil, errors.New("Database failed to get plant settings")
+		}
+		if zone.Valid {
+			plantSettings.Zone = &zone.Int64
+		}
+		res = append(res, plantSettings)
+	}
+	rows.Close()
+	fmt.Println(res)
+	return &res, nil
+}
+
+func queryAllZones() (*[]ZoneTableRow, error) {
+	var zones []ZoneTableRow
+	rows, rowsErr := database.Query("SELECT * FROM zone")
+	if rowsErr != nil {
+		return nil, errors.New("Can't get zones from database")
+	}
+	for rows.Next() {
+		var zone ZoneTableRow
+
+		err := rows.Scan(&zone.id, &zone.plantId)
+		if err != nil {
+			fmt.Println(err)
+			return nil, errors.New("Database failed to get zone")
+		}
+		zones = append(zones, zone)
+	}
+	rows.Close()
+	return &zones, nil
 }

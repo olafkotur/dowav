@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -386,101 +389,169 @@ func getWaterWs(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 }
 
-func setUserSetting(writer http.ResponseWriter, request *http.Request) {
-	_ = request.ParseForm()
-	time := time.Now().Unix()
-	settingType := request.Form.Get("type")
-	value := request.Form.Get("value")
-
-	if settingType == "" || value == "" {
-		http.Error(writer, "Provide a type and setting field in a form", http.StatusBadRequest)
-		return
-	}
-
-	statement, _ := database.Prepare("UPDATE settings SET time=?, value=? WHERE type == ?")
-	_, err := statement.Exec(toString(int(time)), value, settingType)
-	if err != nil {
-		http.Error(writer, "Database failed to execute command", http.StatusInternalServerError)
-		return
-	}
-
-	res := Message{"Success"}
-	sendResponse(res, writer)
+func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
+
+	connTime := time.Now().Unix()
+	decoder := json.NewDecoder(request.Body)
+	var s []PlantSettings
+	err := decoder.Decode(&s)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't parse JSON", http.StatusBadRequest)
+		return
+	}
+
+	zones, zoneErr := queryAllZones()
+	if zoneErr != nil {
+		http.Error(writer, zoneErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, p := range s {
+		if *p.Zone > int64(len(*zones)) || *p.Zone < 1 {
+			http.Error(writer, "There is no such zone.", http.StatusBadRequest)
+			return
+		}
+	}
+
+	statement, statementError := database.Prepare("Update plant SET shouldSendTweets=?, minTemperature=?, maxTemperature=?, minLight=?, maxLight=?, minMoisture=?, lastUpdate=? WHERE plant=?")
+	updateStatement, updateStatError := database.Prepare("UPDATE zone SET plant=(SELECT id FROM plant WHERE plant=?) WHERE id=?")
+	if statementError != nil || updateStatError != nil {
+		fmt.Println(statementError)
+		http.Error(writer, "Database statement Error", http.StatusInternalServerError)
+		return
+	}
+
+	for _, plant := range s {
+		var plantName = plant.Plant
+		_, err := statement.Exec(&plant.ShouldSendTweets, &plant.MinTemperature, &plant.MaxTemperature, &plant.MinLight, &plant.MaxLight, &plant.MinMoisture, &connTime, plantName)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(writer, "Database can't execute statement", http.StatusInternalServerError)
+			return
+		}
+
+		if plant.Zone != nil {
+			_, err := updateStatement.Exec(plantName, plant.Zone)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(writer, "Database can't execute statement", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	res := Message{"Successfully changed row."}
+	sendResponse(res, writer)
 }
 
-func getUserSettingWs(writer http.ResponseWriter, request *http.Request) {
+func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 	ch, errCh := upgrader.Upgrade(writer, request, nil)
 
 	if errCh != nil {
 		fmt.Println("Upgrader error: " + errCh.Error())
 		return
 	}
-	connTime := time.Now()
+	connTime := time.Now().Unix()
+	timeStr := strconv.Itoa(int(connTime))
 	defer ch.Close()
 
 	for {
-		rows, err := database.Query("SELECT * FROM settings WHERE time > " + toString(int(connTime.Unix())) + " ORDER BY time DESC LIMIT 1")
-		if err != nil {
-			fmt.Println("Database error")
-			ch.Close()
+		var res []PlantSettings
+		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
+		if e != nil {
+			fmt.Println(e)
 		}
-
-		var settings Setting
-
 		for rows.Next() {
-			_ = rows.Scan(&settings.Time, &settings.Type, &settings.Value)
+			var plantSettings PlantSettings
+			var zone sql.NullInt64
+
+			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture)
+			fmt.Println(res)
+			if err != nil {
+				fmt.Println(err)
+				ch.Close()
+			}
+			if zone.Valid {
+				plantSettings.Zone = &zone.Int64
+			}
+			res = append(res, plantSettings)
 		}
 		rows.Close()
-
-		if settings.Time != 0 && settings.Type != "" && settings.Value != "" {
-			settings.Time *= 1000
-			err = ch.WriteJSON(settings)
+		if len(res) > 0 {
+			err := ch.WriteJSON(res)
 			if err != nil {
 				log.Println("write:", err)
 				break
 			}
-			connTime = time.Now()
+			connTime = time.Now().Unix()
+			timeStr = strconv.Itoa(int(connTime))
 		}
 
 		time.Sleep(2 * time.Second)
 	}
 }
 
-func getAllUserSettings(writer http.ResponseWriter, request *http.Request) {
+func getAllPlantsSettings(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 
-	var res =  make(map[string]interface{})
-	rows, _ := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM plant INNER JOIN zone on zone.plant=plant.id")
-	for rows.Next() {
-		var zone int
-		var plant string
-		var shouldSendTweets bool
-		var minTemperature int
-		var maxTemperature int
-		var minLight int
-		var maxLight int
-		var minMoisture int
-
-		err := rows.Scan(&zone, &plant, &shouldSendTweets, &minTemperature, &maxTemperature, &minLight, &maxLight, &minMoisture)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(writer, "Database failed to get settings", http.StatusInternalServerError)
-			return
-		}
-		res[plant] = make(map[string]interface{})
-		res[plant] = map[string]interface{}{
-			"zone": zone,
-			"shouldSendTweets": shouldSendTweets,
-			"minTemperature": minTemperature,
-			"maxTemperature": maxTemperature,
-			"minLight": minLight,
-			"maxLight": maxLight,
-			"minMoisture": minMoisture,
-		}
+	res, err := queryAllPlantsSettings()
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	rows.Close()
+	sendResponse(*res, writer)
+}
 
-	sendResponse(res, writer)
+func createPlantSetting(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	connTime := time.Now().Unix()
+	decoder := json.NewDecoder(request.Body)
+	var s PlantSettings
+	err := decoder.Decode(&s)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't parse JSON", http.StatusBadRequest)
+		return
+	}
+
+	statement, err := database.Prepare("INSERT INTO plant(plant, shouldSendTweets, minTemperature, maxTemperature, minLight, maxLight, minMoisture, lastUpdate) VALUES (?,?,?,?,?,?,?,?)")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't prepare statement", http.StatusInternalServerError)
+		return
+	}
+	_, err = statement.Exec(s.Plant, &s.ShouldSendTweets, &s.MinTemperature, &s.MaxTemperature, &s.MinLight, &s.MaxLight, &s.MinMoisture, connTime)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't Execute SQL", http.StatusInternalServerError)
+		return
+	}
+	sendResponse(Message{"Success"}, writer)
+}
+
+func deletePlantSetting(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	plantName := getMuxVariable("plantName", request)
+
+	statement, err := database.Prepare("DELETE FROM plant WHERE plant=?")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't prepare statement", http.StatusInternalServerError)
+		return
+	}
+	res, err := statement.Exec(&plantName)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Can't Execute SQL", http.StatusInternalServerError)
+		return
+	}
+	if rows, _ := res.RowsAffected(); rows == 1 {
+		sendResponse(Message{"Success"}, writer)
+	} else {
+		http.Error(writer, "There is no "+plantName+" plant.", http.StatusBadRequest)
+	}
 }

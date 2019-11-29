@@ -3,10 +3,12 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -28,24 +30,22 @@ func main() {
 	}
 
 	database, _ = sql.Open("sqlite3", "./database.db?_foreign_keys=on")
-	
+
 	// Create plant table in database
 	_, err := database.Exec("DROP TABLE plant")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT , plant TEXT, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT , plant TEXT UNIQUE, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER, lastUpdate REAL)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
 	}
 
-	
 	// Create zones table in database
 	_, err = database.Exec("DROP TABLE zone")
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant INTEGER REFERENCES plant(id))")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant INTEGER REFERENCES plant(id) ON DELETE SET NULL)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
 	}
-	
 
 	// Create historic table in database
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS historic (zoneId INTEGER REFERENCES zone(id), startTime REAL, endTime REAL, temperature REAL, moisture REAL, light REAL)")
@@ -91,7 +91,6 @@ func main() {
 
 	setDefault()
 
-
 	// Server routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
@@ -107,9 +106,11 @@ func main() {
 	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
 	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
 	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
-	router.HandleFunc("/api/setting", setUserSetting).Methods("POST")
-	router.HandleFunc("/api/setting", getUserSettingWs).Methods("GET")
-	router.HandleFunc("/api/setting/all", getAllUserSettings).Methods("GET")
+	router.HandleFunc("/api/setting", setPlantSetting).Methods("POST")
+	router.HandleFunc("/api/setting/{plantName}", deletePlantSetting).Methods("DELETE")
+	router.HandleFunc("/api/setting/create", createPlantSetting).Methods("POST")
+	router.HandleFunc("/api/setting", getPlantSettingWs).Methods("GET")
+	router.HandleFunc("/api/setting/all", getAllPlantsSettings).Methods("GET")
 
 	log.Printf("Serving restful on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
@@ -123,14 +124,23 @@ func setDefault() {
 
 	plants := []string{"Tomatoes", "Staff", "Cucumbers"}
 	values := []interface{}{"true", 18, 50, 20, 35, 225}
-
+	time := time.Now().Unix()
 	// Set each user setting
-	statement, _ = database.Prepare("INSERT INTO plant ( plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	statement, _ = database.Prepare("INSERT INTO plant ( plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	for i := range plants {
-		r, _ := statement.Exec(plants[i], values[0],values[1],values[2],values[3],values[4],values[5])
-		id, _ := r.LastInsertId()
-		st, _ := database.Prepare("INSERT INTO zone(id,plant) VALUES (?, ?)")
-		st.Exec(i + 1, id)
+		r, rErr := statement.Exec(plants[i], values[0], values[1], values[2], values[3], values[4], values[5], time)
+		if rErr != nil {
+			fmt.Println(rErr)
+		}
+		id, idErr := r.LastInsertId()
+		if idErr != nil {
+			fmt.Println(idErr)
+		}
+		st, stErr := database.Prepare("INSERT INTO zone(id,plant) VALUES (?, ?)")
+		if stErr != nil {
+			fmt.Println(stErr)
+		}
+		st.Exec(i+1, id)
 	}
 }
 
