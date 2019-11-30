@@ -18,12 +18,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: theme.backgroundColor,
   },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-  },
+  text: theme.text,
 });
 
 export default MovScreen;

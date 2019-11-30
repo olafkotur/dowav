@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SensorData, GraphState } from '../types';
-import { Text, TextStyle } from 'react-native';
-import Loader from '../containers/Loader';
+import { Text, TextStyle, ActivityIndicator } from 'react-native';
+import theme from '../theme';
 
 const ENDPOINT = 'https://dowav-api.herokuapp.com/api/location/live';
 const DELAY = 1000;
@@ -49,7 +49,7 @@ const ZoneLocation = (props: Props) => {
     }
   }, [zone]);
 
-  let component = <Loader />;
+  let component = <ActivityIndicator size="large" color={theme.accentColor} />;
   if (screenState === 'error') {
     component = <Text style={textStyle}>No movement data was received from the server</Text>;
   } else if (screenState === 'displaying') {

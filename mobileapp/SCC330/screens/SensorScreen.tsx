@@ -7,7 +7,7 @@ import GraphSet from '../containers/GraphSet';
 import GraphButton from '../containers/GraphButton';
 
 import theme from '../theme';
-import { Sensor, ZoneData } from '../types';
+import { Sensor } from '../types';
 import { fetchLiveData } from '../actions';
 
 interface Props {
@@ -32,6 +32,7 @@ const SensorScreen = (props: Props) => {
 
   return (
     <View style={styles.container}>
+
       <GraphSet
         sensor={sensor}
         style={styles.graphSet}
@@ -44,7 +45,7 @@ const SensorScreen = (props: Props) => {
           style={theme.liveBtnStyle}
           onPress={() => setIsLive(!isLive)}
         />
-        <Text style={styles.title}>All Zones</Text>
+        <Text style={styles.graphTitle}>All Zones</Text>
         <View></View>
       </View>
 
@@ -58,6 +59,7 @@ const SensorScreen = (props: Props) => {
           style={styles.mainGraphContainer}
         />
       )}
+      
     </View>
   );
 };
@@ -78,11 +80,13 @@ const styles = StyleSheet.create({
     flex: 3,
   },
   title: {
+    ...theme.text,
+    textAlign: 'left',
+  },
+  graphTitle: {
+    ...theme.text,
     fontSize: 18,
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  }
+  },
 });
 
 export default SensorScreen;

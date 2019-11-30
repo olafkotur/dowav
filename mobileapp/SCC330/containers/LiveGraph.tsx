@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle, ActivityIndicator } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 import { useSelector } from 'react-redux';
 
 import theme from '../theme';
 import { Zone, ZoneData, GraphState, GlobalState } from '../types';
-import Loader from './Loader';
 
 interface Props {
   zone?: Zone,
@@ -73,7 +72,7 @@ const LiveGraph = (props: Props) => {
   }
 
   return (
-    <Loader />
+    <ActivityIndicator size="large" color={theme.accentColor} />
   );
 }
 

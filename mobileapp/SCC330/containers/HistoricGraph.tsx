@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 
-import Loader from './Loader';
 import { HistoricData, Sensor, Zone, ZoneData, GraphState } from '../types';
 import theme from '../theme';
 
@@ -110,7 +109,7 @@ const HistoricGraph = (props: Props) => {
 
   let component = <Text style={errorMsgStyle}>No {sensor} data was received from the server, please try again later</Text>;
   if (graphState === 'loading') {
-    component = <Loader />;
+    component = <ActivityIndicator size="large" color={theme.accentColor} />;
   } else if (graphState === 'displaying') {
     containerStyle.position = 'relative';
     component = (
