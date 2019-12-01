@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SensorData, GraphState } from '../types';
 import { Text, TextStyle, ActivityIndicator } from 'react-native';
 import theme from '../theme';
+import ErrorMessage from './ErrorMessage';
 
 const ENDPOINT = 'https://dowav-api.herokuapp.com/api/location/live';
 const DELAY = 1000;
@@ -51,9 +52,10 @@ const ZoneLocation = (props: Props) => {
 
   let component = <ActivityIndicator size="large" color={theme.accentColor} />;
   if (screenState === 'error') {
-    component = <Text style={textStyle}>No movement data was received from the server</Text>;
+    component = <ErrorMessage dataType="movement" />;
   } else if (screenState === 'displaying') {
-    component = <Text style={textStyle}>The user is {zone === 0 ? 'not online' : `in zone ${zone}`}</Text>
+    const style = { ...textStyle, color: theme.inactiveColor };
+    component = <Text style={style}>The user is {zone === 0 ? 'not online' : `in zone ${zone}`}</Text>
   }
 
   return component;

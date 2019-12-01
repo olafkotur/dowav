@@ -4,6 +4,7 @@ import { LineChart, Grid } from 'react-native-svg-charts';
 
 import { HistoricData, Sensor, Zone, ZoneData, GraphState } from '../types';
 import theme from '../theme';
+import ErrorMessage from './ErrorMessage';
 
 interface Props {
   sensor: Sensor,
@@ -16,10 +17,6 @@ const HISTORIC_ENDPOINT = 'https://dowav-api.herokuapp.com/api/historic/';
 const gridSvgStyle = {
   stroke: 'grey',
 };
-const errorMsgStyle: TextStyle = {
-  color: 'white',
-  fontSize: 18,
-}
 
 // Function which maps historic data to charts on a graph
 const mapDataToCharts = (data: HistoricData, zone: Zone) => {
@@ -107,7 +104,7 @@ const HistoricGraph = (props: Props) => {
     ...style,
   }
 
-  let component = <Text style={errorMsgStyle}>No {sensor} data was received from the server, please try again later</Text>;
+  let component = <ErrorMessage dataType={sensor} />;
   if (graphState === 'loading') {
     component = <ActivityIndicator size="large" color={theme.accentColor} />;
   } else if (graphState === 'displaying') {

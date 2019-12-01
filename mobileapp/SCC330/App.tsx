@@ -13,6 +13,7 @@ import MovScreen from './screens/MovScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import theme from './theme';
 import store from './reducers';
+import WaterScreen from './screens/WaterScreen';
 
 interface ScreenIcons<T> {
   [key: string]: T
@@ -34,6 +35,10 @@ const tabIcons: ScreenIcons<IconProps> = {
     name: 'light-bulb',
     type: 'octicon',
   },
+  Water: {
+    name: 'water-pump',
+    type: 'material-community',
+  },
   Movement: {
     name: 'location-searching',
     type: 'material',
@@ -43,6 +48,10 @@ const tabIcons: ScreenIcons<IconProps> = {
 const SettingsIcon = ({ navigation }: SettingsIconProps) => (
   <TouchableOpacity
     onPress={() => navigation.navigate('Settings')}
+    hitSlop={{
+      top: 20,
+      bottom: 20,
+    }}
     style={{
       paddingRight: 15,
       paddingLeft: 15,
@@ -64,9 +73,16 @@ const TabNavigator = createBottomTabNavigator({
   Temperature: TempScreen,
   Moisture: MoistureScreen,
   Light: LightScreen,
+  Water: WaterScreen,
   Movement: MovScreen,
 }, {
   initialRouteName: 'Temperature',
+  tabBarOptions: {
+    activeBackgroundColor: theme.accentColor,
+    activeTintColor: 'black',
+    inactiveBackgroundColor: theme.backgroundColor,
+    inactiveTintColor: 'white',
+  },
   defaultNavigationOptions: ({ navigation }) => ({
     tabBarIcon: ({ tintColor }) => (
       <Icon
@@ -75,12 +91,6 @@ const TabNavigator = createBottomTabNavigator({
       />
     ),
   }),
-  tabBarOptions: {
-    activeBackgroundColor: theme.accentColor,
-    activeTintColor: 'black',
-    inactiveBackgroundColor: theme.backgroundColor,
-    inactiveTintColor: 'white',
-  },
 });
 
 const RootStack = createStackNavigator({

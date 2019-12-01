@@ -13,7 +13,7 @@ import { fetchLiveData } from '../actions';
 interface Props {
   sensor: Sensor,
 }
-const LIVE_DATA_FETCH_DELAY = 1000;
+const LIVE_DATA_FETCH_DELAY = 5000; // 5000 for dev, 1000 for production
 
 const SensorScreen = (props: Props) => {
   const { sensor } = props;
@@ -46,7 +46,7 @@ const SensorScreen = (props: Props) => {
           onPress={() => setIsLive(!isLive)}
         />
         <Text style={styles.graphTitle}>All Zones</Text>
-        <View></View>
+        <View style={{ marginLeft: 43 }}></View>
       </View>
 
       {isLive ? (
@@ -78,10 +78,6 @@ const styles = StyleSheet.create({
   },
   mainGraphContainer: {
     flex: 3,
-  },
-  title: {
-    ...theme.text,
-    textAlign: 'left',
   },
   graphTitle: {
     ...theme.text,

@@ -23,6 +23,7 @@ const theme = {
   headerColor: '#1f404f',
   statusBarColor: '#0e2c38',
   accentColor: 'orange',
+  inactiveColor: '#ddd',
   graph: {
     lineWidth: 3,
     chartColors: ['#ff3d3d', '#ff7521', 'orange'],

@@ -1,11 +1,12 @@
 import { createStore, Reducer } from 'redux';
-import { GlobalState, LiveDataAction } from './types';
+import { GlobalState, IDataAction } from './types';
 
 const initialState: GlobalState = {
   liveData: [],
+  waterData: null,
 }
 
-const reducer: Reducer<GlobalState, LiveDataAction> = (state = initialState, action) => {
+const reducer: Reducer<GlobalState, IDataAction> = (state = initialState, action) => {
   const { liveData } = state;
   const newState = { ...state };
 
@@ -16,6 +17,9 @@ const reducer: Reducer<GlobalState, LiveDataAction> = (state = initialState, act
       } else {
         newState.liveData = [ ...liveData, action.payload ];
       }
+      break;
+    case 'WATER_DATA_RECV':
+      newState.waterData = action.payload;
       break;
     default:
       return state;
