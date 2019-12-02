@@ -107,7 +107,7 @@ func main() {
 	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
 	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
 	router.HandleFunc("/api/setting", setPlantSetting).Methods("POST")
-	router.HandleFunc("/api/setting/{plantName}", deletePlantSetting).Methods("DELETE")
+	router.HandleFunc("/api/setting/delete/{plantName}", deletePlantSetting).Methods("GET")
 	router.HandleFunc("/api/setting/create", createPlantSetting).Methods("POST")
 	router.HandleFunc("/api/setting", getPlantSettingWs).Methods("GET")
 	router.HandleFunc("/api/setting/all", getAllPlantsSettings).Methods("GET")

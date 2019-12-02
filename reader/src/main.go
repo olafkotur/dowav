@@ -15,11 +15,8 @@ import (
 	"github.com/tarm/serial"
 )
 
-// func maind() {
-// 	OnOFFLight(userID, url, true, 1)        //true : on, false : off
-// 	changeBrightness(userID, url, 254, 1)   //can't change brightness while off
-// 	changeColour(userID, url, "#513143", 5) //can't change colour while off
-// }
+var hueUserId string
+var hueUrl string
 
 func main() {
 	var err = godotenv.Load("../../.env")
@@ -40,8 +37,9 @@ func main() {
 }
 
 func attemptHueConnection() {
-	url := "localhost:9090"
-	userId, ok := createHueId(url)
+	ok := false
+	hueUrl = "localhost:9090"
+	hueUserId, ok = createHueId(hueUrl)
 	if !ok {
 		fmt.Println("Hue connection failed, re-attempting in 10 seconds")
 		time.Sleep(10 * time.Second)
@@ -50,9 +48,9 @@ func attemptHueConnection() {
 
 	// Set all lights to default
 	for i := 0; i < 3; i++ {
-		toggleLight(userId, url, true, i+1)
-		changeColour(userId, url, zoneSettings[i].BulbColor, i+1)
-		changeBrightness(userId, url, i+1, zoneSettings[i].BulbBrightness)
+		toggleLight(hueUserId, hueUrl, true, i+1)
+		changeColor(hueUserId, hueUrl, zoneSettings[i].BulbColor, i+1)
+		changeBrightness(hueUserId, hueUrl, i+1, zoneSettings[i].BulbBrightness)
 	}
 }
 

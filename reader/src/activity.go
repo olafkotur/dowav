@@ -25,7 +25,7 @@ func listenUserSettings() {
 			for _, s := range settings {
 				if s.Zone != 0 {
 					fmt.Println("Received new setting change request, updating:", s)
-					zoneSettings[s.Zone-1] = s
+					handleSettingUpdate(s)
 				}
 			}
 		},

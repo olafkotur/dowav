@@ -46,9 +46,9 @@ type ZoneSetting struct {
 	ShouldSendTweets bool   `json:"shouldSendTweets"`
 	MinTemperature   int    `json:"minTemperature"`
 	MaxTemperature   int    `json:"maxTemperature"`
-	MinMoisture      int    `json:"minMoisture"`
 	MinLight         int    `json:"minLight"`
 	MaxLight         int    `json:"maxLight"`
+	MinMoisture      int    `json:"minMoisture"`
 	BulbColor        string `json:"bulbColor"`
 	BulbBrightness   int    `json:"bulbBrightness"`
 }

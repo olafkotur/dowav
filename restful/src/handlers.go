@@ -465,7 +465,7 @@ func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 
 	for {
 		var res []PlantSettings
-		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
+		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture, bulbColor, bulbBrightness FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
 		if e != nil {
 			fmt.Println(e)
 		}
@@ -473,7 +473,7 @@ func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 			var plantSettings PlantSettings
 			var zone sql.NullInt64
 
-			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture)
+			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture, &plantSettings.BulbColor, &plantSettings.BulbBrightness)
 			fmt.Println(res)
 			if err != nil {
 				fmt.Println(err)

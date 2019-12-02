@@ -153,7 +153,7 @@ func changeBrightness(id, url string, bulbNum, brightness int) {
 	resp.Body.Close()
 }
 
-func changeColour(id, url, hex string, bulbNum int) {
+func changeColor(id, url, hex string, bulbNum int) {
 	h, s, v := hexToHsv(hex)
 	h = (h / 360) * 65535 // hue
 	s = s * 255           //saturation
@@ -168,11 +168,8 @@ func changeColour(id, url, hex string, bulbNum int) {
 		Sat int       `json:"sat"`
 	}
 
-	//xy := []float64{0.115, 0.826}
 	xy := getXY(r, g, b)
-	//hue := getHue(red, green, blue)
-	//data := Payload{true, 254, cM, xy, hM, 255} //(hue * 255), }
-	data := Payload{true, int(v), xy, int(h), int(s)} //(hue * 255), }
+	data := Payload{true, int(v), xy, int(h), int(s)}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		return
