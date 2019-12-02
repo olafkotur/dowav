@@ -32,15 +32,15 @@ func main() {
 	database, _ = sql.Open("sqlite3", "./database.db?_foreign_keys=on")
 
 	// Create plant table in database
-	_, err := database.Exec("DROP TABLE plant")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT , plant TEXT UNIQUE, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER, lastUpdate REAL)")
-	_, err = statement.Exec()
+	_, _ = database.Exec("DROP TABLE plant")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT, plant TEXT UNIQUE, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER, bulbColor TEXT, bulbBrightness INTEGER, lastUpdate REAL)")
+	_, err := statement.Exec()
 	if err != nil {
 		panic(err)
 	}
 
 	// Create zones table in database
-	_, err = database.Exec("DROP TABLE zone")
+	_, _ = database.Exec("DROP TABLE zone")
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant INTEGER REFERENCES plant(id) ON DELETE SET NULL)")
 	_, err = statement.Exec()
 	if err != nil {
@@ -107,7 +107,7 @@ func main() {
 	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
 	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
 	router.HandleFunc("/api/setting", setPlantSetting).Methods("POST")
-	router.HandleFunc("/api/setting/{plantName}", deletePlantSetting).Methods("DELETE")
+	router.HandleFunc("/api/setting/delete/{plantName}", deletePlantSetting).Methods("GET")
 	router.HandleFunc("/api/setting/create", createPlantSetting).Methods("POST")
 	router.HandleFunc("/api/setting", getPlantSettingWs).Methods("GET")
 	router.HandleFunc("/api/setting/all", getAllPlantsSettings).Methods("GET")
@@ -118,17 +118,18 @@ func main() {
 
 func setDefault() {
 	// Clear the table from previous settings
-	database.Exec("DELETE FROM zone")
+	_, _ = database.Exec("DELETE FROM zone")
 	statement, _ := database.Prepare("DELETE FROM plant")
 	_, _ = statement.Exec()
 
 	plants := []string{"Tomatoes", "Staff", "Cucumbers"}
-	values := []interface{}{"true", 18, 50, 20, 35, 225}
+	values := []interface{}{"true", 18, 50, 20, 35, 225, "#fff", 254}
 	time := time.Now().Unix()
+
 	// Set each user setting
-	statement, _ = database.Prepare("INSERT INTO plant ( plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	statement, _ = database.Prepare("INSERT INTO plant ( plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, bulbColor, bulbBrightness, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	for i := range plants {
-		r, rErr := statement.Exec(plants[i], values[0], values[1], values[2], values[3], values[4], values[5], time)
+		r, rErr := statement.Exec(plants[i], values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7], time)
 		if rErr != nil {
 			fmt.Println(rErr)
 		}
@@ -140,7 +141,7 @@ func setDefault() {
 		if stErr != nil {
 			fmt.Println(stErr)
 		}
-		st.Exec(i+1, id)
+		_, _ = st.Exec(i+1, id)
 	}
 }
 

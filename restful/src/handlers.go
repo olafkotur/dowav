@@ -411,7 +411,6 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 
 	for _, p := range s {
 		if p.Zone != nil {
-			fmt.Println(p)
 			if *p.Zone > int64(len(*zones)) || *p.Zone < 0 {
 				http.Error(writer, "There is no such zone.", http.StatusBadRequest)
 				return
@@ -419,7 +418,7 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	statement, statementError := database.Prepare("Update plant SET shouldSendTweets=?, minTemperature=?, maxTemperature=?, minLight=?, maxLight=?, minMoisture=?, lastUpdate=? WHERE plant=?")
+	statement, statementError := database.Prepare("Update plant SET shouldSendTweets=?, minTemperature=?, maxTemperature=?, minLight=?, maxLight=?, minMoisture=?, bulbColor=?, bulbBrightness=?, lastUpdate=? WHERE plant=?")
 	updateStatement, updateStatError := database.Prepare("UPDATE zone SET plant=(SELECT id FROM plant WHERE plant=?) WHERE id=?")
 	if statementError != nil || updateStatError != nil {
 		fmt.Println(statementError)
@@ -429,7 +428,7 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 
 	for _, plant := range s {
 		var plantName = plant.Plant
-		_, err := statement.Exec(&plant.ShouldSendTweets, &plant.MinTemperature, &plant.MaxTemperature, &plant.MinLight, &plant.MaxLight, &plant.MinMoisture, &connTime, plantName)
+		_, err := statement.Exec(&plant.ShouldSendTweets, &plant.MinTemperature, &plant.MaxTemperature, &plant.MinLight, &plant.MaxLight, &plant.MinMoisture, &plant.BulbColor, &plant.BulbBrightness, &connTime, plantName)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(writer, "Database can't execute statement", http.StatusInternalServerError)
@@ -466,7 +465,7 @@ func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 
 	for {
 		var res []PlantSettings
-		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
+		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture, bulbColor, bulbBrightness FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
 		if e != nil {
 			fmt.Println(e)
 		}
@@ -474,7 +473,7 @@ func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 			var plantSettings PlantSettings
 			var zone sql.NullInt64
 
-			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture)
+			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture, &plantSettings.BulbColor, &plantSettings.BulbBrightness)
 			fmt.Println(res)
 			if err != nil {
 				fmt.Println(err)
