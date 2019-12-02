@@ -51,6 +51,7 @@ const SensorScreen = (props: Props) => {
 
       {isLive ? (
         <LiveGraph
+          sensor={sensor}
           style={styles.mainGraphContainer}
         />
       ) : (

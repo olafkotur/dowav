@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ViewStyle, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ViewStyle, ActivityIndicator } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 import { useSelector } from 'react-redux';
 
 import theme from '../theme';
-import { Zone, ZoneData, GraphState, GlobalState } from '../types';
+import { Zone, ZoneData, GraphState, GlobalState, Sensor } from '../types';
+import ErrorMessage from './ErrorMessage';
 
 interface Props {
+  sensor: Sensor,
   zone?: Zone,
   hidden?: boolean,
   style?: ViewStyle,
@@ -48,9 +50,7 @@ const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
 }
 
 const LiveGraph = (props: Props) => {
-  const { zone, hidden, style } = props;
-
-  const [ graphState, setGraphState ] = useState('loading' as GraphState);
+  const { sensor, zone, hidden, style } = props;
   let liveData = useSelector((store: GlobalState) => store.liveData);
 
   const graphStyle: ViewStyle = {
@@ -65,14 +65,10 @@ const LiveGraph = (props: Props) => {
         {mapDataToCharts(liveData, zone)}
       </View>
     );
-  } else if (graphState === 'error') {
-    return (
-      <Text>An error occured, please try again</Text>
-    );
   }
 
   return (
-    <ActivityIndicator size="large" color={theme.accentColor} />
+    <ErrorMessage dataType={`live ${sensor}`} />
   );
 }
 

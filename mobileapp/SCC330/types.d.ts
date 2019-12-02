@@ -7,12 +7,14 @@ export type GraphState = 'loading' | 'displaying' | 'error';
 // Structure of redux store
 export type GlobalState = {
   liveData: ZoneData[],
-  waterData: WaterData | null,
+  waterData: WaterData | false | null,
 };
 
 // Action interfaces
-export interface IDataAction extends Action {
-  type: 'LIVE_DATA_RECV' | 'WATER_DATA_RECV',
+export interface IAction extends Action {
+  type: 'LIVE_DATA_RECV' | 'WATER_DATA_RECV' | 'WATER_DATA_FAIL',
+}
+export interface IDataAction extends IAction {
   payload: any,
 }
 export interface ILiveDataAction extends IDataAction {
@@ -45,3 +47,8 @@ export type WaterData = {
   volume: number,
   tilt: number,
 };
+
+export type Tweet = {
+  text: string,
+  'created_at': string,
+}

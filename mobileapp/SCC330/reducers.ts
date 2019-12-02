@@ -1,16 +1,30 @@
-import { createStore, Reducer } from 'redux';
-import { GlobalState, IDataAction } from './types';
+import { createStore, Reducer, combineReducers } from 'redux';
+import { GlobalState, IDataAction, IAction } from './types';
 
 const initialState: GlobalState = {
   liveData: [],
   waterData: null,
 }
 
-const reducer: Reducer<GlobalState, IDataAction> = (state = initialState, action) => {
+const reducer: Reducer<GlobalState, IAction> = (state = initialState, action) => {
+  const newState = { ...state };
+
+  switch (action.type) {
+    case 'WATER_DATA_FAIL':
+      newState.waterData = false;
+      break;
+    default:
+      return state;
+  }
+
+  return newState;
+}
+
+const dataReducer: Reducer<GlobalState, IDataAction> = (state = initialState, action) => {
   const { liveData } = state;
   const newState = { ...state };
 
-  switch(action.type) {
+  switch (action.type) {
     case 'LIVE_DATA_RECV':
       if (liveData.length >= 10) {
         newState.liveData = [ ...liveData.slice(1), action.payload ];
@@ -28,6 +42,6 @@ const reducer: Reducer<GlobalState, IDataAction> = (state = initialState, action
   return newState;
 }
 
-const store = createStore(reducer);
+const store = createStore(combineReducers({ reducer, dataReducer }));
 
 export default store;

@@ -3,17 +3,12 @@ import { SensorData, GraphState } from '../types';
 import { Text, TextStyle, ActivityIndicator } from 'react-native';
 import theme from '../theme';
 import ErrorMessage from './ErrorMessage';
+import Loader from './Loader';
 
-const ENDPOINT = 'https://dowav-api.herokuapp.com/api/location/live';
+const LOCATION_ENDPOINT = 'https://dowav-api.herokuapp.com/api/location/live';
 const DELAY = 1000;
 
-interface Props {
-  textStyle?: TextStyle,
-}
-
-const ZoneLocation = (props: Props) => {
-  const { textStyle } = props;
-
+const ZoneLocation = () => {
   const [ zone, setZone ] = useState(0);
   const [ screenState, setScreenState ] = useState('loading' as GraphState);
 
@@ -21,7 +16,7 @@ const ZoneLocation = (props: Props) => {
     let doUpdate = true;
 
     const interval = setInterval(() => {
-      const pData = fetch(ENDPOINT);
+      const pData = fetch(LOCATION_ENDPOINT);
 
       pData.then((res) => {
         if (res) {
@@ -50,19 +45,15 @@ const ZoneLocation = (props: Props) => {
     }
   }, [zone]);
 
-  let component = <ActivityIndicator size="large" color={theme.accentColor} />;
+  let component = <Loader />;
   if (screenState === 'error') {
     component = <ErrorMessage dataType="movement" />;
   } else if (screenState === 'displaying') {
-    const style = { ...textStyle, color: theme.inactiveColor };
+    const style = { ...theme.text, color: theme.inactiveColor };
     component = <Text style={style}>The user is {zone === 0 ? 'not online' : `in zone ${zone}`}</Text>
   }
 
   return component;
-}
-
-ZoneLocation.defaultProps = {
-  textStyle: {},
 }
 
 export default ZoneLocation;

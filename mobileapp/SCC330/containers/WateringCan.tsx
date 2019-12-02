@@ -5,17 +5,20 @@ import { Svg, Rect } from 'react-native-svg';
 
 import ErrorMessage from './ErrorMessage';
 import { GlobalState } from '../types';
-import { startWaterData } from '../actions';
+import { openWebSocket } from '../actions';
 import theme from '../theme';
+import Loader from './Loader';
+
+const WATER_ENDPOINT = 'ws://dowav-api.herokuapp.com/api/water';
 
 const WateringCan = () => {
   const [ loading, setLoading ] = useState(true);
 
   useEffect(() => {
-    const stopWaterData = startWaterData();
+    const waterSocket = openWebSocket(WATER_ENDPOINT);
 
     return () => {
-      stopWaterData();
+      waterSocket.close();
     };
   }, []);
 
@@ -25,9 +28,9 @@ const WateringCan = () => {
 
   if (loading && waterData) {
     setLoading(false);
-  } else if (loading) {
-    return <ActivityIndicator size="large" color={theme.accentColor} />
-  } else if (!waterData) {
+  } else if (waterData === null) {
+    return <Loader />
+  } else if (waterData === false) {
     return <ErrorMessage dataType="water" />
   }
 

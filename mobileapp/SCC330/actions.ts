@@ -1,4 +1,4 @@
-import { ZoneData, ILiveDataAction, Sensor, IWaterDataAction, WaterData } from './types';
+import { ZoneData, ILiveDataAction, Sensor, IWaterDataAction, WaterData, IAction } from './types';
 import { ActionCreator } from 'redux';
 import store from './reducers';
 
@@ -13,6 +13,7 @@ export const waterDataReceived: ActionCreator<IWaterDataAction> = (payload: Wate
   type: 'WATER_DATA_RECV',
   payload
 });
+export const waterDataFailed: IAction = { type: 'WATER_DATA_FAIL' };
 
 export const fetchLiveData = (sensor: Sensor) => {
   // const LIVE_ENDPOINT = 'https://danmiz.net/api/dowavlive.php'; FOR DEBUG
@@ -31,8 +32,8 @@ export const fetchLiveData = (sensor: Sensor) => {
     });
 }
 
-export const startWaterData = () => {
-  const ws = new WebSocket('ws://dowav-api.herokuapp.com/api/water');
+export const openWebSocket = (url: string) => {
+  const ws = new WebSocket(url);
 
   ws.onmessage = (ev) => {
     if (ev.data) {
@@ -46,14 +47,12 @@ export const startWaterData = () => {
   }
 
   ws.onerror = () => {
-    //dispatch(waterDataFailed);
+    dispatch(waterDataFailed);
   }
 
   ws.onclose = () => {
-    //dispatch(waterDataEnd);
+    dispatch(waterDataFailed);
   }
 
-  return () => {
-    ws.close();
-  };
+  return { close: () => ws.close() };
 }

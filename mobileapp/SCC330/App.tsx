@@ -1,9 +1,9 @@
 import React from 'react';
-import { StatusBar, View, Text, TouchableOpacity } from 'react-native';
+import { StatusBar, View, TouchableOpacity, Insets, TouchableOpacityProps, GestureResponderEvent } from 'react-native';
 import { createAppContainer, NavigationRoute, NavigationParams } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { createStackNavigator, NavigationStackProp } from 'react-navigation-stack';
-import { Icon, IconProps } from 'react-native-elements';
+import { Icon, IconProps, IconType } from 'react-native-elements';
 import { Provider } from 'react-redux';
 
 import TempScreen from './screens/TempScreen';
@@ -14,12 +14,14 @@ import SettingsScreen from './screens/SettingsScreen';
 import theme from './theme';
 import store from './reducers';
 import WaterScreen from './screens/WaterScreen';
+import TwitterScreen from './screens/TwitterScreen';
 
 interface ScreenIcons<T> {
-  [key: string]: T
+  [key: string]: T,
 }
-interface SettingsIconProps {
-  navigation: NavigationStackProp<NavigationRoute<NavigationParams>, any>
+
+interface HeaderIconProps {
+  navigation: NavigationStackProp<NavigationRoute<NavigationParams>, any>,
 }
 
 const tabIcons: ScreenIcons<IconProps> = {
@@ -45,25 +47,48 @@ const tabIcons: ScreenIcons<IconProps> = {
   },
 }
 
-const SettingsIcon = ({ navigation }: SettingsIconProps) => (
-  <TouchableOpacity
-    onPress={() => navigation.navigate('Settings')}
-    hitSlop={{
-      top: 20,
-      bottom: 20,
-    }}
-    style={{
-      paddingRight: 15,
-      paddingLeft: 15,
-    }}
-  >
-    <Icon
-      name="settings"
-      color="white"
-      size={30}
-    />
-  </TouchableOpacity>
-);
+const HeaderIcons = ({ navigation }: HeaderIconProps) => {
+  const { navigate } = navigation;
+  const hitSlop: Insets = {
+    top: 20,
+    bottom: 20,
+  };
+
+  return (
+    <>
+      <TouchableOpacity
+        onPress={() => navigate('Twitter Feed')}
+        hitSlop={hitSlop}
+        style={{
+          paddingLeft: 10,
+          paddingRight: 15,
+        }}
+      >
+        <Icon
+          name="twitter"
+          type="material-community"
+          color="white"
+          size={30}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => navigate('Settings')}
+        hitSlop={hitSlop}
+        style={{
+          paddingLeft: 10,
+          paddingRight: 25,
+        }}
+      >
+        <Icon
+          name="settings"
+          color="white"
+          size={30}
+        />
+      </TouchableOpacity>
+    </>
+  );
+}
 
 const getHeaderTitle = (state: any): string => (
   state.routeName === 'Root' ? state.routes[state.index].routeName : state.routeName
@@ -97,20 +122,17 @@ const RootStack = createStackNavigator({
   Root: {
     screen: TabNavigator,
     navigationOptions: ({ navigation }) => ({
-      headerRight: <SettingsIcon navigation={navigation} />,
+      headerRight: <HeaderIcons navigation={navigation} />,
     }),
   },
-  Settings: {
-    screen: SettingsScreen,
-  },
+  'Twitter Feed': TwitterScreen,
+  Settings: SettingsScreen,
 }, {
   initialRouteName: 'Root',
   defaultNavigationOptions: ({ navigation }) => ({
-    headerStyle: {
-      backgroundColor: theme.headerColor,
-    },
     headerTintColor: 'white',
     headerTitle: getHeaderTitle(navigation.state),
+    headerStyle: { backgroundColor: theme.headerColor },
     headerTitleStyle: {
       color: 'white',
       fontWeight: 'bold',
