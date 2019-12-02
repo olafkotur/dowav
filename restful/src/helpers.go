@@ -78,12 +78,12 @@ func getLiveDataBySensor(sensor string, symbol string) (string, error, int) {
 
 func queryAllPlantsSettings() (*[]PlantSettings, error) {
 	var res []PlantSettings
-	rows, _ := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM plant LEFT JOIN zone on zone.plant=plant.id")
+	rows, _ := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight, maxLight, minMoisture, bulbColor, bulbBrightness FROM plant LEFT JOIN zone on zone.plant=plant.id")
 	for rows.Next() {
 		var plantSettings PlantSettings
 		var zone sql.NullInt64
 
-		err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture)
+		err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture, &plantSettings.BulbColor, &plantSettings.BulbBrightness)
 		if err != nil {
 			fmt.Println(err)
 			return nil, errors.New("Database failed to get plant settings")

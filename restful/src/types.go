@@ -24,12 +24,6 @@ type WaterData struct {
 	Tilt   float64 `json:"tilt"`
 }
 
-type Setting struct {
-	Time  float64 `json:"time"`
-	Type  string  `json:"type"`
-	Value string  `json:"value"`
-}
-
 type PlantSettings struct {
 	Zone             *int64  `json:"zone,omitempty"`
 	Plant            string  `json:"plant"`
@@ -48,18 +42,3 @@ type ZoneTableRow struct {
 	id      int
 	plantId sql.NullInt64
 }
-
-// type Readings struct {
-// 	Temperature ReadingData `json:"temperature"`
-// 	Moisture    ReadingData `json:"moisture"`
-// 	Light       ReadingData `json:"light"`
-// }
-
-// type FullData struct {
-// 	Zone        int     `json:"zone"`
-// 	StartTime   float64 `json:"startTime"`
-// 	EndTime     float64 `json:"endTime"`
-// 	Temperature int     `json:"temperature"`
-// 	Moisture    int     `json:"moisture"`
-// 	Light       int     `json:"light"`
-// }
