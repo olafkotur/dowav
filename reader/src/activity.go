@@ -15,20 +15,19 @@ var shouldSendTweets bool
 var previousTweet string
 var previousNotification string
 
-var minTemperature int
-var minMoisture int
-var minLight int
-var maxTemperature int
-var maxLight int
-
 var zoneSettings []ZoneSetting
 
 func listenUserSettings() {
 	conn := evtwebsocket.Conn{
 		OnMessage: func(msg []byte, w *evtwebsocket.Conn) {
-			var data Setting
-			_ = json.Unmarshal(msg, &data)
-			handleUserSetting(data)
+			var settings []ZoneSetting
+			_ = json.Unmarshal(msg, &settings)
+			for _, s := range settings {
+				if s.Zone != 0 {
+					fmt.Println("Received new setting change request, updating:", s)
+					zoneSettings[s.Zone-1] = s
+				}
+			}
 		},
 		OnError: func(err error) {
 			listenUserSettings() // Reconnect
@@ -40,39 +39,45 @@ func listenUserSettings() {
 	}
 }
 
-func checkEnvironmentTweet(d []byte) {
+func analyseEnvironmentData(d []byte) {
 	var data Environment
 	var msg string
 	_ = json.Unmarshal(d, &data)
 
-	// Temperature
-	if data.Temperature.Value <= minTemperature {
-		msg = "The temperature seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #temperature"
-	} else if data.Temperature.Value >= maxTemperature {
-		msg = "The temperature seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #temperature"
-	}
+	for _, setting := range zoneSettings {
+		if setting.Zone == 0 {
+			continue
+		}
 
-	// Moisture
-	if data.Moisture.Value <= minMoisture {
-		msg = "The moisture level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #moisture"
-	}
+		// Temperature
+		if data.Temperature.Value <= setting.MinTemperature {
+			msg = "The temperature seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #temperature"
+		} else if data.Temperature.Value >= setting.MaxTemperature {
+			msg = "The temperature seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #temperature"
+		}
 
-	// Light
-	if data.Light.Value <= minLight {
-		msg = "The light level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #light"
+		// Moisture
+		if data.Moisture.Value <= setting.MinMoisture {
+			msg = "The moisture level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #moisture"
+		}
 
-	} else if data.Light.Value >= maxLight {
-		msg = "The light level seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #light"
-	}
+		// Light
+		if data.Light.Value <= setting.MinLight {
+			msg = "The light level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #light"
 
-	// Send tweet and notification
-	if msg != "" {
-		postTweet(msg)
-		pushNotification(msg, "info")
+		} else if data.Light.Value >= setting.MaxLight {
+			msg = "The light level seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #light"
+		}
+
+		// Send tweet and notification
+		if msg != "" {
+			postTweet(msg)
+			pushNotification(msg, "info")
+		}
 	}
 }
 
-func checkLocationTweet(d []byte) {
+func analyseLocationData(d []byte) {
 	var data Location
 	_ = json.Unmarshal(d, &data)
 
@@ -83,7 +88,7 @@ func checkLocationTweet(d []byte) {
 	}
 }
 
-func checkWaterTweet(d []byte) {
+func analyseWaterData(d []byte) {
 	var data Water
 	_ = json.Unmarshal(d, &data)
 
