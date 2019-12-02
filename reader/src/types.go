@@ -40,12 +40,6 @@ type HistoricData struct {
 	Light       Calculations `json:"light"`
 }
 
-type Setting struct {
-	Time  float64 `json:"time"`
-	Type  string  `json:"type"`
-	Value string  `json:"value"`
-}
-
 type ZoneSetting struct {
 	Zone             int    `json:"zone"`
 	Plant            string `json:"plant"`
@@ -55,4 +49,6 @@ type ZoneSetting struct {
 	MinMoisture      int    `json:"minMoisture"`
 	MinLight         int    `json:"minLight"`
 	MaxLight         int    `json:"maxLight"`
+	BulbColor        string `json:"bulbColor"`
+	BulbBrightness   int    `json:"bulbBrightness"`
 }
