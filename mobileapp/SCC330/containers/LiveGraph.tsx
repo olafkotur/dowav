@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, ViewStyle, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 import { useSelector } from 'react-redux';
 
 import theme from '../theme';
-import { Zone, ZoneData, GraphState, GlobalState, Sensor } from '../types';
+import { Zone, ZoneData, GlobalState, Sensor } from '../types';
 import ErrorMessage from './ErrorMessage';
 
 interface Props {
@@ -51,7 +51,7 @@ const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
 
 const LiveGraph = (props: Props) => {
   const { sensor, zone, hidden, style } = props;
-  let liveData = useSelector((store: GlobalState) => store.liveData);
+  let data = useSelector((store: GlobalState) => store.liveData[sensor]);
 
   const graphStyle: ViewStyle = {
     display: hidden ? 'none' : 'flex',
@@ -59,10 +59,10 @@ const LiveGraph = (props: Props) => {
     ...style,
   };
 
-  if (liveData.length) {
+  if (data.length) {
     return (
       <View style={graphStyle}>
-        {mapDataToCharts(liveData, zone)}
+        {mapDataToCharts(data, zone)}
       </View>
     );
   }

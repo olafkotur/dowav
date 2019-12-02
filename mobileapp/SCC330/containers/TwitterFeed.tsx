@@ -1,9 +1,8 @@
 import React from 'react';
-import { ActivityIndicator, Text, ScrollView, View, StyleSheet } from 'react-native';
-import { useFetch } from '../hooks/useFetch';
+import { Text, ScrollView, View, StyleSheet } from 'react-native';
+import useFetch from '../hooks/useFetch';
 import { Tweet } from '../types';
 import ErrorMessage from './ErrorMessage';
-import theme from '../theme';
 import Loader from './Loader';
 
 const TWEET_ENDPOINT = 'https://dowav-api.herokuapp.com/api/tweets';

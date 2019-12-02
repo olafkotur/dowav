@@ -1,59 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { SensorData, GraphState } from '../types';
-import { Text, TextStyle, ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { Text } from 'react-native';
+
+import { GlobalState } from '../types';
 import theme from '../theme';
 import ErrorMessage from './ErrorMessage';
-import Loader from './Loader';
+import { fetchLocationData } from '../actions';
 
-const LOCATION_ENDPOINT = 'https://dowav-api.herokuapp.com/api/location/live';
-const DELAY = 1000;
+const LOCATION_FETCH_DELAY = 1000;
 
 const ZoneLocation = () => {
-  const [ zone, setZone ] = useState(0);
-  const [ screenState, setScreenState ] = useState('loading' as GraphState);
-
   useEffect(() => {
-    let doUpdate = true;
+    fetchLocationData();
 
     const interval = setInterval(() => {
-      const pData = fetch(LOCATION_ENDPOINT);
-
-      pData.then((res) => {
-        if (res) {
-          res.json().then((data: SensorData) => {
-            if (doUpdate) {
-              if (data) {
-                setZone(data.value);
-                setScreenState('displaying');
-              } else {
-                setScreenState('error');
-              }
-            }
-          });
-        } else {
-          setScreenState('error');
-        }
-      }).catch((err) => {
-        setScreenState('error');
-        console.log(err);
-      });
-    }, DELAY);
+      fetchLocationData();
+    }, LOCATION_FETCH_DELAY);
 
     return () => {
-      doUpdate = false;
       clearInterval(interval);
     }
-  }, [zone]);
+  }, []);
 
-  let component = <Loader />;
-  if (screenState === 'error') {
-    component = <ErrorMessage dataType="movement" />;
-  } else if (screenState === 'displaying') {
+  const data = useSelector((store: GlobalState) => store.location);
+
+  if (data) {
     const style = { ...theme.text, color: theme.inactiveColor };
-    component = <Text style={style}>The user is {zone === 0 ? 'not online' : `in zone ${zone}`}</Text>
+    const zone = data.value;
+
+    return <Text style={style}>The user is {zone === 0 ? 'not online' : `in zone ${zone}`}</Text>;
   }
 
-  return component;
+  return <ErrorMessage dataType="movement" />;
 }
 
 export default ZoneLocation;

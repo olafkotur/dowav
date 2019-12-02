@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import { LineChart, Grid } from 'react-native-svg-charts';
 
-import { HistoricData, Sensor, Zone, ZoneData, GraphState } from '../types';
+import { HistoricData, Sensor, Zone, ZoneData } from '../types';
 import theme from '../theme';
 import ErrorMessage from './ErrorMessage';
-import { useFetch } from '../hooks/useFetch';
+import useFetch from '../hooks/useFetch';
 import Loader from './Loader';
 
 interface Props {
@@ -23,28 +23,32 @@ const gridSvgStyle = {
 
 // Function which maps historic data to charts on a graph
 const mapDataToCharts = (data: HistoricData, zone: Zone) => {
-  return data.map((zoneData: ZoneData, i) => {
-    const chartData = zoneData.map(point => point.value);
-    const chartSvgStyle = {
-      stroke: theme.graph.chartColors[zone ? (zone - 1) : i % 3],
-      strokeWidth: theme.graph.lineWidth,
-    };
-    
-    return (
-      <LineChart
-        data={chartData}
-        style={StyleSheet.absoluteFill}
-        svg={chartSvgStyle}
-        animate
-        yMin={Math.min(...chartData) - 0.2}
-        yMax={Math.max(...chartData) + 0.2}
-        key={i}
-      >
-        {i === 0 ? (
-          <Grid svg={gridSvgStyle} />
-        ) : null}
-      </LineChart>
-    );
+  return data.map((zoneData: ZoneData | null, i) => {
+    if (zoneData) {
+      const chartData = zoneData.map(point => point.value);
+      const chartSvgStyle = {
+        stroke: theme.graph.chartColors[zone ? (zone - 1) : i % 3],
+        strokeWidth: theme.graph.lineWidth,
+      };
+      
+      return (
+        <LineChart
+          data={chartData}
+          style={StyleSheet.absoluteFill}
+          svg={chartSvgStyle}
+          animate
+          yMin={Math.min(...chartData) - 0.2}
+          yMax={Math.max(...chartData) + 0.2}
+          key={i}
+        >
+          {i === 0 ? (
+            <Grid svg={gridSvgStyle} />
+          ) : null}
+        </LineChart>
+      );
+    } else {
+      return null;
+    }
   });
 }
 

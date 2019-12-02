@@ -1,16 +1,12 @@
-import React, { useState } from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
-import { Slider } from 'react-native-elements';
+import React from 'react';
 
-import theme from '../theme';
-import Loader from '../containers/Loader';
-import { useFetch } from '../hooks/useFetch';
+import DisplayScreen from './DisplayScreen';
+import AppSettings from '../containers/AppSettings';
 
-const MIN_TEMP = 0;
-const MAX_TEMP = 50;
-
-const SettingsScreen = () => {
-  
-}
+const SettingsScreen = () => (
+  <DisplayScreen>
+    <AppSettings />
+  </DisplayScreen>
+);
 
 export default SettingsScreen;

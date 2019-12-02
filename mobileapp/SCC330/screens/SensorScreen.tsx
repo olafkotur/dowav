@@ -13,7 +13,7 @@ import { fetchLiveData } from '../actions';
 interface Props {
   sensor: Sensor,
 }
-const LIVE_DATA_FETCH_DELAY = 5000; // 5000 for dev, 1000 for production
+const LIVE_DATA_FETCH_DELAY = 1000; // 5000 for dev, 1000 for production
 
 const SensorScreen = (props: Props) => {
   const { sensor } = props;

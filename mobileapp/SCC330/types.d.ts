@@ -6,22 +6,26 @@ export type GraphState = 'loading' | 'displaying' | 'error';
 
 // Structure of redux store
 export type GlobalState = {
-  liveData: ZoneData[],
+  liveData: {
+    [key in Sensor]: ZoneData[]
+  },
+  location: SensorData,
   waterData: WaterData | false | null,
 };
 
 // Action interfaces
 export interface IAction extends Action {
-  type: 'LIVE_DATA_RECV' | 'WATER_DATA_RECV' | 'WATER_DATA_FAIL',
-}
-export interface IDataAction extends IAction {
+  type: 'LIVE_DATA_RECV' | 'LOCATION_DATA_RECV' | 'WATER_DATA_RECV' | 'WATER_DATA_FAIL' | 'WATER_DATA_CLOSE',
   payload: any,
 }
-export interface ILiveDataAction extends IDataAction {
+export interface ILiveDataAction extends IAction {
   type: 'LIVE_DATA_RECV',
-  payload: ZoneData,
+  payload: {
+    sensor: Sensor,
+    data: ZoneData,
+  },
 }
-export interface IWaterDataAction extends IDataAction {
+export interface IWaterDataAction extends IAction {
   type: 'WATER_DATA_RECV',
   payload: WaterData,
 }
@@ -51,4 +55,15 @@ export type WaterData = {
 export type Tweet = {
   text: string,
   'created_at': string,
+}
+
+export type PlantSetting = {
+  zone: Zone,
+  plant: string,
+  shouldSendTweets: boolean,
+  minTemperature: number,
+  maxTemperature: number,
+  minLight: number,
+  maxLight: number,
+  minMoisture: number,
 }

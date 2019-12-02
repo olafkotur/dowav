@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function useFetch<D>(url: string) {
+export default function useFetch<D>(url: RequestInfo) {
   let doUpdate = true;
   const [ data, setData ] = useState<D | null>(null);
   const [ error, setError ] = useState<any>(null);
@@ -12,14 +12,12 @@ export function useFetch<D>(url: string) {
         const json: D = await res.json();
         if (doUpdate) {
           setData(json);
-          setPending(false);
         }
       }).catch((err) => {
         if (doUpdate) {
           setError(err);
-          setPending(false);
         }
-      });
+      }).finally(() => setPending(false));
 
     return () => {
       doUpdate = false;
