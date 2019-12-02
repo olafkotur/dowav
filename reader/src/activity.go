@@ -21,6 +21,8 @@ var minLight int
 var maxTemperature int
 var maxLight int
 
+var zoneSettings []ZoneSetting
+
 func listenUserSettings() {
 	conn := evtwebsocket.Conn{
 		OnMessage: func(msg []byte, w *evtwebsocket.Conn) {

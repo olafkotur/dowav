@@ -75,30 +75,12 @@ func setDefaultSettings() {
 	if err != nil {
 		log.Println("Failed to set default user settings")
 	}
-	defer res.Body.Close()
 
-	var settings []Setting
 	body, _ := ioutil.ReadAll(res.Body)
-	_ = json.Unmarshal(body, &settings)
+	_ = json.Unmarshal(body, &zoneSettings)
+	res.Body.Close()
 
-	for _, s := range settings {
-		switch s.Type {
-		case "minTemperature":
-			minTemperature = toInt(s.Value)
-		case "minMoisture":
-			minMoisture = toInt(s.Value)
-		case "minLight":
-			minLight = toInt(s.Value)
-		case "maxTemperature":
-			maxTemperature = toInt(s.Value)
-		case "maxLight":
-			maxLight = toInt(s.Value)
-		case "shouldSendTweets":
-			shouldSendTweets = s.Value == "true"
-		}
-	}
-
-	fmt.Println("Set default user settings to:", minTemperature, minMoisture, minLight, maxTemperature, maxLight, shouldSendTweets)
+	fmt.Println("Set default user settings to:", zoneSettings)
 }
 
 func listenToPort(sp *serial.Port) (b string) {

@@ -45,3 +45,14 @@ type Setting struct {
 	Type  string  `json:"type"`
 	Value string  `json:"value"`
 }
+
+type ZoneSetting struct {
+	Zone             int    `json:"zone"`
+	Plant            string `json:"plant"`
+	ShouldSendTweets bool   `json:"shouldSendTweets"`
+	MinTemperature   int    `json:"minTemperature"`
+	MaxTemperature   int    `json:"maxTemperature"`
+	MinMoisture      int    `json:"minMoisture"`
+	MinLight         int    `json:"minLight"`
+	MaxLight         int    `json:"maxLight"`
+}
