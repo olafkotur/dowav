@@ -407,10 +407,15 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, zoneErr.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Println(zones)
+
 	for _, p := range s {
-		if *p.Zone > int64(len(*zones)) || *p.Zone < 1 {
-			http.Error(writer, "There is no such zone.", http.StatusBadRequest)
-			return
+		if p.Zone != nil {
+			fmt.Println(p)
+			if *p.Zone > int64(len(*zones)) || *p.Zone < 0 {
+				http.Error(writer, "There is no such zone.", http.StatusBadRequest)
+				return
+			}
 		}
 	}
 
@@ -430,8 +435,11 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 			http.Error(writer, "Database can't execute statement", http.StatusInternalServerError)
 			return
 		}
-
-		if plant.Zone != nil {
+		fmt.Println(*plant.Zone)
+		if *plant.Zone == 0 {
+			_, err := database.Exec("UPDATE zone SET plant=NULL WHERE plant=(SELECT id FROM plant WHERE plant='" + plantName + "')")
+			fmt.Println(err)
+		} else if plant.Zone != nil {
 			_, err := updateStatement.Exec(plantName, plant.Zone)
 			if err != nil {
 				fmt.Println(err)
