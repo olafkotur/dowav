@@ -32,15 +32,15 @@ func main() {
 	database, _ = sql.Open("sqlite3", "./database.db?_foreign_keys=on")
 
 	// Create plant table in database
-	_, err := database.Exec("DROP TABLE plant")
+	_, _ = database.Exec("DROP TABLE plant")
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT , plant TEXT UNIQUE, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER, lastUpdate REAL)")
-	_, err = statement.Exec()
+	_, err := statement.Exec()
 	if err != nil {
 		panic(err)
 	}
 
 	// Create zones table in database
-	_, err = database.Exec("DROP TABLE zone")
+	_, _ = database.Exec("DROP TABLE zone")
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant INTEGER REFERENCES plant(id) ON DELETE SET NULL)")
 	_, err = statement.Exec()
 	if err != nil {

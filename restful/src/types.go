@@ -39,6 +39,8 @@ type PlantSettings struct {
 	MinLight         int     `json:"minLight"`
 	MaxLight         int     `json:"maxLight"`
 	MinMoisture      int     `json:"minMoisture"`
+	BulbColor        string  `json:"bulbColor"`
+	BulbBrightness   int     `json:"bulbBrightness"`
 	LastUpdate       float64 `json:"-"`
 }
 
