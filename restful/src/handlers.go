@@ -15,7 +15,11 @@ import (
 	"github.com/dghubble/oauth1"
 )
 
-// TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
+func getDocumentation(writer http.ResponseWriter, request *http.Request) {
+	url := "https://documenter.getpostman.com/view/8555555/SWDzgMa6?version=latest"
+	http.Redirect(writer, request, url, http.StatusSeeOther)
+}
+
 func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 

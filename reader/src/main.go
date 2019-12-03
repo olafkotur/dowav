@@ -86,8 +86,6 @@ func startReadingSerial(name, baud string) {
 			handleLocation(data)
 		} else if data[:1] == "W" {
 			handleWater(data)
-		} else {
-			log.Println("Unexpected data format read from serial port, skipping")
 		}
 	}
 }
