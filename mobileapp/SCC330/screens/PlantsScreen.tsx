@@ -1,11 +1,11 @@
 import React from 'react';
 
 import DisplayScreen from './DisplayScreen';
-import AppSettings from '../containers/AppSettings';
+import MyPlants from '../containers/MyPlants';
 
 const SettingsScreen = () => (
   <DisplayScreen>
-    <AppSettings />
+    <MyPlants />
   </DisplayScreen>
 );
 

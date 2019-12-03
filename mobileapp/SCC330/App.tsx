@@ -3,14 +3,14 @@ import { StatusBar, View, TouchableOpacity, Insets, TouchableOpacityProps, Gestu
 import { createAppContainer, NavigationRoute, NavigationParams } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { createStackNavigator, NavigationStackProp } from 'react-navigation-stack';
-import { Icon, IconProps, IconType } from 'react-native-elements';
+import { Icon, IconProps } from 'react-native-elements';
 import { Provider } from 'react-redux';
 
 import TempScreen from './screens/TempScreen';
 import MoistureScreen from './screens/MoistureScreen';
 import LightScreen from './screens/LightScreen';
 import MovScreen from './screens/MovScreen';
-import SettingsScreen from './screens/SettingsScreen';
+import PlantsScreen from './screens/PlantsScreen';
 import theme from './theme';
 import store from './reducers';
 import WaterScreen from './screens/WaterScreen';
@@ -73,7 +73,7 @@ const HeaderIcons = ({ navigation }: HeaderIconProps) => {
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => navigate('Settings')}
+        onPress={() => navigate('My Plants')}
         hitSlop={hitSlop}
         style={{
           paddingLeft: 10,
@@ -81,7 +81,8 @@ const HeaderIcons = ({ navigation }: HeaderIconProps) => {
         }}
       >
         <Icon
-          name="settings"
+          name="flower"
+          type="material-community"
           color="white"
           size={30}
         />
@@ -126,7 +127,7 @@ const RootStack = createStackNavigator({
     }),
   },
   'Twitter Feed': TwitterScreen,
-  Settings: SettingsScreen,
+  'My Plants': PlantsScreen,
 }, {
   initialRouteName: 'Root',
   defaultNavigationOptions: ({ navigation }) => ({

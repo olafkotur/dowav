@@ -66,4 +66,6 @@ export type PlantSetting = {
   minLight: number,
   maxLight: number,
   minMoisture: number,
+  bulbColor: string,
+  bulbBrightness: number,
 }
