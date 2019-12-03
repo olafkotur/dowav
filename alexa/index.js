@@ -1,5 +1,6 @@
 const Alexa = require('ask-sdk-core');
 const request = require("request");
+const requests = require("./requests")
 
 const url = 'http://dowav-api.herokuapp.com'
 
@@ -35,44 +36,28 @@ const LightColorIntentHandler = {
     async handle(handlerInput) {
       const zone = Alexa.getSlotValue(handlerInput.requestEnvelope, "zone")
       const color = Alexa.getSlotValue(handlerInput.requestEnvelope, "color")
-      const res = new Promise((resolve, reject) => {
-        request({uri: url + '/api/setting/all', method: 'GET'}, (error, response, body) => {
-          const data = JSON.parse(body)
-          const settings = data[zone - 1]
-          const hex = colors[color]
-          const updatedSettings = {
-            zone: settings.zone,
-            plant: settings.plant,
-            shouldSendTweets: settings.shouldSendTweets,
-            minTemperature: settings.minTemperature,
-            maxTemperature: settings.maxTemperature,
-            minLight: settings.minLight,
-            maxLight: settings.maxLight,
-            minMoisture: settings.minMoisture,
-            bulbColor: hex,
-            bulbBrightness: settings.bulbBrightness
-          }
-
-          const msg = hex ? `Changed the light color in zone ${zone} to ${color}` : 'I dont recognise that color, please try again';
-          resolve(msg)
-          if (hex) {
-          request({
-              uri: url + '/api/setting', 
-              method: 'POST',
-              body: JSON.stringify([updatedSettings])
-          }, (error2, response2, body2) => {
-              console.log(body2)
-          })
-          }
-        });
-      })
-
-      const speakOutput = await res;
+      const speakOutput = await requests.changeColor(zone, color)
       return handlerInput.responseBuilder
           .speak(speakOutput)
           .getResponse();
     }
 };
+
+const LightBrightIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LightBrightIntent';
+    },
+    async handle(handlerInput) {
+      const zone = Alexa.getSlotValue(handlerInput.requestEnvelope, "zone")
+      const action = Alexa.getSlotValue(handlerInput.requestEnvelope, "action")
+      const speakOutput = await requests.changeBrightness(action, zone);
+      return handlerInput.responseBuilder
+          .speak(speakOutput)
+          .getResponse();
+    }
+};
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -144,6 +129,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
         LightColorIntentHandler,
+        LightBrightIntentHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
