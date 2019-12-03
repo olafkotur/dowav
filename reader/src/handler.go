@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func handleEnvironment(data string) {
 	formatted := formatEnvironmentData(data)
 	uploadLiveData(formatted)
@@ -22,9 +20,6 @@ func handleWater(data string) {
 
 func handleSettingUpdate(setting ZoneSetting) {
 	zoneSettings[setting.Zone-1] = setting
-
-	fmt.Println(setting)
-
-	changeColor(hueUserId, hueUrl, setting.BulbColor, 1)
-	changeBrightness(hueUserId, hueUrl, setting.BulbBrightness, 1)
+	changeColor(hueUserId, hueUrl, setting.BulbColor, setting.Zone)
+	changeBrightness(hueUserId, hueUrl, setting.BulbBrightness, setting.Zone)
 }

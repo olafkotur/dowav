@@ -304,6 +304,10 @@ func uploadWaterData(data []byte) {
 		tilt = 90
 	}
 
+	if tilt > 45 {
+		changeBrightness(hueUserId, hueUrl, obj.Zone, 160+tilt)
+	}
+
 	// Define the form values
 	values := url.Values{
 		"volume": {toString(volume)},

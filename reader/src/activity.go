@@ -14,6 +14,7 @@ import (
 var shouldSendTweets bool
 var previousTweet string
 var previousNotification string
+var previousMoisture [3]int
 
 var zoneSettings []ZoneSetting
 
@@ -44,6 +45,10 @@ func analyseEnvironmentData(d []byte) {
 	var msg string
 	_ = json.Unmarshal(d, &data)
 
+	if previousMoisture[data.Zone-1] >= 1 {
+		previousMoisture[data.Zone-1]--
+	}
+
 	for _, setting := range zoneSettings {
 		if setting.Zone == 0 {
 			continue
@@ -59,6 +64,12 @@ func analyseEnvironmentData(d []byte) {
 		// Moisture
 		if data.Moisture.Value <= setting.MinMoisture {
 			msg = "The moisture level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #moisture"
+		}
+
+		if data.Moisture.Value-previousMoisture[data.Zone-1] > 300 {
+			previousMoisture[data.Zone-1] = data.Moisture.Value
+			pushNotification("Increasing the light level in zone "+toString(data.Zone)+" due to a large increase in plant moisture", "info")
+			changeBrightness(hueUserId, hueUrl, data.Zone, 254)
 		}
 
 		// Light
@@ -83,6 +94,7 @@ func analyseLocationData(d []byte) {
 
 	if data.Zone != 0 && previousLocation != 0 {
 		msg := "A user has entered the green house and is now in zone " + toString(data.Zone) + " #wearefamily"
+		changeBrightness(hueUserId, hueUrl, 254, data.Zone)
 		postTweet(msg)
 		pushNotification(msg, "success")
 	}
