@@ -572,19 +572,19 @@ func updatePlantHealth(writer http.ResponseWriter, request *http.Request) {
 
 	// Get data from request
 	_ = request.ParseForm()
-	plantId := getMuxVariable("plantId", request)
+	plant := getMuxVariable("plant", request)
 	now := time.Now().Unix()
 	soil := request.Form.Get("soil")
 	stem := request.Form.Get("stem")
 	leaf := request.Form.Get("leaf")
 
 	// Update database
-	statement, err := database.Prepare("UPDATE health SET time=?, soil=?, stem=?, leaf=? WHERE id=?")
+	statement, err := database.Prepare("UPDATE health SET time=?, soil=?, stem=?, leaf=? WHERE plant=?")
 	if err != nil {
 		http.Error(writer, "Database failed", http.StatusInternalServerError)
 		return
 	}
-	_, err = statement.Exec(now, soil, stem, leaf, toInt(plantId))
+	_, err = statement.Exec(now, soil, stem, leaf, plant)
 	if err != nil {
 		http.Error(writer, "Can't Execute SQL", http.StatusInternalServerError)
 		return
@@ -606,7 +606,7 @@ func getPlantHealth(writer http.ResponseWriter, request *http.Request) {
 	var res []HealthData
 	for rows.Next() {
 		var data HealthData
-		_ = rows.Scan(&data.Id, &data.Time, &data.Soil, &data.Soil, &data.Leaf)
+		_ = rows.Scan(&data.Plant, &data.Time, &data.Soil, &data.Stem, &data.Leaf)
 		res = append(res, data)
 	}
 	rows.Close()
