@@ -35,7 +35,7 @@ type PlantSettings struct {
 	MinMoisture      int     `json:"minMoisture"`
 	BulbColor        string  `json:"bulbColor"`
 	BulbBrightness   int     `json:"bulbBrightness"`
-	LastUpdate       float64 `json:"-"`
+	LastUpdate       float64 `json:"lastUpdate"`
 }
 
 type ZoneTableRow struct {
