@@ -606,7 +606,7 @@ func getPlantHealth(writer http.ResponseWriter, request *http.Request) {
 	var res []HealthData
 	for rows.Next() {
 		var data HealthData
-		_ = rows.Scan(&data.Plant, &data.Time, &data.Soil, &data.Stem, &data.Leaf)
+		_ = rows.Scan(&data.Id, &data.Plant, &data.Time, &data.Soil, &data.Stem, &data.Leaf)
 		res = append(res, data)
 	}
 	rows.Close()

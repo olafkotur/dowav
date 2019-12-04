@@ -44,6 +44,7 @@ type ZoneTableRow struct {
 }
 
 type HealthData struct {
+	Id    string  `json:"id"`
 	Plant string  `json:"plant"`
 	Time  float64 `json:"time"`
 	Soil  string  `json:"soil"`

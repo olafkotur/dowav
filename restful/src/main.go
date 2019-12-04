@@ -85,7 +85,7 @@ func setDefaultValues() {
 
 	// Set each user setting
 	statement, _ = database.Prepare("INSERT INTO plant (plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, bulbColor, bulbBrightness, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	healthStatement, _ := database.Prepare("INSERT INTO health (plant, time, soil, stem, leaf) VALUES (?, ?, ?, ?, ?)")
+	healthStatement, _ := database.Prepare("INSERT INTO health (id, plant, time, soil, stem, leaf) VALUES (?, ?, ?, ?, ?, ?)")
 	for i := range plants {
 		r, rErr := statement.Exec(plants[i], values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7], time)
 		if rErr != nil {
@@ -101,7 +101,7 @@ func setDefaultValues() {
 		}
 		_, _ = st.Exec(i+1, id)
 
-		_, err := healthStatement.Exec(plants[i], time, "", "", "")
+		_, err := healthStatement.Exec(id, plants[i], time, "", "", "")
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -186,7 +186,7 @@ func createTables() {
 
 	// Create health table in database
 	_, _ = database.Exec("DROP TABLE health")
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS health (plant TEXT PRIMARY KEY, time REAL, soil TEXT, stem TEXT, leaf TEXT)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS health (id INTEGER PRIMARY KEY, plant TEXT, time REAL, soil TEXT, stem TEXT, leaf TEXT)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
