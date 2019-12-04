@@ -89,6 +89,27 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	sendResponse(res, writer)
 }
 
+func getWaterHistoricData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	connTime := time.Now().Add(time.Duration(-24) * time.Hour).Unix()
+
+	var res []WaterData
+	rows, err := database.Query("SELECT * FROM water WHERE time > " + strconv.FormatInt(connTime, 10) + " ORDER BY time ASC")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Database failed to execute", http.StatusInternalServerError)
+		return
+	}
+	for rows.Next() {
+		var waterData WaterData
+		_ = rows.Scan(&waterData.Time, &waterData.Volume, &waterData.Tilt)
+		res = append(res, waterData)
+	}
+
+	sendResponse(res, writer)
+}
+
 // TEST: curl -d "zone=1&temperature=26&moisture=220&light=98" localhost:8080/api/live/upload
 func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
