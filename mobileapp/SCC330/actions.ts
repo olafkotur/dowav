@@ -1,4 +1,4 @@
-import { ZoneData, ILiveDataAction, Sensor, IWaterDataAction, WaterData, IAction, SensorData } from './types';
+import { ZoneData, ILiveDataAction, Sensor, IWaterDataAction, WaterData, IAction, SensorData, ISettingsAction, PlantSetting } from './types';
 import { ActionCreator } from 'redux';
 import store from './reducers';
 
@@ -15,6 +15,10 @@ export const locationDataReceived: ActionCreator<IAction> = (payload: SensorData
 });
 export const waterDataReceived: ActionCreator<IWaterDataAction> = (payload: WaterData) => ({
   type: 'WATER_DATA_RECV',
+  payload,
+});
+export const changeSettings: ActionCreator<ISettingsAction> = (payload: PlantSetting[]) => ({
+  type: 'CHANGE_SETTINGS',
   payload,
 });
 export const waterDataFailed: IAction = {
@@ -43,7 +47,7 @@ export const fetchLocationData = () => {
   fetch(LOCATION_ENDPOINT)
     .then(async res => {
       const data: ZoneData = await res.json();
-      dispatch(liveDataReceived(sensor, data));
+      dispatch(liveDataReceived(data));
     }).catch(() => {});
 }
 

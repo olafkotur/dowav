@@ -13,7 +13,7 @@ const LabPlant = ({ name, color, onPress }: Props) => {
   return (
     <TouchableOpacity
       style={styles.plantContainer}
-      onPress={onPress.bind(null, name)}
+      onPress={() => onPress(name)}
       activeOpacity={1}
     >
       <Icon

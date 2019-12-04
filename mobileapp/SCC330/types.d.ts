@@ -1,4 +1,4 @@
-import { Action } from "redux";
+import { Action } from 'redux';
 
 export type Sensor = 'temperature' | 'moisture' | 'light';
 export type Zone = 1 | 2 | 3 | null | undefined;
@@ -10,12 +10,13 @@ export type GlobalState = {
     [key in Sensor]: ZoneData[]
   },
   location: SensorData,
+  settings: PlantSetting[] | null,
   waterData: WaterData | false | null,
 };
 
 // Action interfaces
 export interface IAction extends Action {
-  type: 'LIVE_DATA_RECV' | 'LOCATION_DATA_RECV' | 'WATER_DATA_RECV' | 'WATER_DATA_FAIL' | 'WATER_DATA_CLOSE',
+  type: 'LIVE_DATA_RECV' | 'LOCATION_DATA_RECV' | 'CHANGE_SETTINGS' | 'WATER_DATA_RECV' | 'WATER_DATA_FAIL' | 'WATER_DATA_CLOSE',
   payload: any,
 }
 export interface ILiveDataAction extends IAction {
@@ -28,6 +29,10 @@ export interface ILiveDataAction extends IAction {
 export interface IWaterDataAction extends IAction {
   type: 'WATER_DATA_RECV',
   payload: WaterData,
+}
+export interface ISettingsAction extends IAction {
+  type: 'CHANGE_SETTINGS',
+  payload: PlantSetting[],
 }
 
 // Data for one sensor in one zone

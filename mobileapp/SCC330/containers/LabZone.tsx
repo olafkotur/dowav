@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Text, StyleSheet, View } from 'react-native';
 
-import { Zone, PlantSetting } from '../types';
+import { Zone, PlantSetting, GlobalState } from '../types';
+import store from '../reducers';
 import LabPlant from './LabPlant';
 import PlantSettings from './PlantSettings';
 import GraphButton from './GraphButton';
 import theme from '../theme';
+import { changeSettings } from '../actions';
+import { useSelector } from 'react-redux';
 
 interface Props {
   zone: Zone,
-  initSettings: PlantSetting[],
 }
 
 const POST_SETTINGS_ENDPOINT = 'https://dowav-api.herokuapp.com/api/setting';
@@ -27,63 +29,72 @@ const mapSettingsToPlants = (settings: PlantSetting[], onPress: Function) => {
   });
 }
 
-const postSettings = (settings: PlantSetting[], setPlant: Function) => {
+const updateUserSettings = (userSettings: PlantSetting[], newUserSetting: PlantSetting, setUserSettings: Function) => {
+  const newUserSettings = [ ...userSettings ];
+  const settingIndex = newUserSettings.findIndex(userSetting => userSetting.plant === newUserSetting.plant);
+
+  if (settingIndex > -1) {
+    newUserSettings[settingIndex] = newUserSetting;
+  }
+
+  setUserSettings(newUserSettings);
+}
+
+const updateGlobalSettings = (settings: PlantSetting[], setPlant: Function) => {
   fetch(POST_SETTINGS_ENDPOINT, {
     method: 'POST',
     body: JSON.stringify(settings),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  }).finally(() => setPlant(''));
+  }).then(() => {
+    store.dispatch(changeSettings(settings));
+    setPlant('');
+  });
 }
 
-const LabZone = ({ zone, initSettings }: Props) => {
-  const zoneSettings = initSettings.filter(setting => setting.zone === zone);
-
+const LabZone = ({ zone }: Props) => {
+  const globalSettings = useSelector((store: GlobalState) => store.settings);
+  const [ userSettings, setUserSettings ] = useState(globalSettings);
   const [ plant, setPlant ] = useState('');
-  const [ settings, setSettings ] = useState(initSettings);
 
-  const setNewSettings = (newSetting: PlantSetting) => {
-    const newSettings = [ ...settings ];
-    const settingIndex = settings.findIndex(setting => setting.plant === newSetting.plant);
+  if (globalSettings && userSettings) {
+    const zoneSettings = globalSettings.filter(setting => setting.zone === zone);
+    const showSettings = plant !== '';
+    const plantSetting = userSettings.find(s => s.plant === plant);
 
-    if (settingIndex > -1) {
-      newSettings[settingIndex] = newSetting;
-    }
+    return (
+      <View style={styles.container}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>{showSettings ? `Settings for ${plant}` : `Zone ${zone}`}</Text>
+          {showSettings ? (
+            <GraphButton
+              label="Save"
+              style={{ ...theme.btnStyle, padding: 2 }}
+              onPress={() => updateGlobalSettings(userSettings, setPlant)}
+            />
+          ) : null}
+        </View>
 
-    setSettings(newSettings);
-  }
-  const showSettings = plant !== '';
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>{showSettings ? `Settings for ${plant}` : `Zone ${zone}`}</Text>
-        {showSettings ? (
-          <GraphButton
-            label="Save"
-            style={{ ...theme.btnStyle, padding: 2 }}
-            onPress={() => postSettings(settings, setPlant)}
-          />
-        ) : null}
+        {showSettings && plantSetting ? (
+          <View style={styles.settingsContainer}>
+            <PlantSettings
+              userSettings={plantSetting}
+              onSettingChange={(newSetting) => updateUserSettings(userSettings, newSetting, setUserSettings)}
+            />
+          </View>
+        ) : (
+          <View style={styles.plantsContainer}>
+            {zoneSettings.length ? (
+              mapSettingsToPlants(zoneSettings, setPlant)
+            ) : (
+              <Text style={{ ...theme.text, color: theme.inactiveColor }}>No plants in zone {zone}</Text>
+            )}
+          </View>
+        )}
       </View>
-
-      {showSettings ? (
-        <View style={styles.settingsContainer}>
-          <PlantSettings
-            settings={zoneSettings.filter(setting => setting.plant === plant)[0]}
-            onSettingChange={setNewSettings}
-          />
-        </View>
-      ) : (
-        <View style={styles.plantsContainer}>
-          {zoneSettings.length ? (
-            mapSettingsToPlants(zoneSettings, setPlant)
-          ) : (
-            <Text style={{ ...theme.text, color: theme.inactiveColor }}>No plants in zone {zone}</Text>
-          )}
-        </View>
-      )}
-    </View>
-  );
+    );
+  } else {
+    return null;
+  }
 }
 
 const styles = StyleSheet.create({

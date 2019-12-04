@@ -11,6 +11,7 @@ const initialState: GlobalState = {
     time: 0,
     value: 0,
   },
+  settings: null,
   waterData: null,
 }
 
@@ -30,6 +31,9 @@ const reducer: Reducer<GlobalState, IAction> = (state = initialState, action) =>
       break;
     case 'LOCATION_DATA_RECV':
       newState.location = action.payload;
+      break;
+    case 'CHANGE_SETTINGS':
+      newState.settings = action.payload;
       break;
     case 'WATER_DATA_RECV':
       newState.waterData = action.payload;

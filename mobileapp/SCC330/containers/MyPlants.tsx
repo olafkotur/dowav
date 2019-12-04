@@ -7,6 +7,8 @@ import LabZone from './LabZone';
 import Loader from './Loader';
 import { PlantSetting } from '../types';
 import theme from '../theme';
+import store from '../reducers';
+import { changeSettings } from '../actions';
 
 const SETTINGS_ENDPOINT = 'https://dowav-api.herokuapp.com/api/setting/all';
 
@@ -27,20 +29,13 @@ const MyPlants = () => {
   }
 
   if (data) {
+    store.dispatch(changeSettings(data));
+
     return (
       <View style={styles.container}>
-        <LabZone
-          zone={1}
-          initSettings={data}
-        />
-        <LabZone
-          zone={2}
-          initSettings={data}
-        />
-        <LabZone
-          zone={3}
-          initSettings={data}
-        />
+        <LabZone zone={1} />
+        <LabZone zone={2} />
+        <LabZone zone={3} />
       </View>
     );
   }
