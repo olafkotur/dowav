@@ -58,6 +58,20 @@ const LightBrightIntentHandler = {
     }
 };
 
+const PartyProtocolIntentHandler = {
+  canHandle(handlerInput) {
+      return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+          && Alexa.getIntentName(handlerInput.requestEnvelope) === 'PartyProtocolIntent';
+  },
+  async handle(handlerInput) {
+    requests.partyProtocol()
+    const speakOutput = 'You got it, Jarvis do your thing!'
+    return handlerInput.responseBuilder
+        .speak(speakOutput)
+        .getResponse();
+  }
+};
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -130,6 +144,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         LaunchRequestHandler,
         LightColorIntentHandler,
         LightBrightIntentHandler,
+        PartyProtocolIntentHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
