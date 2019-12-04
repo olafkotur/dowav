@@ -45,6 +45,7 @@ func attemptHueConnection() {
 		time.Sleep(10 * time.Second)
 		attemptHueConnection()
 	}
+	fmt.Println("Success - connected to hue bridge")
 
 	// Set all lights to default
 	for i := 0; i < 3; i++ {
@@ -72,13 +73,6 @@ func startReadingSerial(name, baud string) {
 
 	path := createLogFile()
 	for {
-		writer := bufio.NewWriter(sp)
-		msg := []byte("X Python is a hacking language")
-		_, err := writer.Write(msg)
-		if err != nil {
-			log.Println(err)
-		}
-
 		data := listenToPort(sp)
 		if len(data) <= 0 {
 			continue
@@ -93,7 +87,7 @@ func startReadingSerial(name, baud string) {
 		} else if data[:1] == "W" {
 			handleWater(data)
 		} else {
-			fmt.Println(data)
+			continue
 		}
 	}
 }
