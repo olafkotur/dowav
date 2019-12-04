@@ -38,6 +38,7 @@ func main() {
 
 	// Historic handlers
 	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
+	router.HandleFunc("/api/historic/water", getWaterHistoricData).Methods("GET")
 	router.HandleFunc("/api/historic/{sensor}", getHistoricData).Methods("GET")
 
 	// Live handlers
