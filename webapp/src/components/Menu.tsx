@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { MdDashboard, MdSettings, MdLocationSearching } from "react-icons/md";
-import { FaTemperatureLow, FaTwitter } from "react-icons/fa";
+import { FaTemperatureLow, FaTwitter, FaHeartbeat } from "react-icons/fa";
 import { IoIosWater } from "react-icons/io";
 import { GoLightBulb } from "react-icons/go";
 import { GiWateringCan } from "react-icons/gi";
@@ -45,6 +45,11 @@ export const menuOptions: Array<IMenuOption> = [
     name: MENU_OPTIONS.WATERING_CAN,
     indented: true,
     icon: <GiWateringCan size={20} color={iconColor} />
+  },
+  {
+    name: MENU_OPTIONS.HEALTH_STATUS,
+    indented: true,
+    icon: <FaHeartbeat size={20} color={iconColor} />
   },
   {
     name: MENU_OPTIONS.TWITTER,

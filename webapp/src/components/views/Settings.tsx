@@ -1,12 +1,13 @@
 import React, { useContext, useState, useEffect } from "react";
-import { SettingsState } from "../../types";
+import { SettingsState, PlantSettings } from "../../types";
 import Checkbox from "../control/Checkbox";
+import Range from "../control/Range";
 import SettingsContext from "../../context/SettingsContext";
 import useFetch from "../../hooks/useFetch";
-import Range from "../control/Range";
 import { toast } from "react-toastify";
 import Loader from "../styled/Loader";
 import ErrorMessage from "../../errors/ErrorMessage";
+import ServerSettings from "../ServerSettings";
 
 type FetchedSettings = { time: number; type: string; value: any };
 
@@ -46,7 +47,7 @@ function compare(
 const Settings: React.FC = () => {
   const [counter, setCounter] = useState(0);
   const { settings, setSettings } = useContext(SettingsContext);
-  const [serverSettings, setServerSettings] = useState<SettingsState | null>(
+  const [serverSettings, setServerSettings] = useState<PlantSettings[] | null>(
     null
   );
   const { data, loading, error } = useFetch({
@@ -58,7 +59,6 @@ const Settings: React.FC = () => {
   function createControls(settings: SettingsState | null, set: any) {
     if (!settings) return null;
     const keys = Object.keys(settings);
-
     return keys
       .map(k => {
         const t = settings[k].type;
@@ -91,31 +91,7 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      const newObj = {};
-      (data as FetchedSettings[]).forEach((f: FetchedSettings) => {
-        switch (f.type) {
-          case "shouldSendTweets": {
-            Object.assign(newObj, {
-              [f.type]: {
-                value: f.value === "true",
-                type: "checkbox",
-                label: "Server sends Tweets"
-              }
-            });
-            break;
-          }
-          default: {
-            Object.assign(newObj, {
-              [f.type]: {
-                value: parseInt(f.value),
-                type: "range",
-                label: typeToLabel[f.type]
-              }
-            });
-          }
-        }
-      });
-      setServerSettings(newObj as SettingsState);
+      setServerSettings(data as PlantSettings[]);
     }
   }, [data]);
 
@@ -142,7 +118,13 @@ const Settings: React.FC = () => {
           />
         ) : serverSettings ? (
           <>
-            {createControls(serverSettings, (key: any, value: any) => {
+            <ServerSettings
+              settings={serverSettings}
+              reload={() => {
+                setCounter(counter + 1);
+              }}
+            />
+            {/* {createControls(serverSettings, (key: any, value: any) => {
               const newState = {
                 ...serverSettings,
                 [key]: { ...serverSettings[key], value: value }
@@ -177,7 +159,7 @@ const Settings: React.FC = () => {
               disabled={compare(data, serverSettings)}
             >
               Save
-            </button>
+            </button> */}
           </>
         ) : null}
       </div>

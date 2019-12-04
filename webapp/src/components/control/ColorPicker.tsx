@@ -1,19 +1,22 @@
 import React from "react";
 
-type RangeProps = {
-  value: number;
+type ColorPickerProps = {
+  value: string;
   label: string;
-  onChange: any;
+  onChange: Function;
 };
 
-const Range: React.FC<RangeProps> = ({ value, label, onChange }) => {
+const ColorPicker: React.FC<ColorPickerProps> = ({
+  label,
+  value,
+  onChange
+}) => {
   return (
     <div className="checkbox-bar">
       <label>{label}</label>
       <input
-        type="number"
-        min="0"
-        max="255"
+        className="color-picker"
+        type="color"
         value={value}
         onChange={e => {
           onChange(e.target.value);
@@ -23,4 +26,4 @@ const Range: React.FC<RangeProps> = ({ value, label, onChange }) => {
   );
 };
 
-export default Range;
+export default ColorPicker;

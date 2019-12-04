@@ -73,3 +73,15 @@ export type SettingsState = {
   [key: string]: SettingsStateValue;
   showNotifications: SettingsStateValue;
 };
+
+export type PlantSettings = {
+  [key: string]: any;
+  zone: number;
+  shouldSendTweets: boolean;
+  plant: string;
+  minTemperature: number;
+  maxTemperature: number;
+  minMoisture: number;
+  minLight: number;
+  maxLight: number;
+};
