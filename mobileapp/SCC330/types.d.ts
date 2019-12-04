@@ -2,7 +2,6 @@ import { Action } from 'redux';
 
 export type Sensor = 'temperature' | 'moisture' | 'light';
 export type Zone = 1 | 2 | 3 | null | undefined;
-export type GraphState = 'loading' | 'displaying' | 'error';
 
 // Structure of redux store
 export type GlobalState = {

@@ -1,5 +1,5 @@
 import { createStore, Reducer } from 'redux';
-import { GlobalState, IAction, ILiveDataAction, PlantSetting } from './types';
+import { GlobalState, IAction, ILiveDataAction, PlantSetting, WaterData } from './types';
 
 const initialState: GlobalState = {
   liveData: {
@@ -49,7 +49,16 @@ const reducer: Reducer<GlobalState, IAction> = (state = initialState, action) =>
     case 'WATER_DATA_RECV':
     case 'WATER_DATA_FAIL':
     case 'WATER_DATA_CLOSE':
-      newState.waterData = action.payload;
+      const oldData = state.waterData;
+      const newData = action.payload as WaterData;
+
+      if (oldData && newData) {
+        if (oldData.tilt !== newData.tilt || oldData.volume !== newData.volume || oldData.time !== newData.time) {
+          newState.waterData = newData;
+        }
+      } else {
+        newState.waterData = newData;
+      }
       break;
     default:
       return state;

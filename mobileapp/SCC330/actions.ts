@@ -47,7 +47,7 @@ export const fetchLocationData = () => {
   fetch(LOCATION_ENDPOINT)
     .then(async res => {
       const data: ZoneData = await res.json();
-      dispatch(liveDataReceived(data));
+      dispatch(locationDataReceived(data));
     }).catch(() => {});
 }
 
