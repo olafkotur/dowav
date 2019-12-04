@@ -8,6 +8,7 @@ import { IoIosConstruct } from "react-icons/io";
 import Settings from "./views/Settings";
 import WateringCanView from "./views/WateringCanView";
 import HealthStatus from "./views/HealthStatus";
+import Notifications from "./views/Notifications";
 
 const Switch: React.FC = () => {
   const { currentOption } = useContext(NavigationContext);
@@ -38,6 +39,9 @@ const Switch: React.FC = () => {
       break;
     case MENU_OPTIONS.HEALTH_STATUS:
       component = <HealthStatus />;
+      break;
+    case MENU_OPTIONS.NOTIFICATIONS:
+      component = <Notifications />;
       break;
     default:
       component = (

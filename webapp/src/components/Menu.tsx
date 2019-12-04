@@ -1,5 +1,10 @@
 import React, { useContext } from "react";
-import { MdDashboard, MdSettings, MdLocationSearching } from "react-icons/md";
+import {
+  MdDashboard,
+  MdSettings,
+  MdLocationSearching,
+  MdNotificationsActive
+} from "react-icons/md";
 import { FaTemperatureLow, FaTwitter, FaHeartbeat } from "react-icons/fa";
 import { IoIosWater } from "react-icons/io";
 import { GoLightBulb } from "react-icons/go";
@@ -55,6 +60,11 @@ export const menuOptions: Array<IMenuOption> = [
     name: MENU_OPTIONS.TWITTER,
     indented: false,
     icon: <FaTwitter size={20} color={iconColor} />
+  },
+  {
+    name: MENU_OPTIONS.NOTIFICATIONS,
+    indented: false,
+    icon: <MdNotificationsActive size={20} color={iconColor} />
   },
   {
     name: MENU_OPTIONS.SETTINGS,

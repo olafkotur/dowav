@@ -770,3 +770,34 @@ input.switch-checkbox {
     }
   }
 }
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  overflow: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    width: 0 !important;
+  }
+  .notification-box {
+    padding: 20px;
+    width: 60%;
+    border-radius: 10px;
+    margin: 10px;
+    &.success {
+      background: green;
+    }
+    &.info {
+      background: $niceBlue;
+    }
+    &.warning {
+      background: orange;
+    }
+    &.error {
+      background: red;
+    }
+  }
+}

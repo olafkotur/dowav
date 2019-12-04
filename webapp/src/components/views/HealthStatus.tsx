@@ -26,12 +26,6 @@ const HealthStatus: React.FC = () => {
       let dim = ref.current.getBoundingClientRect();
       let x = e.clientX - dim.left;
       let y = e.clientY - dim.top;
-      console.log(
-        data.filter((d: any) => {
-          console.log(d === selectedPlant);
-          return d === selectedPlant;
-        })
-      );
       setTooltip({
         position: { x, y },
         text: data.filter((d: any) => d === selectedPlant)[0][part],
@@ -39,7 +33,6 @@ const HealthStatus: React.FC = () => {
       });
     }
   }
-  console.log(tooltip);
   useEffect(() => {
     if (ref.current) {
       setRect(ref.current.getBoundingClientRect());
@@ -171,7 +164,7 @@ const HealthStatus: React.FC = () => {
                   setTooltip(null);
                 }}
                 onMouseEnter={e => {
-                  generateTooltip(e, "leave");
+                  generateTooltip(e, "leaf");
                 }}
               >
                 <path
