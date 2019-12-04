@@ -43,23 +43,26 @@ const updateUserSettings = (userSettings: PlantSetting[], newUserSetting: PlantS
   setUserSettings(newUserSettings);
 }
 
-const updateGlobalSettings = (settings: PlantSetting[], setLoading: Function, setPlant: Function, setError: Function) => {
-  setLoading(true);
+const updateGlobalSettings = (userSettings: PlantSetting[], plant: string, setLoading: Function, setPlant: Function, setError: Function) => {
+  const newSetting = [ userSettings.find(s => s.plant === plant) ];
 
-  fetch(POST_SETTINGS_ENDPOINT, {
-    method: 'POST',
-    body: JSON.stringify(settings),
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  }).then(() => {
-    store.dispatch(changeSettings(settings));
-    setPlant('');
-  }).catch(() => {
-    setError(true);
-    setTimeout(() => {
-      setError(false);
+  if (newSetting[0]) {
+    setLoading(true);
+
+    fetch(POST_SETTINGS_ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify(newSetting),
+    }).then(() => {
+      store.dispatch(changeSettings(userSettings));
       setPlant('');
-    }, 4000);
-  }).finally(() => setLoading(false));
+    }).catch(() => {
+      setError(true);
+      setTimeout(() => {
+        setError(false);
+        setPlant('');
+      }, 4000);
+    }).finally(() => setLoading(false));
+  }
 }
 
 const LabZone = ({ zone }: Props) => {
@@ -112,7 +115,7 @@ const LabZone = ({ zone }: Props) => {
                 label="Save"
                 active
                 style={{ ...theme.btnStyle, marginLeft: 5, padding: 2 }}
-                onPress={() => updateGlobalSettings(userSettings, setLoading, setPlant, setError)}
+                onPress={() => updateGlobalSettings(userSettings, plant, setLoading, setPlant, setError)}
               />
             </View>
           ) : null}
