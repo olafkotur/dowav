@@ -5,6 +5,7 @@
 MicroBit uBit;
 int zoneId = 0;
 int deviceID = 0;
+int userID = 0;
 int oldDeviceID = deviceID;//Used to detect changes for display update
 int signalStrength = -128;
 char currentLocation = '0';
@@ -13,20 +14,23 @@ int currentTime = 0;
 int version = 1;
 int on = 0;
 int maxZones = 6;
-
-int distanceFrom1 = 0;
-int distanceFrom2 = 0;
-int distanceFrom3 = 0;
+int messagesSeen[10];
+int messagesSeenCounter = 0;
+int messegesSent[10];
+int messagesSentCounter = 0;
 
 int xZ1 = 0;
 int yZ1 = 0;
 int s1 = 0;
+int rssi1 = 0;
 int xZ2 = 0;
-int yZ2 = 1700;
+int yZ2 = 1600;
 int s2 = 0;
-int xZ3 = 240;
-int yZ3 = 800;
+int rssi2 = 0;
+int xZ3 = 800;
+int yZ3 = 240;
 int s3 = 0;
+int rssi3 = 0;
 
 //int calibratePower = 0;
 
@@ -34,7 +38,7 @@ int currentX = 0;
 int currentY = 0;
 
 int roomSizeX = 800;
-int roomSizeY = 1700;
+int roomSizeY = 1600;
 int searchResolution = 50;
 
 
@@ -191,10 +195,19 @@ void onButtonEvent(MicroBitEvent e) {
   printzoneId();
 }
 
-void sendMessage(ManagedString msg) {
-  uBit.radio.datagram.send(msg);
-  const char* temp = msg.toCharArray();
-  uBit.serial.printf("%s\r\n", temp);
+void sendMessage(ManagedString msg, int messageIDInt, int print) {
+  ManagedString space(" ");
+  ManagedString myZone(zoneId);
+  ManagedString messageID (messageIDInt);
+  ManagedString colon(":");
+  ManagedString fullMessage = myZone + space + messageID + colon + msg;
+  if(zoneId != 1){
+    uBit.radio.datagram.send(fullMessage);
+  }
+  const char* temp = fullMessage.toCharArray();
+  if(print == 1){
+    uBit.serial.printf("%s\r\n", temp);
+  }
   delete [] temp;
 }
 
@@ -202,29 +215,62 @@ void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
   const char* msg = recv.toCharArray();
 
+  char croppedMsg[strlen(msg)];
+  for(int i=0;i<strlen(msg);i++){
+    croppedMsg[i] = msg[i + 6];
+  }
+  int origonialyFrom = ((int)msg[7] % 48);//https://stackoverflow.com/questions/5029840/convert-char-to-int-in-c-and-c
+  int recivedFrom = ((int)msg[0] % 48) - 3;
+
+  //Get message ID
+  char currentMessageIDChar[4];
+  currentMessageIDChar[0] = msg[2];
+  currentMessageIDChar[1] = msg[3];
+  currentMessageIDChar[2] = msg[4];
+  currentMessageIDChar[3] = '\n';
+
+  int currentMessageID = atoi(currentMessageIDChar);
+  int seen = 0;
+
+  for(int i=0;i<10;i++){
+    if(messegesSent[i] == currentMessageID){
+      seen = 1;
+      break;
+    }
+  }
+  if (seen == 0){
+    if(zoneId == 2){//Is reciver
+      uBit.serial.printf("%s\r\n", croppedMsg);
+    }
+    messegesSent[messagesSeenCounter] = currentMessageID;
+    messagesSeenCounter++;
+    if(messagesSeenCounter == 10){
+      messagesSeenCounter = 0;
+    }
+  }
+
   // Receiver
   if(on == 1){
     if (zoneId == 2) {
       // Change zone each time it changes
       if (msg[0] == 'U') {
-        currentLocation = msg[1];
+        currentLocation = msg[7];
         userLocationLastUpdateTime = currentTime;
       }
-      uBit.serial.printf("%s\r\n", msg);
     }
 
-  //User
-    if(msg[1] != 'U' && msg[1] != 'W' && zoneId == 1) {
-      int recivedZone = (int)msg[1] % 48;//https://stackoverflow.com/questions/5029840/convert-char-to-int-in-c-and-c
-      if (recivedZone == 1){
+    //Message from sensor and I am user
+    if(msg[6] != 'U' && msg[6] != 'W' && zoneId == 1) {
+      if (recivedFrom == 1){
         s1 = RSSIToDistance(uBit.radio.getRSSI());
-      } else if (recivedZone == 2){
+        rssi1 = uBit.radio.getRSSI();
+      } else if (recivedFrom == 2){
         s2 = RSSIToDistance(uBit.radio.getRSSI());
-      } else if (recivedZone == 3){
+        rssi2 = uBit.radio.getRSSI();
+      } else if (recivedFrom == 3){
         s3 = RSSIToDistance(uBit.radio.getRSSI());
+        rssi3 = uBit.radio.getRSSI();
       }
-
-      uBit.serial.printf("Zone %i strength: %i\r\b",recivedZone,uBit.radio.getRSSI());
 
       int currentError = -1;
       int tempError;
@@ -238,20 +284,49 @@ void receiveMessage(MicroBitEvent) {
           }
         }
       }
-
-       //uBit.serial.printf("1:%i 2:%i 3:%i\r\n",s1,s2,s3);
-       //uBit.serial.printf("X:%i Y:%i\r\n",currentX,currentY);
+      if(s1 != 0 && s2 != 0 && s3 != 0){
+        uBit.serial.printf("%i %i %i\r\n",rssi1,rssi2,rssi3);
+        uBit.serial.printf("%i %i %i\r\n",s1,s2,s3);
+        ManagedString toSend(ManagedString("U2 ") + ManagedString(userID) + ManagedString(' ') +
+                                                         ManagedString(currentX) + ManagedString(' ') +
+                                                         ManagedString(currentY));
+        sendMessage(toSend,(rand() % 900) + 100,1);
+        }
+      }
+      int seenMessageBefore = 0;
+      for (int i = 0;i < 10;i++){
+        if(messagesSeen[i] == currentMessageID){
+          seenMessageBefore = 1;
+          break;
+        }
+      }
+      if(seenMessageBefore == 0){
+        //I have not seen this message before
+        if (origonialyFrom != zoneId){
+        messagesSeen[messagesSeenCounter] = currentMessageID;
+        messagesSeenCounter++;
+        if(messagesSeenCounter == 10){
+          messagesSeenCounter = 0;
+        }
+          sendMessage(croppedMsg,currentMessageID,0);
+        } else {
+          //This message is for me
+          uBit.serial.print(msg);
+          }
+      } else {
+      }
     }
   }
-
   delete [] msg;
-
 }
 
 int main() {
   uBit.init();
+  srand((unsigned) 50);
+  userID = rand() % 100;
   uBit.radio.enable();
   uBit.radio.setGroup(3);
+  //uBit.radio.setTransmitPower(1);
   uBit.thermometer.setCalibration(uBit.thermometer.getTemperature());
 
   uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onButtonEvent);
@@ -276,11 +351,11 @@ int main() {
                              ManagedString(moisture) + ManagedString(' ') +
                              ManagedString(light) + ManagedString(' ') +
                              ManagedString(waterLevel));
-        sendMessage(toSend);
+        sendMessage(toSend,(rand() % 900) + 100,0);
 
-      //Reciver
+      //Reciver reading Serial data
       } else if (zoneId == 2){
-        int input;
+        /*int input;
         char str[64];
         int i = 0;
         do{
@@ -293,7 +368,13 @@ int main() {
         str[i] = '\0';
         if(i != 0){
           ManagedString inputMS(str);
-          sendMessage(inputMS);
+          sendMessage(inputMS,(rand() % 900) + 100,0);
+        }*/
+
+        ManagedString input = uBit.serial.readUntil(ManagedString("\r\n"),ASYNC);
+        if(input.length()!=0){
+          sendMessage(input,(rand() % 900) + 100,1);
+          uBit.display.print(input);
         }
 
       } else if (zoneId == 3){
@@ -308,7 +389,7 @@ int main() {
                                                  ManagedString(accelerometerY) + ManagedString(' ') +
                                                  ManagedString(accelerometerZ) + ManagedString(' ') +
                                                  ManagedString(waterLevel));
-        sendMessage(toSend);
+        sendMessage(toSend,(rand() % 900) + 100,0);
       }
     }
     currentTime = currentTime + 1;
