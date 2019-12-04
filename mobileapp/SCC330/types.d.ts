@@ -74,3 +74,10 @@ export type PlantSetting = {
   bulbColor: string,
   bulbBrightness: number,
 };
+export type PlantHealth = {
+  plant: string,
+  time: number,
+  soil: string,
+  stem: string,
+  leaf: string,
+};

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, StyleSheet, View } from 'react-native';
 
-import { Zone, PlantSetting, GlobalState } from '../types';
+import { Zone, PlantSetting, GlobalState, PlantHealth } from '../types';
 import store from '../reducers';
 import LabPlant from './LabPlant';
 import PlantSettings from './PlantSettings';
@@ -10,11 +10,13 @@ import theme from '../theme';
 import { changeSettings } from '../actions';
 import { useSelector } from 'react-redux';
 import Loader from './Loader';
+import useFetch from '../hooks/useFetch';
 
 interface Props {
   zone: Zone,
 }
 
+const HEALTH_ENDPOINT = 'https://dowav-api.herokuapp.com/api/health';
 const POST_SETTINGS_ENDPOINT = 'https://dowav-api.herokuapp.com/api/setting';
 
 const mapSettingsToPlants = (settings: PlantSetting[], onPress: Function) => {
@@ -62,6 +64,7 @@ const updateGlobalSettings = (settings: PlantSetting[], setLoading: Function, se
 
 const LabZone = ({ zone }: Props) => {
   const globalSettings = useSelector((store: GlobalState) => store.settings);
+  const [ healthData ] = useFetch<PlantHealth[]>(HEALTH_ENDPOINT);
 
   const [ userSettings, setUserSettings ] = useState(globalSettings);
   const [ plant, setPlant ] = useState('');
@@ -97,7 +100,7 @@ const LabZone = ({ zone }: Props) => {
     return (
       <View style={styles.container}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>{showSettings ? `Settings for ${plant}` : `Zone ${zone}`}</Text>
+          <Text style={styles.title}>{showSettings ? plant : `Zone ${zone}`}</Text>
           {showSettings ? (
             <View style={{ flexDirection: 'row' }}>
               <GraphButton
@@ -119,6 +122,7 @@ const LabZone = ({ zone }: Props) => {
           <View style={styles.settingsContainer}>
             <PlantSettings
               userSettings={plantSetting}
+              healthData={healthData && healthData.length ? healthData.filter(d => d.plant === plant)[0] : undefined}
               onSettingChange={(newSetting) => updateUserSettings(userSettings, newSetting, setUserSettings)}
             />
           </View>

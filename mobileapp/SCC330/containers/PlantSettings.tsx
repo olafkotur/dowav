@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Switch, StyleSheet, Text, ScrollView } from 'react-native';
-import { PlantSetting, GlobalState } from '../types';
+import { PlantSetting, GlobalState, PlantHealth } from '../types';
 import theme from '../theme';
 import { Slider } from 'react-native-elements';
 import { useSelector } from 'react-redux';
@@ -34,10 +34,11 @@ LabelledSlider.defaultProps = { unit: '' };
 
 interface Props {
   userSettings: PlantSetting,
+  healthData?: PlantHealth,
   onSettingChange: (newSetting: PlantSetting) => void,
 }
 
-const PlantSettings = ({ userSettings, onSettingChange }: Props) => {
+const PlantSettings = ({ userSettings, healthData, onSettingChange }: Props) => {
   if (userSettings.minTemperature < 0) {
     userSettings.minTemperature = 0;
   }
@@ -72,6 +73,14 @@ const PlantSettings = ({ userSettings, onSettingChange }: Props) => {
 
   return (
     <ScrollView style={styles.container}>
+
+      {healthData && (healthData.soil || healthData.leaf || healthData.stem) ? (
+        <View style={styles.healthContainer}>
+          {healthData.soil ? <Text style={styles.healthText}>{healthData.soil}</Text> : null}
+          {healthData.leaf ? <Text style={styles.healthText}>{healthData.leaf}</Text> : null}
+          {healthData.stem ? <Text style={styles.healthText}>{healthData.stem}</Text> : null}
+        </View>
+      ) : null}
 
       <View style={{ flexDirection: 'row' }}>
         <Text
@@ -160,6 +169,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
+    color: 'white',
+    fontSize: 16,
+  },
+  healthContainer: {
+    paddingBottom: 5,
+    marginBottom: 5,
+    borderBottomColor: 'grey',
+    borderBottomWidth: 1,
+  },
+  healthText: {
+    fontStyle: 'italic',
     color: 'white',
     fontSize: 16,
   },
