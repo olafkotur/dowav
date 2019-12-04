@@ -16,7 +16,7 @@ func TestQueryHourlyData(t *testing.T) {
 		fmt.Println(i1)
 	}
 	if i1 == 0 {
-		t.Error("Expected the last value of the TestDB talbe instead of 0")
+		t.Error("Expected the last value of the TestDB table instead of 0")
 	}
 }
 
