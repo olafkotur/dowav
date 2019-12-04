@@ -49,7 +49,7 @@ const renderGraphs = (sensor: Sensor, activeGraph: number, liveStates: boolean[]
           <GraphButton
             active={liveStates[i]}
             label="Live"
-            style={theme.liveBtnStyle}
+            style={theme.btnStyle}
             onPress={() => setOneLiveState(i, !liveStates[i])}
           />
         </View>

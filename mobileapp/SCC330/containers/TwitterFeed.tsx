@@ -7,8 +7,9 @@ import Loader from './Loader';
 
 const TWEET_ENDPOINT = 'https://dowav-api.herokuapp.com/api/tweets';
 
+const addZero = (n: number) => n === 0 ? '00' : (n < 10 ? `0${n}` : n.toString());
 const parseDate = (dateTime: Date) => {
-  const time = `${dateTime.getHours()}:${dateTime.getMinutes()}`;
+  const time = `${addZero(dateTime.getHours())}:${addZero(dateTime.getMinutes())}`;
   const date = dateTime.toDateString();
 
   return `${time} • ${date}`;

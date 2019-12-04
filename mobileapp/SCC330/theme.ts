@@ -6,7 +6,7 @@ const liveBtnContainer: ViewStyle = {
   alignItems: 'center',
   justifyContent: 'space-between',
 };
-const liveBtnStyle: ViewStyle = {
+const btnStyle: ViewStyle = {
   borderRadius: 3,
   borderColor: 'orange',
   borderWidth: 1,
@@ -22,7 +22,8 @@ const theme = {
   backgroundColor: '#2c5364',
   headerColor: '#1f404f',
   statusBarColor: '#0e2c38',
-  accentColor: 'orange',
+  accentColor: '#ffa500',
+  inactiveAccentColor: '#fc8a00',
   inactiveColor: '#ddd',
   graph: {
     lineWidth: 3,
@@ -30,7 +31,7 @@ const theme = {
   },
   text,
   liveBtnContainer,
-  liveBtnStyle,
+  btnStyle,
 };
 
 export default theme;

@@ -27,32 +27,19 @@ const MyPlants = () => {
   }
 
   if (data) {
-    data.push({
-      plant: 'Peppers',
-      zone: 2,
-      shouldSendTweets: false,
-      minTemperature: 19,
-      maxTemperature: 35,
-      minLight: 20,
-      maxLight: 225,
-      minMoisture: 50,
-      bulbColor: "#f00",
-      bulbBrightness: 254
-    });
-
     return (
       <View style={styles.container}>
         <LabZone
           zone={1}
-          settings={data}
+          initSettings={data}
         />
         <LabZone
           zone={2}
-          settings={data}
+          initSettings={data}
         />
         <LabZone
           zone={3}
-          settings={data}
+          initSettings={data}
         />
       </View>
     );

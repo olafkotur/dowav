@@ -42,7 +42,7 @@ const SensorScreen = (props: Props) => {
         <GraphButton
           active={isLive}
           label="Live"
-          style={theme.liveBtnStyle}
+          style={theme.btnStyle}
           onPress={() => setIsLive(!isLive)}
         />
         <Text style={styles.graphTitle}>All Zones</Text>

@@ -1,32 +1,46 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { PlantSetting } from '../types';
 
 interface Props {
   name: PlantSetting['plant'],
   color: PlantSetting['bulbColor'],
+  onPress: Function,
 }
 
-const LabPlant = (props: Props) => {
-  const { name, color } = props;
-
+const LabPlant = ({ name, color, onPress }: Props) => {
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      style={styles.plantContainer}
+      onPress={onPress.bind(null, name)}
+      activeOpacity={1}
+    >
       <Icon
         name="flower"
         type="material-community"
         color={color}
       />
-      <Text style={{ color: 'white' }}>{name}</Text>
-    </View>
+      <Text style={styles.name}>{name}</Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  modalContainer: {
+    flex: 1,
+    borderColor: 'red',
+    borderWidth: 1,
+  },
+  plantContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  name: {
+    marginTop: 3,
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
