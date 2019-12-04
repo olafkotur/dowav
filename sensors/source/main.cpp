@@ -1,5 +1,6 @@
 #include "MicroBit.h"
 #include "time.h"
+#include "math.h"
 
 MicroBit uBit;
 int zoneId = 0;
@@ -11,6 +12,31 @@ int userLocationLastUpdateTime = 0;
 int currentTime = 0;
 int version = 1;
 int on = 0;
+int maxZones = 6;
+
+int distanceFrom1 = 0;
+int distanceFrom2 = 0;
+int distanceFrom3 = 0;
+
+int xZ1 = 0;
+int yZ1 = 0;
+int s1 = 0;
+int xZ2 = 0;
+int yZ2 = 1700;
+int s2 = 0;
+int xZ3 = 240;
+int yZ3 = 800;
+int s3 = 0;
+
+//int calibratePower = 0;
+
+int currentX = 0;
+int currentY = 0;
+
+int roomSizeX = 800;
+int roomSizeY = 1700;
+int searchResolution = 50;
+
 
 // Returns 0-1024 range representing the voltage on pin 0. Use a resistive divider with pin0 between 3V and ground. With the nichrome wire & cup being between pin0 and ground.
 int getWaterLevel() {
@@ -85,6 +111,17 @@ int getMoistureLevel() {
   return toReturn;
 }
 
+float measuredPower = -62.0;
+int RSSIToDistance(float rssi){
+  //https://iotandelectronics.wordpress.com/2016/10/07/how-to-calculate-distance-from-the-rssi-value-of-the-ble-beacon/
+  return pow(10,(measuredPower - rssi)/(10.0*2.0))*100;
+  //return pow(10,0.1)*100;
+}
+
+int distanceBetweenPoints(int x1,int y1, int x2, int y2){
+  return sqrt(pow((x2-x1),2)+pow(y2-y1,2));
+}
+
 int temperature = getTemperature();
 int moisture = getMoistureLevel();
 int light = getLightLevel();
@@ -124,21 +161,20 @@ void printzoneId() {
       uBit.display.print(zoneId-3);
   }
   else if (zoneId == 3) {
-      uBit.display.printAsync("W");
+      uBit.display.print("W");
     }
   else if (zoneId == 2) {
-    uBit.display.printAsync("R");
+    uBit.display.print("R");
   }
   else if (zoneId == 1){
-    uBit.display.printAsync("U");
+    uBit.display.print("U");
   }
   else {
-    uBit.display.printAsync("-");
+    uBit.display.print("-");
   }
 }
 
 void onButtonEvent(MicroBitEvent e) {
-  int maxZones = 6;
   if (e.source == MICROBIT_ID_BUTTON_A && zoneId > 0) {
     zoneId--;
   }
@@ -157,7 +193,9 @@ void onButtonEvent(MicroBitEvent e) {
 
 void sendMessage(ManagedString msg) {
   uBit.radio.datagram.send(msg);
-  uBit.serial.printf("%s\r\n", msg.toCharArray());
+  const char* temp = msg.toCharArray();
+  uBit.serial.printf("%s\r\n", temp);
+  delete [] temp;
 }
 
 void receiveMessage(MicroBitEvent) {
@@ -171,33 +209,43 @@ void receiveMessage(MicroBitEvent) {
       if (msg[0] == 'U') {
         currentLocation = msg[1];
         userLocationLastUpdateTime = currentTime;
-      }// else {
-        /*if(currentTime-userLocationLastUpdateTime<10){
-          uBit.serial.printf("%s %c\r\n", msg, currentLocation);
-        } else {
-          //No user recived for more then 10 seconds - so send 0 for location
-          uBit.serial.printf("%s 0\r\n", msg);
-        }*/
-      uBit.serial.printf("%s\r\n", msg);
-      //}
+        uBit.serial.printf("%s\r\n", msg);
+      }
     }
 
   //User
     if(msg[1] != 'U' && msg[1] != 'W' && zoneId == 1) {
-      if (msg[1] == currentLocation) {
-        signalStrength = uBit.radio.getRSSI();
+      int recivedZone = (int)msg[1] % 48;//https://stackoverflow.com/questions/5029840/convert-char-to-int-in-c-and-c
+      if (recivedZone == 1){
+        s1 = RSSIToDistance(uBit.radio.getRSSI());
+      } else if (recivedZone == 2){
+        s2 = RSSIToDistance(uBit.radio.getRSSI());
+      } else if (recivedZone == 3){
+        s3 = RSSIToDistance(uBit.radio.getRSSI());
       }
-      if (uBit.radio.getRSSI() > signalStrength) {
-        signalStrength = uBit.radio.getRSSI();
-        currentLocation = msg[1];
+
+      uBit.serial.printf("Zone %i strength: %i\r\b",recivedZone,uBit.radio.getRSSI());
+
+      int currentError = -1;
+      int tempError;
+      for(int x=0;x<roomSizeX;x=x+searchResolution){
+        for(int y=0;y<roomSizeY;y=y+searchResolution){
+          tempError = abs(distanceBetweenPoints(x,y,xZ1,yZ1) - s1) + abs(distanceBetweenPoints(x,y,xZ2,yZ2) - s2) + abs(distanceBetweenPoints(x,y,xZ3,yZ3) - s3);
+          if(tempError<currentError || currentError == -1){
+            currentX = x;
+            currentY = y;
+            currentError = tempError;
+          }
+        }
       }
-      //ManagedString prefix("U");
-      //ManagedString zone(currentLocation);
-      //uBit.radio.datagram.send(prefix + zone);
-      //uBit.serial.printf("%s\r\n",zone.toCharArray());
-      sendMessage(ManagedString('U') + ManagedString(deviceID) + ManagedString(' ') + ManagedString(currentLocation));
+
+       //uBit.serial.printf("1:%i 2:%i 3:%i\r\n",s1,s2,s3);
+       //uBit.serial.printf("X:%i Y:%i\r\n",currentX,currentY);
     }
   }
+
+  delete [] msg;
+
 }
 
 int main() {
@@ -222,12 +270,13 @@ int main() {
         light = getLightLevel();
         waterLevel = getWaterLevel();
 
-        sendMessage(ManagedString(ManagedString('R') +
-                                  ManagedString(zoneId-3) + ManagedString(' ') +
-                                  ManagedString(temperature) + ManagedString(' ') +
-                                  ManagedString(moisture) + ManagedString(' ') +
-                                  ManagedString(light) + ManagedString(' ') +
-                                  ManagedString(waterLevel)));
+        ManagedString toSend(ManagedString('R') +
+                             ManagedString(zoneId-3) + ManagedString(' ') +
+                             ManagedString(temperature) + ManagedString(' ') +
+                             ManagedString(moisture) + ManagedString(' ') +
+                             ManagedString(light) + ManagedString(' ') +
+                             ManagedString(waterLevel));
+        sendMessage(toSend);
       } else if (zoneId == 3){
         //Watering can
         waterLevel = getWaterLevel();
@@ -235,11 +284,12 @@ int main() {
         accelerometerY = getAccelorometerY();
         accelerometerZ = getAccelorometerZ();
 
-        sendMessage(ManagedString(ManagedString('W') + ManagedString(deviceID) + ManagedString(' ') +
-                    ManagedString(accelerometerX) + ManagedString(' ') +
-                    ManagedString(accelerometerY) + ManagedString(' ') +
-                    ManagedString(accelerometerZ) + ManagedString(' ') +
-                    ManagedString(waterLevel)));
+        ManagedString toSend(ManagedString('W') + ManagedString(deviceID) + ManagedString(' ') +
+                                                 ManagedString(accelerometerX) + ManagedString(' ') +
+                                                 ManagedString(accelerometerY) + ManagedString(' ') +
+                                                 ManagedString(accelerometerZ) + ManagedString(' ') +
+                                                 ManagedString(waterLevel));
+        sendMessage(toSend);
       }
     }
     currentTime = currentTime + 1;
