@@ -95,7 +95,7 @@ func getWaterHistoricData(writer http.ResponseWriter, request *http.Request) {
 	connTime := time.Now().Add(time.Duration(-24) * time.Hour).Unix()
 
 	var res []WaterData
-	rows, err := database.Query("SELECT * FROM water WHERE time > " + strconv.FormatInt(connTime, 10))
+	rows, err := database.Query("SELECT * FROM water WHERE time > " + strconv.FormatInt(connTime, 10) + " ORDER BY time ASC")
 	if err != nil {
 		fmt.Println(err)
 		http.Error(writer, "Database failed to execute", http.StatusInternalServerError)
