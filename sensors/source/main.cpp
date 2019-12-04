@@ -211,44 +211,6 @@ void receiveMessage(MicroBitEvent) {
         userLocationLastUpdateTime = currentTime;
       }
       uBit.serial.printf("%s\r\n", msg);
-
-      /*ManagedString serialInput("");
-      ManagedString read = uBit.serial.read(ASYNC);
-      sendMessage(read);
-      ManagedString total;
-      for (int i=0;i<read.length();i++){
-        total = serialInput + read;
-      }
-      if (total.length() != 0){
-        uBit.display.scroll(total);
-        sendMessage(total);
-      }*/
-
-       /*int c;
-       do while {
-           c=uBit.serial.read(ASYNC);
-           if(c!=MICROBIT_NO_DATA){
-              uBit.serial.send((char)c);
-           }
-          } while(c!='x');*/
-
-      int input;
-      char str[20];
-      int i=0;
-       do{
-         input = uBit.serial.read(ASYNC);
-         if(input != MICROBIT_NO_DATA){
-           //uBit.serial.send((char)input);
-           str[i] = (char)input;
-           i++;
-         }
-       } while (input != MICROBIT_NO_DATA);
-       str[i] = '\0';
-       if(i!=0){
-         //uBit.serial.printf("%s\r\n",str);
-         ManagedString inputMS(str);
-         sendMessage(inputMS);
-       }
     }
 
   //User
@@ -315,6 +277,25 @@ int main() {
                              ManagedString(light) + ManagedString(' ') +
                              ManagedString(waterLevel));
         sendMessage(toSend);
+
+      //Reciver
+      } else if (zoneId == 2){
+        int input;
+        char str[64];
+        int i = 0;
+        do{
+          input = uBit.serial.read(ASYNC);
+          if(input != MICROBIT_NO_DATA){
+            str[i] = (char)input;
+            i++;
+          }
+        } while (input != MICROBIT_NO_DATA);
+        str[i] = '\0';
+        if(i != 0){
+          ManagedString inputMS(str);
+          sendMessage(inputMS);
+        }
+
       } else if (zoneId == 3){
         //Watering can
         waterLevel = getWaterLevel();
