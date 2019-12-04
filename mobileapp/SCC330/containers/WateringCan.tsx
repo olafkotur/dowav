@@ -3,16 +3,16 @@ import { useSelector } from 'react-redux';
 import { Svg, Rect } from 'react-native-svg';
 
 import ErrorMessage from './ErrorMessage';
-import { GlobalState } from '../types';
-import { openWebSocket } from '../actions';
+import { GlobalState, WaterData } from '../types';
+import { openWebSocket, waterDataReceived, waterDataFailed, waterDataClosed } from '../actions';
 import theme from '../theme';
 import Loader from './Loader';
 
-const WATER_ENDPOINT = 'ws://dowav-api.herokuapp.com/api/water';
+const WATER_ENDPOINT = 'wss://dowav-api.herokuapp.com/api/water';
 
 const WateringCan = () => {
   useEffect(() => {
-    const waterSocket = openWebSocket(WATER_ENDPOINT);
+    const waterSocket = openWebSocket<WaterData>(WATER_ENDPOINT, waterDataReceived, waterDataFailed, waterDataClosed);
 
     return () => {
       waterSocket.close();

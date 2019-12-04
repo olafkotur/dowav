@@ -1,5 +1,5 @@
 import { createStore, Reducer } from 'redux';
-import { GlobalState, IAction, ILiveDataAction } from './types';
+import { GlobalState, IAction, ILiveDataAction, PlantSetting } from './types';
 
 const initialState: GlobalState = {
   liveData: {
@@ -33,16 +33,24 @@ const reducer: Reducer<GlobalState, IAction> = (state = initialState, action) =>
       newState.location = action.payload;
       break;
     case 'CHANGE_SETTINGS':
-      newState.settings = action.payload;
+      if (state.settings && newState.settings) {
+        const payload = action.payload as PlantSetting[];
+
+        if (payload.length) {
+          const newSetting = payload[0];
+          const index = state.settings.findIndex(s => s.plant === newSetting.plant);
+
+          newState.settings[index] = newSetting;
+        }
+      } else {
+        newState.settings = action.payload;
+      }
       break;
     case 'WATER_DATA_RECV':
-      newState.waterData = action.payload;
-      break;
     case 'WATER_DATA_FAIL':
-      newState.waterData = action.payload;
-      break;
     case 'WATER_DATA_CLOSE':
       newState.waterData = action.payload;
+      break;
     default:
       return state;
   }

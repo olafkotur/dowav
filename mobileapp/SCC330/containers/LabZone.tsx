@@ -9,6 +9,7 @@ import GraphButton from './GraphButton';
 import theme from '../theme';
 import { changeSettings } from '../actions';
 import { useSelector } from 'react-redux';
+import Loader from './Loader';
 
 interface Props {
   zone: Zone,
@@ -40,7 +41,9 @@ const updateUserSettings = (userSettings: PlantSetting[], newUserSetting: PlantS
   setUserSettings(newUserSettings);
 }
 
-const updateGlobalSettings = (settings: PlantSetting[], setPlant: Function) => {
+const updateGlobalSettings = (settings: PlantSetting[], setLoading: Function, setPlant: Function, setError: Function) => {
+  setLoading(true);
+
   fetch(POST_SETTINGS_ENDPOINT, {
     method: 'POST',
     body: JSON.stringify(settings),
@@ -48,14 +51,44 @@ const updateGlobalSettings = (settings: PlantSetting[], setPlant: Function) => {
   }).then(() => {
     store.dispatch(changeSettings(settings));
     setPlant('');
-  });
+  }).catch(() => {
+    setError(true);
+    setTimeout(() => {
+      setError(false);
+      setPlant('');
+    }, 4000);
+  }).finally(() => setLoading(false));
 }
 
 const LabZone = ({ zone }: Props) => {
   const globalSettings = useSelector((store: GlobalState) => store.settings);
+
   const [ userSettings, setUserSettings ] = useState(globalSettings);
   const [ plant, setPlant ] = useState('');
+  const [ loading, setLoading ] = useState(false);
+  const [ error, setError ] = useState(false);
 
+  const resetUserSettings = () => {
+    setUserSettings(globalSettings);
+    setPlant('');
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Loader />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ ...theme.text, color: theme.inactiveColor }}>Failed to update settings for {plant}, please try again later</Text>
+      </View>
+    );
+  }
+  
   if (globalSettings && userSettings) {
     const zoneSettings = globalSettings.filter(setting => setting.zone === zone);
     const showSettings = plant !== '';
@@ -66,11 +99,19 @@ const LabZone = ({ zone }: Props) => {
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{showSettings ? `Settings for ${plant}` : `Zone ${zone}`}</Text>
           {showSettings ? (
-            <GraphButton
-              label="Save"
-              style={{ ...theme.btnStyle, padding: 2 }}
-              onPress={() => updateGlobalSettings(userSettings, setPlant)}
-            />
+            <View style={{ flexDirection: 'row' }}>
+              <GraphButton
+                label="Cancel"
+                style={{ ...theme.btnStyle, padding: 2 }}
+                onPress={resetUserSettings}
+              />
+              <GraphButton
+                label="Save"
+                active
+                style={{ ...theme.btnStyle, marginLeft: 5, padding: 2 }}
+                onPress={() => updateGlobalSettings(userSettings, setLoading, setPlant, setError)}
+              />
+            </View>
           ) : null}
         </View>
 
@@ -100,6 +141,7 @@ const LabZone = ({ zone }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
     padding: 5,
     borderColor: 'white',
     borderWidth: 1,

@@ -28,6 +28,12 @@ const GraphButton = (props: Props) => {
     <TouchableOpacity
       style={btnStyle}
       onPress={onPress}
+      hitSlop={{
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+      }}
     >
       <Text style={textStyle}>{label}</Text>
     </TouchableOpacity>

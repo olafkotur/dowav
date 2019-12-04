@@ -51,26 +51,32 @@ export const fetchLocationData = () => {
     }).catch(() => {});
 }
 
-export const openWebSocket = (url: string) => {
+export function openWebSocket<D>(url: string, successAction: ActionCreator<IAction>, failedAction?: IAction, closedAction?: IAction) {
   const ws = new WebSocket(url);
 
   ws.onmessage = (ev) => {
     if (ev.data) {
       try {
-        const data = JSON.parse(ev.data) as WaterData;
-        dispatch(waterDataReceived(data));
+        const data = JSON.parse(ev.data) as D;
+        dispatch(successAction(data));
       } catch(e) {
-        dispatch(waterDataFailed);
+        if (failedAction) {
+          dispatch(failedAction);
+        }
       }
     }
   }
 
   ws.onerror = () => {
-    dispatch(waterDataFailed);
+    if (failedAction) {
+      dispatch(failedAction);
+    }
   }
 
   ws.onclose = () => {
-    dispatch(waterDataClosed);
+    if (closedAction) {
+      dispatch(closedAction);
+    }
   }
 
   return { close: () => ws.close() };

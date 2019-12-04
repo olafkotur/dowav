@@ -60,7 +60,7 @@ export type WaterData = {
 export type Tweet = {
   text: string,
   'created_at': string,
-}
+};
 
 export type PlantSetting = {
   zone: Zone,
@@ -73,4 +73,4 @@ export type PlantSetting = {
   minMoisture: number,
   bulbColor: string,
   bulbBrightness: number,
-}
+};
