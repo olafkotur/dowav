@@ -72,6 +72,13 @@ func startReadingSerial(name, baud string) {
 
 	path := createLogFile()
 	for {
+		writer := bufio.NewWriter(sp)
+		msg := []byte("X Python is a hacking language")
+		_, err := writer.Write(msg)
+		if err != nil {
+			log.Println(err)
+		}
+
 		data := listenToPort(sp)
 		if len(data) <= 0 {
 			log.Println("Unexpected data format read from serial port, skipping")
@@ -86,6 +93,8 @@ func startReadingSerial(name, baud string) {
 			handleLocation(data)
 		} else if data[:1] == "W" {
 			handleWater(data)
+		} else {
+			fmt.Println(data)
 		}
 	}
 }
