@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/rgamba/evtwebsocket"
 )
@@ -16,6 +17,9 @@ var shouldSendTweets bool
 var previousTweet string
 var previousNotification string
 var previousMoisture [3]int
+var previousStatus string
+var lastSent int64
+var timeout = int64(5)
 
 var zoneSettings []ZoneSetting
 
@@ -59,13 +63,16 @@ func analyseEnvironmentData(d []byte) {
 		// Temperature
 		if data.Temperature.Value <= setting.MinTemperature {
 			msg = "The temperature seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #temperature"
+			updateHealthStatus(data.Zone, "stem", "The temperature is a little low which can affect the germination of the plant")
 		} else if data.Temperature.Value >= setting.MaxTemperature {
 			msg = "The temperature seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #temperature"
+			updateHealthStatus(data.Zone, "soil", "The plant may not be getting enough water due to the high temperatures")
 		}
 
 		// Moisture
 		if data.Moisture.Value <= setting.MinMoisture {
 			msg = "The moisture level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #moisture"
+			updateHealthStatus(data.Zone, "soil", "The plant needs a little more water to help it grow")
 		}
 
 		if data.Moisture.Value-previousMoisture[data.Zone-1] > 300 {
@@ -77,9 +84,10 @@ func analyseEnvironmentData(d []byte) {
 		// Light
 		if data.Light.Value <= setting.MinLight {
 			msg = "The light level seems to be below the recommend value in zone " + toString(data.Zone) + " #warning #low #light"
-
+			updateHealthStatus(data.Zone, "leaf", "The plant needs a little more light to help it grow")
 		} else if data.Light.Value >= setting.MaxLight {
 			msg = "The light level seems to be above the recommend value in zone " + toString(data.Zone) + " #warning #high #light"
+			updateHealthStatus(data.Zone, "leaf", "The light is quite high, this could damage the leaves in the future!")
 		}
 
 		// Send tweet and notification
@@ -114,7 +122,11 @@ func analyseWaterData(d []byte) {
 }
 
 func postTweet(msg string) {
-	if msg == previousTweet || !shouldSendTweets {
+	if shouldTimeout() {
+		return
+	}
+
+	if !shouldSendTweets || msg == previousTweet {
 		return
 	}
 	previousTweet = msg
@@ -129,9 +141,14 @@ func postTweet(msg string) {
 		return
 	}
 	res.Body.Close()
+	lastSent = time.Now().Unix()
 }
 
 func pushNotification(msg, messageType string) {
+	if shouldTimeout() {
+		return
+	}
+
 	// Remove any hashtags from the message
 	if strings.Contains(msg, "#") {
 		msg = strings.Split(msg, "#")[0]
@@ -153,9 +170,18 @@ func pushNotification(msg, messageType string) {
 		return
 	}
 	res.Body.Close()
+	lastSent = time.Now().Unix()
 }
 
 func updateHealthStatus(zoneId int, typ, msg string) {
+	if shouldTimeout() {
+		return
+	}
+
+	if msg == previousStatus {
+		return
+	}
+	previousStatus = msg
 	fmt.Println("Updating health:", msg)
 
 	// Get previous health status
@@ -165,39 +191,44 @@ func updateHealthStatus(zoneId int, typ, msg string) {
 	}
 
 	// Read status data
-	var previousStatus []HealthData
+	var previousHealth []HealthData
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Println(err)
 	}
 	res.Body.Close()
-	_ = json.Unmarshal(body, &previousStatus)
+	_ = json.Unmarshal(body, &previousHealth)
 
 	var values url.Values
 	if typ == "soil" {
 		values = url.Values{
 			"soil": {msg},
-			"stem": {previousStatus[zoneId-1].Stem},
-			"leaf": {previousStatus[zoneId-1].Leaf},
+			"stem": {previousHealth[zoneId-1].Stem},
+			"leaf": {previousHealth[zoneId-1].Leaf},
 		}
 	} else if typ == "stem" {
 		values = url.Values{
-			"soil": {previousStatus[zoneId-1].Stem},
+			"soil": {previousHealth[zoneId-1].Stem},
 			"stem": {msg},
-			"leaf": {previousStatus[zoneId-1].Leaf},
+			"leaf": {previousHealth[zoneId-1].Leaf},
 		}
 	} else if typ == "leaf" {
 		values = url.Values{
-			"soil": {previousStatus[zoneId-1].Stem},
-			"stem": {previousStatus[zoneId-1].Stem},
+			"soil": {previousHealth[zoneId-1].Stem},
+			"stem": {previousHealth[zoneId-1].Stem},
 			"leaf": {msg},
 		}
 	}
 
 	// Send new health status
-	res, err = http.PostForm("http://dowav-api.herokuapp.com/api/health/upload/"+previousStatus[zoneId-1].Plant, values)
+	res, err = http.PostForm("http://dowav-api.herokuapp.com/api/health/upload/"+previousHealth[zoneId-1].Plant, values)
 	if err != nil {
 		log.Println(err)
 	}
 	res.Body.Close()
+}
+
+// Determines whether sufficient time has passed in between sending
+func shouldTimeout() (b bool) {
+	return time.Now().Unix()-lastSent < timeout
 }
