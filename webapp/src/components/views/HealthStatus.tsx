@@ -326,7 +326,7 @@ const HealthStatus: React.FC = () => {
               <h4 style={{ textTransform: "capitalize" }}>{tooltip.part}</h4>
               <p>
                 {tooltip.text === ""
-                  ? "Nothing bad haven't been seen yet."
+                  ? "Everything looks fine, the plant is healthy."
                   : tooltip.text}
               </p>
             </div>
