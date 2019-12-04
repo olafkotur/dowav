@@ -28,7 +28,7 @@ const StringInput: React.FC<{ reload: any }> = ({ reload }) => {
       <button
         onClick={async () => {
           const response = await fetch(
-            "http://localhost:8080/api/setting/create",
+            "https://dowav-api.herokuapp.com/api/setting/create",
             {
               method: "POST",
               body: JSON.stringify({

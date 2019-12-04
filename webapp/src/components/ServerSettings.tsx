@@ -142,7 +142,7 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
               <button
                 onClick={async () => {
                   const response = await fetch(
-                    "http://localhost:8080/api/setting",
+                    "https://dowav-api.herokuapp.com/api/setting",
                     {
                       method: "POST",
                       body: JSON.stringify([selected])
@@ -173,7 +173,8 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                 );
                 if (r) {
                   const response = await fetch(
-                    "http://localhost:8080/api/setting/delete/" + selected.plant
+                    "https://dowav-api.herokuapp.com/api/setting/delete/" +
+                      selected.plant
                   );
                   if (response.status === 200) {
                     toast("Successfully deleted.", {
