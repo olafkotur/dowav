@@ -52,3 +52,12 @@ type ZoneSetting struct {
 	BulbColor        string `json:"bulbColor"`
 	BulbBrightness   int    `json:"bulbBrightness"`
 }
+
+type HealthData struct {
+	Id    int     `json:"id"`
+	Plant string  `json:"plant"`
+	Time  float64 `json:"time"`
+	Soil  string  `json:"soil"`
+	Stem  string  `json:"stem"`
+	Leaf  string  `json:"leaf"`
+}

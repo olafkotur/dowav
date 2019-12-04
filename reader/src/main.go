@@ -81,7 +81,6 @@ func startReadingSerial(name, baud string) {
 
 		data := listenToPort(sp)
 		if len(data) <= 0 {
-			log.Println("Unexpected data format read from serial port, skipping")
 			continue
 		}
 

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -47,7 +48,7 @@ func analyseEnvironmentData(d []byte) {
 	_ = json.Unmarshal(d, &data)
 
 	if previousMoisture[data.Zone-1] >= 1 {
-		previousMoisture[data.Zone-1]--
+		previousMoisture[data.Zone-1] = previousMoisture[data.Zone-1] - 2
 	}
 
 	for _, setting := range zoneSettings {
@@ -150,6 +151,53 @@ func pushNotification(msg, messageType string) {
 	res, err := http.PostForm("http://dowav-api.herokuapp.com/api/notification", values)
 	if err != nil {
 		return
+	}
+	res.Body.Close()
+}
+
+func updateHealthStatus(zoneId int, typ, msg string) {
+	fmt.Println("Updating health:", msg)
+
+	// Get previous health status
+	res, err := http.Get("http://dowav-api.herokuapp.com/api/health")
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Read status data
+	var previousStatus []HealthData
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	res.Body.Close()
+	_ = json.Unmarshal(body, &previousStatus)
+
+	var values url.Values
+	if typ == "soil" {
+		values = url.Values{
+			"soil": {msg},
+			"stem": {previousStatus[zoneId-1].Stem},
+			"leaf": {previousStatus[zoneId-1].Leaf},
+		}
+	} else if typ == "stem" {
+		values = url.Values{
+			"soil": {previousStatus[zoneId-1].Stem},
+			"stem": {msg},
+			"leaf": {previousStatus[zoneId-1].Leaf},
+		}
+	} else if typ == "leaf" {
+		values = url.Values{
+			"soil": {previousStatus[zoneId-1].Stem},
+			"stem": {previousStatus[zoneId-1].Stem},
+			"leaf": {msg},
+		}
+	}
+
+	// Send new health status
+	res, err = http.PostForm("http://dowav-api.herokuapp.com/api/health/upload/"+previousStatus[zoneId-1].Plant, values)
+	if err != nil {
+		log.Println(err)
 	}
 	res.Body.Close()
 }
