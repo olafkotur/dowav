@@ -1,20 +1,5 @@
 const Alexa = require('ask-sdk-core');
-const request = require("request");
 const requests = require("./requests")
-
-const url = 'http://dowav-api.herokuapp.com'
-
-const colors = {
-  blue: '#0000FF',
-  red: '#DC143C',
-  yellow: '#FFD700',
-  green: '#008000',
-  purple: '#4B0082',
-  pink: '#FF00FF',
-  white: '#fff',
-  cyan: '#00ffff',
-  orange: '#FF8C00',
-}
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -56,6 +41,20 @@ const LightBrightIntentHandler = {
           .speak(speakOutput)
           .getResponse();
     }
+};
+
+const LiveDataIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'LiveDataIntent';
+    },
+    async handle(handlerInput) {
+    const type = Alexa.getSlotValue(handlerInput.requestEnvelope, "type")
+    const speakOutput = await requests.getHistoricData(type)
+    return handlerInput.responseBuilder
+        .speak(speakOutput)
+        .getResponse();
+}
 };
 
 const PartyProtocolIntentHandler = {
@@ -145,6 +144,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         LightColorIntentHandler,
         LightBrightIntentHandler,
         PartyProtocolIntentHandler,
+        LiveDataIntentHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,

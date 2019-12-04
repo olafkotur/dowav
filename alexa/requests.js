@@ -88,6 +88,20 @@ module.exports = {
     });
   },
 
+  getLiveData: async (type) => {
+    return new Promise((resolve, reject) => {
+      request({uri: url + '/api/live/' + type, method: 'GET'}, (error, response, body) => {
+        const data = JSON.parse(body)
+        const zone1 = data[0].Value;
+        const zone2 = data[1].Value;
+        const zone3 = data[2].Value;
+    
+        const msg = `The ${type} in zone 1 is ${zone1}, ${zone2} in zone 2 and ${zone3} in zone 3`;
+        resolve(msg)
+      });
+    });
+  },
+
   partyProtocol: () => {
     request({uri: url + '/api/setting/all', method: 'GET'}, async (error, response, body) => {
       const settings = JSON.parse(body);
