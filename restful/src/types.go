@@ -35,10 +35,19 @@ type PlantSettings struct {
 	MinMoisture      int     `json:"minMoisture"`
 	BulbColor        string  `json:"bulbColor"`
 	BulbBrightness   int     `json:"bulbBrightness"`
-	LastUpdate       float64 `json:"-"`
+	LastUpdate       float64 `json:"lastUpdate"`
 }
 
 type ZoneTableRow struct {
 	id      int
 	plantId sql.NullInt64
+}
+
+type HealthData struct {
+	Id    int     `json:"id"`
+	Plant string  `json:"plant"`
+	Time  float64 `json:"time"`
+	Soil  string  `json:"soil"`
+	Stem  string  `json:"stem"`
+	Leaf  string  `json:"leaf"`
 }

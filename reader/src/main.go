@@ -45,6 +45,7 @@ func attemptHueConnection() {
 		time.Sleep(10 * time.Second)
 		attemptHueConnection()
 	}
+	fmt.Println("Success - connected to hue bridge")
 
 	// Set all lights to default
 	for i := 0; i < 3; i++ {
@@ -74,7 +75,6 @@ func startReadingSerial(name, baud string) {
 	for {
 		data := listenToPort(sp)
 		if len(data) <= 0 {
-			log.Println("Unexpected data format read from serial port, skipping")
 			continue
 		}
 
@@ -86,6 +86,8 @@ func startReadingSerial(name, baud string) {
 			handleLocation(data)
 		} else if data[:1] == "W" {
 			handleWater(data)
+		} else {
+			continue
 		}
 	}
 }
