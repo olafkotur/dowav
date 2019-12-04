@@ -7,7 +7,6 @@ import (
 	"log"
 	"math"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/lucasb-eyer/go-colorful"
@@ -74,7 +73,6 @@ func getBulbs(id, ipPort string) (response string) {
 	}
 
 	respM := string(respBody)
-	//log.Println(respM)
 	resp.Body.Close()
 	/*for i := 1; i < numBulb+1; i++ {
 		value := gjson.Get(respM, toString(i)+".type")
@@ -367,7 +365,6 @@ func changeColour(id, ipPort, hex string, bulbNum int) (response string, failed 
 		words := strings.Fields(value.Str)
 		//log.Println(index)
 		fail = append(fail, words[1])
-		//성공 슬라이스 만들고 어떤 라이트가 어떤 때 에러 만드는지 확인하기
 	}
 	//fmt.Println(fail)
 
@@ -455,7 +452,6 @@ func changeGroupColour(id, ipPort, hex string, groupNum int) (response string) {
 		words := strings.Fields(value.Str)
 		//log.Println(index)
 		fail = append(fail, words[1])
-		//성공 슬라이스 만들고 어떤 라이트가 어떤 때 에러 만드는지 확인하기
 	}
 	//fmt.Println(fail)
 
@@ -487,6 +483,7 @@ func changeGroupColour(id, ipPort, hex string, groupNum int) (response string) {
 	return respM
 }
 
+//func makeGroup()
 /*
 func main() {
 	ipPort := "localhost:8000" //ip:port
@@ -532,9 +529,6 @@ func makeUserID(ipPort string) (userID string) {
 	return id
 }
 
-func toString(i int) (s string) {
-	return strconv.Itoa(i)
-}
 
 /*
  * Author u/Croques
@@ -592,6 +586,10 @@ func hexToRGB(hex string) (r, g, b float64) {
 	}
 	return c.R * 255, c.G * 255, c.B * 255
 }
+
+/*func toString(i int) (s string) {
+	return strconv.Itoa(i)
+}*/
 
 //func grouping
 //have to add returning massage when trying to change the colour of light only bulb
