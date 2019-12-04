@@ -22,7 +22,8 @@ func listenUserSettings() {
 	conn := evtwebsocket.Conn{
 		OnMessage: func(msg []byte, w *evtwebsocket.Conn) {
 			var settings []ZoneSetting
-			_ = json.Unmarshal(msg, &settings)
+			_ = json.Unmarshal([]byte(msg), &settings)
+			fmt.Println(settings)
 			for _, s := range settings {
 				if s.Zone != 0 {
 					fmt.Println("Received new setting change request, updating:", s)

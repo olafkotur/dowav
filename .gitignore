@@ -14,6 +14,8 @@ reader/logs/*
 restful/pkg
 restful/src/database.db
 
+alexa/node_modules
+
 
 .vscode/
 *.DS_Store
