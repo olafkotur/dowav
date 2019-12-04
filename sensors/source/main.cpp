@@ -209,8 +209,46 @@ void receiveMessage(MicroBitEvent) {
       if (msg[0] == 'U') {
         currentLocation = msg[1];
         userLocationLastUpdateTime = currentTime;
-        uBit.serial.printf("%s\r\n", msg);
       }
+      uBit.serial.printf("%s\r\n", msg);
+
+      /*ManagedString serialInput("");
+      ManagedString read = uBit.serial.read(ASYNC);
+      sendMessage(read);
+      ManagedString total;
+      for (int i=0;i<read.length();i++){
+        total = serialInput + read;
+      }
+      if (total.length() != 0){
+        uBit.display.scroll(total);
+        sendMessage(total);
+      }*/
+
+       /*int c;
+       do while {
+           c=uBit.serial.read(ASYNC);
+           if(c!=MICROBIT_NO_DATA){
+              uBit.serial.send((char)c);
+           }
+          } while(c!='x');*/
+
+      int input;
+      char str[20];
+      int i=0;
+       do{
+         input = uBit.serial.read(ASYNC);
+         if(input != MICROBIT_NO_DATA){
+           //uBit.serial.send((char)input);
+           str[i] = (char)input;
+           i++;
+         }
+       } while (input != MICROBIT_NO_DATA);
+       str[i] = '\0';
+       if(i!=0){
+         //uBit.serial.printf("%s\r\n",str);
+         ManagedString inputMS(str);
+         sendMessage(inputMS);
+       }
     }
 
   //User
