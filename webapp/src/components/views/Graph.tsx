@@ -118,7 +118,7 @@ const Graph: React.FC<GraphProps> = ({
         d3chart.goLive();
         const id = setInterval(async () => {
           const json = await fetch(
-            `https://dowav-api.herokuapp.com/api/live/${conf.name}`
+            `https://dowav-api.herokuapp.com/api/live/${conf.name.toLowerCase()}`
           );
           const data = await json.json();
           if (conf.zone) {

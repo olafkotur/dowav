@@ -10,6 +10,7 @@ type GraphViewProps = {
 };
 
 const GraphView: React.FC<GraphViewProps> = ({ currentOption }) => {
+  console.log(currentOption);
   const [count, setCount] = useState<number>(0);
   const [size, setSize] = useState<IViewport | null>(null);
   const graphRef = useRef<HTMLDivElement>(null);

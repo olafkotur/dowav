@@ -87,7 +87,8 @@ export default class D3Graph {
           "stroke",
           this.conf.name === MENU_OPTIONS.TEMPERATURE ||
             this.conf.name === MENU_OPTIONS.MOISTURE ||
-            this.conf.name === MENU_OPTIONS.LIGHT
+            this.conf.name === MENU_OPTIONS.LIGHT ||
+            this.conf.name === "water-data"
             ? "url(#line-gradient)"
             : colors[0]
         );
@@ -139,7 +140,8 @@ export default class D3Graph {
     if (
       this.conf.name === MENU_OPTIONS.TEMPERATURE ||
       this.conf.name === MENU_OPTIONS.MOISTURE ||
-      this.conf.name === MENU_OPTIONS.LIGHT
+      this.conf.name === MENU_OPTIONS.LIGHT ||
+      this.conf.name === "water-data"
     ) {
       d3LineGradients.drawGradient(this.svg, this.viewport, this.conf.name);
     }
@@ -477,7 +479,8 @@ export default class D3Graph {
           "stroke",
           this.conf.name === MENU_OPTIONS.TEMPERATURE ||
             this.conf.name === MENU_OPTIONS.MOISTURE ||
-            this.conf.name === MENU_OPTIONS.LIGHT
+            this.conf.name === MENU_OPTIONS.LIGHT ||
+            this.conf.name === "water-data"
             ? "url(#linegradient)"
             : colors[0]
         );
@@ -507,7 +510,7 @@ export default class D3Graph {
       let i = 0;
       for (let key in this.data) {
         //path
-        this.line[i].datum(this.data[key]).attr("d",line as any);
+        this.line[i].datum(this.data[key]).attr("d", line as any);
         if (on === "update") {
           this.line[i]
             .attr(
@@ -604,20 +607,29 @@ export default class D3Graph {
   }
 
   private getYScale(data: HistoryData) {
-    if (data instanceof Array) {
-      this.yScale = d3
-        .scaleLinear()
-        .domain(d3.extent(data, d => d.value) as [number, number])
-        .range([this.viewport.height, 0]);
-    } else if (typeof data === "object") {
-      let minmax: (number | undefined)[] = [];
-      for (let key in data) {
-        minmax.push(...d3.extent(data[key], d => d.value));
+    if (!this.conf.yDomain) {
+      if (data instanceof Array) {
+        this.yScale = d3
+          .scaleLinear()
+          .domain(d3.extent(data, d => d.value) as [number, number])
+          .range([this.viewport.height, 0]);
+      } else if (typeof data === "object") {
+        let minmax: (number | undefined)[] = [];
+        for (let key in data) {
+          minmax.push(...d3.extent(data[key], d => d.value));
+        }
+        this.yScale = d3
+          .scaleLinear()
+          .domain(d3.extent(minmax as any) as any)
+          .range([this.viewport.height, 0]);
       }
-      this.yScale = d3
-        .scaleLinear()
-        .domain(d3.extent(minmax as any) as any)
-        .range([this.viewport.height, 0]);
+    } else {
+      if (data instanceof Array) {
+        this.yScale = d3
+          .scaleLinear()
+          .domain(this.conf.yDomain)
+          .range([this.viewport.height, 0]);
+      } //TODO: NOT FINISHED FOR MULTIPLE DATA
     }
   }
 }
