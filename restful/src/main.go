@@ -16,7 +16,6 @@ import (
 )
 
 var database *sql.DB
-
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -63,6 +62,10 @@ func main() {
 	router.HandleFunc("/api/setting", getPlantSettingWs).Methods("GET")
 	router.HandleFunc("/api/setting/all", getAllPlantsSettings).Methods("GET")
 
+	// Plant handlers
+	router.HandleFunc("/api/health/upload/{plantId}", updatePlantHealth).Methods("POST")
+	router.HandleFunc("/api/health", getPlantHealth).Methods("GET")
+
 	// Misc handlers
 	router.HandleFunc("/api/docs", getDocumentation).Methods("GET")
 
@@ -81,7 +84,8 @@ func setDefaultValues() {
 	time := time.Now().Unix()
 
 	// Set each user setting
-	statement, _ = database.Prepare("INSERT INTO plant ( plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, bulbColor, bulbBrightness, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	statement, _ = database.Prepare("INSERT INTO plant (plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, bulbColor, bulbBrightness, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	healthStatement, _ := database.Prepare("INSERT INTO health (id, time, soil, stem, leaf) VALUES (?, ?, ?, ?, ?)")
 	for i := range plants {
 		r, rErr := statement.Exec(plants[i], values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7], time)
 		if rErr != nil {
@@ -96,6 +100,11 @@ func setDefaultValues() {
 			fmt.Println(stErr)
 		}
 		_, _ = st.Exec(i+1, id)
+
+		_, err := healthStatement.Exec(i+1, time, "", "", "")
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
@@ -170,6 +179,14 @@ func createTables() {
 
 	// Create setting table in database
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS settings (time REAL, type TEXT, value TEXT)")
+	_, err = statement.Exec()
+	if err != nil {
+		panic(err)
+	}
+
+	// Create health table in database
+	_, _ = database.Exec("DROP TABLE health")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS health (id INTEGER, time REAL, soil TEXT, stem TEXT, leaf TEXT)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)

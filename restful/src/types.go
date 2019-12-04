@@ -42,3 +42,11 @@ type ZoneTableRow struct {
 	id      int
 	plantId sql.NullInt64
 }
+
+type HealthData struct {
+	Id   int     `json:"id"`
+	Time float64 `json:"time"`
+	Soil string  `json:"soil"`
+	Stem string  `json:"stem"`
+	Leaf string  `json:"leaf"`
+}

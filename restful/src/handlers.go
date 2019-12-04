@@ -338,6 +338,7 @@ func pushNotification(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadWaterData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
 	_ = request.ParseForm()
 	now := time.Now().Unix()
 	volume := request.Form.Get("volume")
@@ -350,8 +351,7 @@ func uploadWaterData(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, _ = writer.Write([]byte("Success"))
-	printRequest(request)
+	sendResponse(Message{"Success"}, writer)
 }
 
 func getWaterWs(writer http.ResponseWriter, request *http.Request) {
@@ -565,4 +565,51 @@ func deletePlantSetting(writer http.ResponseWriter, request *http.Request) {
 	} else {
 		http.Error(writer, "There is no "+plantName+" plant.", http.StatusBadRequest)
 	}
+}
+
+func updatePlantHealth(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	// Get data from request
+	_ = request.ParseForm()
+	plantId := getMuxVariable("plantId", request)
+	now := time.Now().Unix()
+	soil := request.Form.Get("soil")
+	stem := request.Form.Get("stem")
+	leaf := request.Form.Get("leaf")
+
+	// Update database
+	statement, err := database.Prepare("UPDATE health SET time=?, soil=?, stem=?, leaf=? WHERE id=?")
+	if err != nil {
+		http.Error(writer, "Database failed", http.StatusInternalServerError)
+		return
+	}
+	_, err = statement.Exec(now, soil, stem, leaf, toInt(plantId))
+	if err != nil {
+		http.Error(writer, "Can't Execute SQL", http.StatusInternalServerError)
+		return
+	}
+
+	sendResponse(Message{"Success"}, writer)
+}
+
+func getPlantHealth(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	// Fetch data from database
+	rows, err := database.Query("SELECT * FROM health")
+	if err != nil {
+		panic(err)
+	}
+
+	// Format data
+	var res []HealthData
+	for rows.Next() {
+		var data HealthData
+		_ = rows.Scan(&data.Id, &data.Time, &data.Soil, &data.Soil, &data.Leaf)
+		res = append(res, data)
+	}
+	rows.Close()
+
+	sendResponse(res, writer)
 }
