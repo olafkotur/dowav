@@ -273,6 +273,25 @@ func postQuestionTweet(writer http.ResponseWriter, request *http.Request) {
 	_, _ = writer.Write([]byte("Success"))
 }
 
+func getAllNotifications(w http.ResponseWriter, r *http.Request) {
+	printRequest(r)
+
+	var res []Notification
+
+	rows, err := database.Query("SELECT * FROM notification")
+	if err != nil {
+		http.Error(w, "Database query failed.", http.StatusInternalServerError)
+	}
+	for rows.Next() {
+		var notification Notification
+		_ = rows.Scan(&notification.Time, &notification.Message, &notification.Type)
+		res = append(res, notification)
+	}
+	rows.Close()
+
+	sendResponse(res, w)
+}
+
 func getNotificationsWs(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Get a request")
 	ch, errCh := upgrader.Upgrade(w, r, nil)

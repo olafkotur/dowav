@@ -54,6 +54,7 @@ func main() {
 	router.HandleFunc("/api/tweet/question", postQuestionTweet).Methods("POST")
 	router.HandleFunc("/api/notifications", getNotificationsWs).Methods("GET")
 	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
+	router.HandleFunc("/api/notification/all", getAllNotifications).Methods("GET")
 
 	// Setting handlers
 	router.HandleFunc("/api/setting", setPlantSetting).Methods("POST")
