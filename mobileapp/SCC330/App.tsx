@@ -154,4 +154,14 @@ const App: React.FunctionComponent = () => {
   );
 };
 
+// Utility function used in multiple components
+export const parseDate = (dateTime: Date, divider = ' • ') => {
+  const addZero = (n: number) => n === 0 ? '00' : (n < 10 ? `0${n}` : n.toString());
+
+  const time = `${addZero(dateTime.getHours())}:${addZero(dateTime.getMinutes())}`;
+  const date = dateTime.toDateString();
+
+  return `${time}${divider}${date}`;
+}
+
 export default App;

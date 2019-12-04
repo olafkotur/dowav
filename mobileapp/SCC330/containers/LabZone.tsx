@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View, ViewStyle } from 'react-native';
 
 import { Zone, PlantSetting, GlobalState, PlantHealth } from '../types';
 import store from '../reducers';
@@ -14,6 +14,7 @@ import useFetch from '../hooks/useFetch';
 
 interface Props {
   zone: Zone,
+  borderBottom?: boolean,
 }
 
 const HEALTH_ENDPOINT = 'https://dowav-api.herokuapp.com/api/health';
@@ -37,7 +38,7 @@ const updateUserSettings = (userSettings: PlantSetting[], newUserSetting: PlantS
   const settingIndex = newUserSettings.findIndex(userSetting => userSetting.plant === newUserSetting.plant);
 
   if (settingIndex > -1) {
-    newUserSettings[settingIndex] = newUserSetting;
+    newUserSettings[settingIndex] = { ...newUserSetting, lastUpdate: userSettings[settingIndex].lastUpdate };
   }
 
   setUserSettings(newUserSettings);
@@ -65,7 +66,7 @@ const updateGlobalSettings = (userSettings: PlantSetting[], plant: string, setLo
   }
 }
 
-const LabZone = ({ zone }: Props) => {
+const LabZone = ({ zone, borderBottom }: Props) => {
   const globalSettings = useSelector((store: GlobalState) => store.settings);
   const [ healthData ] = useFetch<PlantHealth[]>(HEALTH_ENDPOINT);
 
@@ -79,9 +80,11 @@ const LabZone = ({ zone }: Props) => {
     setPlant('');
   }
 
+  const containerStyle: ViewStyle = { ...styles.container, borderBottomWidth: borderBottom ? 1 : 0 };
+
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={containerStyle}>
         <Loader />
       </View>
     );
@@ -89,7 +92,7 @@ const LabZone = ({ zone }: Props) => {
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={containerStyle}>
         <Text style={{ ...theme.text, color: theme.inactiveColor }}>Failed to update settings for {plant}, please try again later</Text>
       </View>
     );
@@ -99,9 +102,10 @@ const LabZone = ({ zone }: Props) => {
     const zoneSettings = globalSettings.filter(setting => setting.zone === zone);
     const showSettings = plant !== '';
     const plantSetting = userSettings.find(s => s.plant === plant);
+    const plantGlobalSetting = globalSettings.find(s => s.plant === plant);
 
     return (
-      <View style={styles.container}>
+      <View style={containerStyle}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{showSettings ? plant : `Zone ${zone}`}</Text>
           {showSettings ? (
@@ -125,6 +129,7 @@ const LabZone = ({ zone }: Props) => {
           <View style={styles.settingsContainer}>
             <PlantSettings
               userSettings={plantSetting}
+              lastUpdate={plantGlobalSetting ? plantGlobalSetting.lastUpdate : undefined}
               healthData={healthData && healthData.length ? healthData.filter(d => d.plant === plant)[0] : undefined}
               onSettingChange={(newSetting) => updateUserSettings(userSettings, newSetting, setUserSettings)}
             />

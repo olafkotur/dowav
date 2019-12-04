@@ -44,7 +44,10 @@ const MyPlants = () => {
       <View style={styles.container}>
         <LabZone zone={1} />
         <LabZone zone={2} />
-        <LabZone zone={3} />
+        <LabZone
+          zone={3}
+          borderBottom
+        />
       </View>
     );
   }

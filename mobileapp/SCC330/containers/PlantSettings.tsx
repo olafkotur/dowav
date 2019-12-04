@@ -4,6 +4,7 @@ import { PlantSetting, GlobalState, PlantHealth } from '../types';
 import theme from '../theme';
 import { Slider } from 'react-native-elements';
 import { useSelector } from 'react-redux';
+import { parseDate } from '../App';
 
 interface LabelledSliderProps {
   label: string,
@@ -34,11 +35,12 @@ LabelledSlider.defaultProps = { unit: '' };
 
 interface Props {
   userSettings: PlantSetting,
+  lastUpdate: PlantSetting['lastUpdate'],
   healthData?: PlantHealth,
   onSettingChange: (newSetting: PlantSetting) => void,
 }
 
-const PlantSettings = ({ userSettings, healthData, onSettingChange }: Props) => {
+const PlantSettings = ({ userSettings, lastUpdate, healthData, onSettingChange }: Props) => {
   if (userSettings.minTemperature < 0) {
     userSettings.minTemperature = 0;
   }
@@ -76,9 +78,9 @@ const PlantSettings = ({ userSettings, healthData, onSettingChange }: Props) => 
 
       {healthData && (healthData.soil || healthData.leaf || healthData.stem) ? (
         <View style={styles.healthContainer}>
-          {healthData.soil ? <Text style={styles.healthText}>{healthData.soil}</Text> : null}
-          {healthData.leaf ? <Text style={styles.healthText}>{healthData.leaf}</Text> : null}
-          {healthData.stem ? <Text style={styles.healthText}>{healthData.stem}</Text> : null}
+          {healthData.soil ? <Text style={styles.italicText}>{healthData.soil}</Text> : null}
+          {healthData.leaf ? <Text style={styles.italicText}>{healthData.leaf}</Text> : null}
+          {healthData.stem ? <Text style={styles.italicText}>{healthData.stem}</Text> : null}
         </View>
       ) : null}
 
@@ -160,6 +162,10 @@ const PlantSettings = ({ userSettings, healthData, onSettingChange }: Props) => 
         setVal={setBulbBrightness}
       />
 
+      {lastUpdate ? (
+        <Text style={styles.italicText}>Last interacted with: {parseDate(new Date(lastUpdate * 1000), ', ')}</Text>
+      ) : null}
+
     </ScrollView>
   );
 }
@@ -178,7 +184,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'grey',
     borderBottomWidth: 1,
   },
-  healthText: {
+  italicText: {
     fontStyle: 'italic',
     color: 'white',
     fontSize: 16,

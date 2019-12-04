@@ -73,6 +73,7 @@ export type PlantSetting = {
   minMoisture: number,
   bulbColor: string,
   bulbBrightness: number,
+  lastUpdate?: number,
 };
 export type PlantHealth = {
   plant: string,

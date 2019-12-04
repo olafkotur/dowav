@@ -1,19 +1,13 @@
 import React from 'react';
 import { Text, ScrollView, View, StyleSheet } from 'react-native';
+
 import useFetch from '../hooks/useFetch';
 import { Tweet } from '../types';
 import ErrorMessage from './ErrorMessage';
 import Loader from './Loader';
+import { parseDate } from '../App';
 
 const TWEET_ENDPOINT = 'https://dowav-api.herokuapp.com/api/tweets';
-
-const addZero = (n: number) => n === 0 ? '00' : (n < 10 ? `0${n}` : n.toString());
-const parseDate = (dateTime: Date) => {
-  const time = `${addZero(dateTime.getHours())}:${addZero(dateTime.getMinutes())}`;
-  const date = dateTime.toDateString();
-
-  return `${time} • ${date}`;
-}
 
 const mapDataToTweets = (data: Tweet[]) => {
   return data.map((tweet, i) => {
