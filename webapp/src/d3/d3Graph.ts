@@ -117,7 +117,8 @@ export default class D3Graph {
       .attr("x", this.viewport.width / 2)
       .attr("y", -this.margin.top / 2)
       .attr("stroke", d3Colors[this.conf.name][1])
-      .attr("font-size", "20px");
+      .attr("font-size", "20px")
+      .attr('text-anchor', 'middle')
     this.clip = this.svg
       .append("g")
       .attr("class", "clip")
