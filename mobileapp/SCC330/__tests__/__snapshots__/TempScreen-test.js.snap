@@ -1,0 +1,430 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders temperature screen correctly 1`] = `
+<View
+  style={
+    Object {
+      "backgroundColor": "#2c5364",
+      "flex": 1,
+      "padding": "5%",
+      "paddingBottom": "2.5%",
+      "paddingTop": "2.5%",
+    }
+  }
+>
+  <View
+    style={
+      Object {
+        "flex": 2,
+        "marginBottom": "2.5%",
+      }
+    }
+  >
+    <View
+      style={
+        Object {
+          "flexDirection": "row",
+          "justifyContent": "center",
+        }
+      }
+    >
+      <View
+        style={
+          Object {
+            "borderColor": "orange",
+            "borderRadius": 5,
+            "borderWidth": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessible={true}
+          focusable={true}
+          isTVSelectable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            Object {
+              "backgroundColor": "orange",
+              "borderBottomLeftRadius": 4,
+              "borderTopLeftRadius": 4,
+              "opacity": 1,
+              "padding": 6,
+              "paddingLeft": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              Object {
+                "color": "black",
+              }
+            }
+          >
+            Zone 1
+          </Text>
+        </View>
+        <View
+          accessible={true}
+          focusable={true}
+          isTVSelectable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            Object {
+              "backgroundColor": "transparent",
+              "opacity": 1,
+              "padding": 6,
+              "paddingLeft": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              Object {
+                "color": "white",
+              }
+            }
+          >
+            Zone 2
+          </Text>
+        </View>
+        <View
+          accessible={true}
+          focusable={true}
+          isTVSelectable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            Object {
+              "backgroundColor": "transparent",
+              "borderBottomRightRadius": 4,
+              "borderTopRightRadius": 4,
+              "opacity": 1,
+              "padding": 6,
+              "paddingLeft": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              Object {
+                "color": "white",
+              }
+            }
+          >
+            Zone 3
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      style={
+        Object {
+          "flex": 1,
+          "marginTop": "2.5%",
+        }
+      }
+    >
+      <View
+        style={
+          Object {
+            "display": "flex",
+            "flex": 1,
+          }
+        }
+      >
+        <View
+          style={
+            Object {
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            accessible={true}
+            focusable={true}
+            isTVSelectable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              Object {
+                "backgroundColor": "transparent",
+                "borderColor": "orange",
+                "borderRadius": 3,
+                "borderWidth": 1,
+                "opacity": 1,
+                "padding": 6,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                Object {
+                  "color": "white",
+                }
+              }
+            >
+              Live
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            Object {
+              "display": "flex",
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            onLayout={[Function]}
+            style={
+              Object {
+                "flex": 1,
+              }
+            }
+          />
+        </View>
+      </View>
+      <View
+        style={
+          Object {
+            "display": "none",
+            "flex": 1,
+          }
+        }
+      >
+        <View
+          style={
+            Object {
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            accessible={true}
+            focusable={true}
+            isTVSelectable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              Object {
+                "backgroundColor": "transparent",
+                "borderColor": "orange",
+                "borderRadius": 3,
+                "borderWidth": 1,
+                "opacity": 1,
+                "padding": 6,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                Object {
+                  "color": "white",
+                }
+              }
+            >
+              Live
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            Object {
+              "display": "flex",
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            onLayout={[Function]}
+            style={
+              Object {
+                "flex": 1,
+              }
+            }
+          />
+        </View>
+      </View>
+      <View
+        style={
+          Object {
+            "display": "none",
+            "flex": 1,
+          }
+        }
+      >
+        <View
+          style={
+            Object {
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            accessible={true}
+            focusable={true}
+            isTVSelectable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              Object {
+                "backgroundColor": "transparent",
+                "borderColor": "orange",
+                "borderRadius": 3,
+                "borderWidth": 1,
+                "opacity": 1,
+                "padding": 6,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                Object {
+                  "color": "white",
+                }
+              }
+            >
+              Live
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            Object {
+              "display": "flex",
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            onLayout={[Function]}
+            style={
+              Object {
+                "flex": 1,
+              }
+            }
+          />
+        </View>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      Object {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "marginBottom": "2.5%",
+      }
+    }
+  >
+    <View
+      accessible={true}
+      focusable={true}
+      isTVSelectable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        Object {
+          "backgroundColor": "transparent",
+          "borderColor": "orange",
+          "borderRadius": 3,
+          "borderWidth": 1,
+          "opacity": 1,
+          "padding": 6,
+          "paddingLeft": 8,
+          "paddingRight": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          Object {
+            "color": "white",
+          }
+        }
+      >
+        Live
+      </Text>
+    </View>
+    <Text
+      style={
+        Object {
+          "color": "white",
+          "fontSize": 18,
+          "fontWeight": "bold",
+          "textAlign": "center",
+        }
+      }
+    >
+      All Zones
+    </Text>
+    <View />
+  </View>
+  <View
+    style={
+      Object {
+        "display": "flex",
+        "flex": 3,
+      }
+    }
+  >
+    <View
+      onLayout={[Function]}
+      style={
+        Object {
+          "flex": 1,
+        }
+      }
+    />
+  </View>
+</View>
+`;
