@@ -13,13 +13,14 @@ import (
 	"github.com/rgamba/evtwebsocket"
 )
 
-var shouldSendTweets bool
 var previousTweet string
 var previousNotification string
 var previousMoisture [3]int
 var previousStatus string
-var lastSent int64
-var timeout = int64(5)
+var lastTweetSent int64
+var lastNotificationSent int64
+var lastStatusSent int64
+var timeout = int64(10)
 
 var zoneSettings []ZoneSetting
 
@@ -92,7 +93,7 @@ func analyseEnvironmentData(d []byte) {
 
 		// Send tweet and notification
 		if msg != "" {
-			postTweet(msg)
+			postTweet(data.Zone, msg)
 			pushNotification(msg, "info")
 		}
 	}
@@ -105,7 +106,7 @@ func analyseLocationData(d []byte) {
 	if data.Zone != 0 && previousLocation != 0 {
 		msg := "A user has entered the green house and is now in zone " + toString(data.Zone) + " #wearefamily"
 		changeBrightness(hueUserId, hueUrl, 254, data.Zone)
-		postTweet(msg)
+		postTweet(data.Zone, msg)
 		pushNotification(msg, "success")
 	}
 }
@@ -116,17 +117,16 @@ func analyseWaterData(d []byte) {
 
 	if data.Depth <= 0 {
 		msg := "The watering can has ran out of water! #warning #low #water"
-		postTweet(msg)
+		postTweet(data.Zone, msg)
 		pushNotification(msg, "info")
 	}
 }
 
-func postTweet(msg string) {
-	if shouldTimeout() {
+func postTweet(zone int, msg string) {
+	if shouldTimeout(lastTweetSent) {
 		return
 	}
-
-	if !shouldSendTweets || msg == previousTweet {
+	if !zoneSettings[zone].ShouldSendTweets || msg == previousTweet {
 		return
 	}
 	previousTweet = msg
@@ -141,14 +141,10 @@ func postTweet(msg string) {
 		return
 	}
 	res.Body.Close()
-	lastSent = time.Now().Unix()
+	lastTweetSent = time.Now().Unix()
 }
 
 func pushNotification(msg, messageType string) {
-	if shouldTimeout() {
-		return
-	}
-
 	// Remove any hashtags from the message
 	if strings.Contains(msg, "#") {
 		msg = strings.Split(msg, "#")[0]
@@ -170,11 +166,11 @@ func pushNotification(msg, messageType string) {
 		return
 	}
 	res.Body.Close()
-	lastSent = time.Now().Unix()
+	lastNotificationSent = time.Now().Unix()
 }
 
 func updateHealthStatus(zoneId int, typ, msg string) {
-	if shouldTimeout() {
+	if shouldTimeout(lastStatusSent) {
 		return
 	}
 
@@ -226,9 +222,10 @@ func updateHealthStatus(zoneId int, typ, msg string) {
 		log.Println(err)
 	}
 	res.Body.Close()
+	lastStatusSent = time.Now().Unix()
 }
 
 // Determines whether sufficient time has passed in between sending
-func shouldTimeout() (b bool) {
-	return time.Now().Unix()-lastSent < timeout
+func shouldTimeout(lastTime int64) (b bool) {
+	return time.Now().Unix()-lastTime < timeout
 }
