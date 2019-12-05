@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-func createLogFile() (path string, f *os.File) {
+func createLogFile() (path string) {
 	t := time.Now().Unix()
-	logPath := "logs/log-" + strconv.FormatInt(t, 10) + ".txt"
+	logPath := "../logs/log-" + strconv.FormatInt(t, 10) + ".txt"
 
 	file, err := os.Create(logPath)
 	if err != nil {
@@ -20,11 +20,11 @@ func createLogFile() (path string, f *os.File) {
 	}
 	log.Printf("New log file created in %s\n\n", logPath)
 
-	defer file.Close()
-	return logPath, file
+	file.Close()
+	return logPath
 }
 
-func logRawData(data, path string, file *os.File) {
+func logRawData(data, path string) {
 	existingData, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println(err)
@@ -41,16 +41,16 @@ func logRawData(data, path string, file *os.File) {
 }
 
 func getLatestLog() (p string) {
-	files, err := ioutil.ReadDir("./logs/")
+	files, err := ioutil.ReadDir("../logs/")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	path := ""
 	latestTime := 0
 	for _, f := range files {
 		// Safety net in case something else ends up in /log dir
-		if strings.Contains(f.Name(), "log") == false {
+		if !strings.Contains(f.Name(), "log") {
 			continue
 		}
 
@@ -68,9 +68,9 @@ func getLatestLog() (p string) {
 }
 
 func getDataAsString(path string) (d string) {
-	data, err := ioutil.ReadFile("logs/" + path)
+	data, err := ioutil.ReadFile("../logs/" + path)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	return string(data)
 }

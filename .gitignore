@@ -1,13 +1,25 @@
 sensors/build
 sensors/yotta_targets
 sensors/yotta_modules
+
 webapp/node_modules
+webapp/build
+
 server/main
 server/logs/*
+server/pkg
+
 reader/logs/*
+
+restful/pkg
+restful/src/database.db
+
+alexa/node_modules
+
 
 .vscode/
 *.DS_Store
 .env
+.VSCodeCounter
 main.exe
 build.bat
