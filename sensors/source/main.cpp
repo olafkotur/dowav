@@ -218,10 +218,10 @@ void receiveMessage(MicroBitEvent) {
   ManagedString recv = uBit.radio.datagram.recv();
   const char* msg = recv.toCharArray();
 
-  char croppedMsg[strlen(msg)];
+  /*char croppedMsg[strlen(msg)];
   for(int i=0;i<strlen(msg);i++){
     croppedMsg[i] = msg[i + 6];
-  }
+  }*/
   //int origonialyFrom = ((int)msg[7] % 48);//https://stackoverflow.com/questions/5029840/convert-char-to-int-in-c-and-c
   //int recivedFrom = ((int)msg[0] % 48) - 3;
   int origonialyFrom = ((int)msg[1] % 48);
@@ -245,7 +245,7 @@ void receiveMessage(MicroBitEvent) {
   }*/
   //if (seen == 0){
     if(zoneId == 2){//Is reciver
-      uBit.serial.printf("%s\r\n", croppedMsg);
+      uBit.serial.printf("%s\r\n", msg);
     } else if (zoneId == 1){
       //Is user
       if (msg[1] == userZone) {

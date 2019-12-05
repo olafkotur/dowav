@@ -78,8 +78,6 @@ func startReadingSerial(name, baud string) {
 		if len(data) <= 0 {
 			continue
 		}
-		fmt.Println(data)
-
 		// Check which handler should be used
 		if data[:1] == "R" {
 			logRawData(data, path)
