@@ -168,16 +168,18 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
 	// Get data from request
 	_ = request.ParseForm()
-	time := toFloat(request.Form.Get("time"))
+	time := time.Now().Unix()
 	zone := toInt(request.Form.Get("zone"))
+	xCoordinate := toInt(request.Form.Get("xCoordinate"))
+	yCoordinate := toInt(request.Form.Get("yCoordinate"))
 
 	if zone < 0 {
 		http.Error(writer, "Zone can't be less than 0", http.StatusBadRequest)
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO location (time, zoneId) VALUES (?, ?)")
-	_, err := statement.Exec(time, zone)
+	statement, _ := database.Prepare("INSERT INTO location (zoneId, time, xCoordinate, yCoordinate) VALUES (?, ?, ?, ?)")
+	_, err := statement.Exec(zone, time, xCoordinate, yCoordinate)
 	if err != nil {
 		panic(err)
 	}
@@ -192,34 +194,33 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 	dataType := getMuxVariable("type", request)
 
 	var res interface{}
-	var now float64
-	var location float64
 
 	// Fetch and return live data
+	var live LocationData
 	if dataType == "live" {
 		// Scan db and save to var
 		rows, _ := database.Query("SELECT * FROM location ORDER BY time DESC LIMIT 1")
 		for rows.Next() {
-			_ = rows.Scan(&now, &location)
+			_ = rows.Scan(&live.ZoneId, &live.Time, &live.XCoordinate, &live.YCoordinate)
 		}
 		rows.Close()
-		res = ReadingData{now * 1000, location}
-
+		res = live
 	}
 
 	// Fetch and return historic data
+	var historic []LocationData
 	if dataType == "historic" {
 		timeRange := int(time.Now().Add(-time.Duration(time.Hour * 24)).Unix())
 
 		// Scan db and save to var
-		var data []ReadingData
 		rows, _ := database.Query("SELECT * FROM location WHERE time > " + toString(timeRange))
 		for rows.Next() {
-			_ = rows.Scan(&now, &location)
-			data = append(data, ReadingData{now * 1000, location})
+			var temp LocationData
+			_ = rows.Scan(&temp.ZoneId, &temp.Time, &temp.XCoordinate, &temp.YCoordinate)
+			historic = append(historic, temp)
 		}
 		rows.Close()
-		res = data
+		res = historic
 	}
 
 	sendResponse(res, writer)

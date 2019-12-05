@@ -24,6 +24,13 @@ type WaterData struct {
 	Tilt   float64 `json:"tilt"`
 }
 
+type LocationData struct {
+	ZoneId      int     `json:"value"`
+	Time        float64 `json:"time"`
+	XCoordinate int     `json:"xCoordinate"`
+	YCoordinate int     `json:"yCoordinate"`
+}
+
 type PlantSettings struct {
 	Zone             *int64  `json:"zone,omitempty"`
 	Plant            string  `json:"plant"`

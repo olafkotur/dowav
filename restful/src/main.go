@@ -159,7 +159,7 @@ func createTables() {
 	}
 
 	// Create location table in database
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS location (time REAL, zoneId INTEGER REFERENCES zone(id))")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS location (zoneId INTEGER REFERENCES zone(id), time REAL, xCoordinate, yCoordinate)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)

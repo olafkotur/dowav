@@ -74,19 +74,20 @@ func startReadingSerial(name, baud string) {
 	path := createLogFile()
 	for {
 		data := listenToPort(sp)
+
 		if len(data) <= 0 {
 			continue
 		}
-
 		// Check which handler should be used
 		if data[:1] == "R" {
 			logRawData(data, path)
 			handleEnvironment(data)
-		} else if data[:1] == "L" {
+		} else if data[:1] == "U" {
 			handleLocation(data)
 		} else if data[:1] == "W" {
 			handleWater(data)
 		} else {
+			fmt.Println(data)
 			continue
 		}
 	}

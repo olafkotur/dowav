@@ -305,7 +305,9 @@ func uploadWaterData(data []byte) {
 	}
 
 	if tilt > 45 {
-		changeBrightness(hueUserId, hueUrl, obj.Zone, 160+tilt)
+		for i := 0; i < 3; i++ {
+			changeBrightness(hueUserId, hueUrl, i+1, 74+(tilt*2))
+		}
 	}
 
 	// Define the form values
