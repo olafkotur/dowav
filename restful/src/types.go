@@ -24,10 +24,11 @@ type WaterData struct {
 	Tilt   float64 `json:"tilt"`
 }
 
-type Setting struct {
-	Time  float64 `json:"time"`
-	Type  string  `json:"type"`
-	Value string  `json:"value"`
+type LocationData struct {
+	ZoneId      int     `json:"value"`
+	Time        float64 `json:"time"`
+	XCoordinate int     `json:"xCoordinate"`
+	YCoordinate int     `json:"yCoordinate"`
 }
 
 type PlantSettings struct {
@@ -39,7 +40,9 @@ type PlantSettings struct {
 	MinLight         int     `json:"minLight"`
 	MaxLight         int     `json:"maxLight"`
 	MinMoisture      int     `json:"minMoisture"`
-	LastUpdate       float64 `json:"-"`
+	BulbColor        string  `json:"bulbColor"`
+	BulbBrightness   int     `json:"bulbBrightness"`
+	LastUpdate       float64 `json:"lastUpdate"`
 }
 
 type ZoneTableRow struct {
@@ -47,17 +50,11 @@ type ZoneTableRow struct {
 	plantId sql.NullInt64
 }
 
-// type Readings struct {
-// 	Temperature ReadingData `json:"temperature"`
-// 	Moisture    ReadingData `json:"moisture"`
-// 	Light       ReadingData `json:"light"`
-// }
-
-// type FullData struct {
-// 	Zone        int     `json:"zone"`
-// 	StartTime   float64 `json:"startTime"`
-// 	EndTime     float64 `json:"endTime"`
-// 	Temperature int     `json:"temperature"`
-// 	Moisture    int     `json:"moisture"`
-// 	Light       int     `json:"light"`
-// }
+type HealthData struct {
+	Id    int     `json:"id"`
+	Plant string  `json:"plant"`
+	Time  float64 `json:"time"`
+	Soil  string  `json:"soil"`
+	Stem  string  `json:"stem"`
+	Leaf  string  `json:"leaf"`
+}

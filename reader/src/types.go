@@ -40,8 +40,24 @@ type HistoricData struct {
 	Light       Calculations `json:"light"`
 }
 
-type Setting struct {
+type ZoneSetting struct {
+	Zone             int    `json:"zone"`
+	Plant            string `json:"plant"`
+	ShouldSendTweets bool   `json:"shouldSendTweets"`
+	MinTemperature   int    `json:"minTemperature"`
+	MaxTemperature   int    `json:"maxTemperature"`
+	MinLight         int    `json:"minLight"`
+	MaxLight         int    `json:"maxLight"`
+	MinMoisture      int    `json:"minMoisture"`
+	BulbColor        string `json:"bulbColor"`
+	BulbBrightness   int    `json:"bulbBrightness"`
+}
+
+type HealthData struct {
+	Id    int     `json:"id"`
+	Plant string  `json:"plant"`
 	Time  float64 `json:"time"`
-	Type  string  `json:"type"`
-	Value string  `json:"value"`
+	Soil  string  `json:"soil"`
+	Stem  string  `json:"stem"`
+	Leaf  string  `json:"leaf"`
 }

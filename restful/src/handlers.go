@@ -15,7 +15,11 @@ import (
 	"github.com/dghubble/oauth1"
 )
 
-// TEST: curl -d "zone=3&startTime=1573593116&endTime=1573593216&temperature=29&moisture=233&light=110" dowav-api.herokuapp.com/:8080/api/historic/upload
+func getDocumentation(writer http.ResponseWriter, request *http.Request) {
+	url := "https://documenter.getpostman.com/view/8555555/SWDzgMa6?version=latest"
+	http.Redirect(writer, request, url, http.StatusSeeOther)
+}
+
 func uploadHistoricData(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
 
@@ -85,6 +89,27 @@ func getHistoricData(writer http.ResponseWriter, request *http.Request) {
 	sendResponse(res, writer)
 }
 
+func getWaterHistoricData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	connTime := time.Now().Add(time.Duration(-24) * time.Hour).Unix()
+
+	var res []WaterData
+	rows, err := database.Query("SELECT * FROM water WHERE time > " + strconv.FormatInt(connTime, 10) + " ORDER BY time ASC")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "Database failed to execute", http.StatusInternalServerError)
+		return
+	}
+	for rows.Next() {
+		var waterData WaterData
+		_ = rows.Scan(&waterData.Time, &waterData.Volume, &waterData.Tilt)
+		res = append(res, waterData)
+	}
+
+	sendResponse(res, writer)
+}
+
 // TEST: curl -d "zone=1&temperature=26&moisture=220&light=98" localhost:8080/api/live/upload
 func uploadLiveData(writer http.ResponseWriter, request *http.Request) {
 	printRequest(request)
@@ -143,16 +168,18 @@ func getLiveData(writer http.ResponseWriter, request *http.Request) {
 func uploadLocationData(writer http.ResponseWriter, request *http.Request) {
 	// Get data from request
 	_ = request.ParseForm()
-	time := toFloat(request.Form.Get("time"))
+	time := time.Now().Unix()
 	zone := toInt(request.Form.Get("zone"))
+	xCoordinate := toInt(request.Form.Get("xCoordinate"))
+	yCoordinate := toInt(request.Form.Get("yCoordinate"))
 
 	if zone < 0 {
 		http.Error(writer, "Zone can't be less than 0", http.StatusBadRequest)
 		return
 	}
 
-	statement, _ := database.Prepare("INSERT INTO location (time, zoneId) VALUES (?, ?)")
-	_, err := statement.Exec(time, zone)
+	statement, _ := database.Prepare("INSERT INTO location (zoneId, time, xCoordinate, yCoordinate) VALUES (?, ?, ?, ?)")
+	_, err := statement.Exec(zone, time, xCoordinate, yCoordinate)
 	if err != nil {
 		panic(err)
 	}
@@ -167,34 +194,33 @@ func getLocationData(writer http.ResponseWriter, request *http.Request) {
 	dataType := getMuxVariable("type", request)
 
 	var res interface{}
-	var now float64
-	var location float64
 
 	// Fetch and return live data
+	var live LocationData
 	if dataType == "live" {
 		// Scan db and save to var
 		rows, _ := database.Query("SELECT * FROM location ORDER BY time DESC LIMIT 1")
 		for rows.Next() {
-			_ = rows.Scan(&now, &location)
+			_ = rows.Scan(&live.ZoneId, &live.Time, &live.XCoordinate, &live.YCoordinate)
 		}
 		rows.Close()
-		res = ReadingData{now * 1000, location}
-
+		res = live
 	}
 
 	// Fetch and return historic data
+	var historic []LocationData
 	if dataType == "historic" {
 		timeRange := int(time.Now().Add(-time.Duration(time.Hour * 24)).Unix())
 
 		// Scan db and save to var
-		var data []ReadingData
 		rows, _ := database.Query("SELECT * FROM location WHERE time > " + toString(timeRange))
 		for rows.Next() {
-			_ = rows.Scan(&now, &location)
-			data = append(data, ReadingData{now * 1000, location})
+			var temp LocationData
+			_ = rows.Scan(&temp.ZoneId, &temp.Time, &temp.XCoordinate, &temp.YCoordinate)
+			historic = append(historic, temp)
 		}
 		rows.Close()
-		res = data
+		res = historic
 	}
 
 	sendResponse(res, writer)
@@ -269,6 +295,25 @@ func postQuestionTweet(writer http.ResponseWriter, request *http.Request) {
 	_, _ = writer.Write([]byte("Success"))
 }
 
+func getAllNotifications(w http.ResponseWriter, r *http.Request) {
+	printRequest(r)
+
+	var res []Notification
+
+	rows, err := database.Query("SELECT * FROM notification")
+	if err != nil {
+		http.Error(w, "Database query failed.", http.StatusInternalServerError)
+	}
+	for rows.Next() {
+		var notification Notification
+		_ = rows.Scan(&notification.Time, &notification.Message, &notification.Type)
+		res = append(res, notification)
+	}
+	rows.Close()
+
+	sendResponse(res, w)
+}
+
 func getNotificationsWs(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Get a request")
 	ch, errCh := upgrader.Upgrade(w, r, nil)
@@ -334,6 +379,7 @@ func pushNotification(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadWaterData(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
 	_ = request.ParseForm()
 	now := time.Now().Unix()
 	volume := request.Form.Get("volume")
@@ -346,8 +392,7 @@ func uploadWaterData(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, _ = writer.Write([]byte("Success"))
-	printRequest(request)
+	sendResponse(Message{"Success"}, writer)
 }
 
 func getWaterWs(writer http.ResponseWriter, request *http.Request) {
@@ -411,7 +456,6 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 
 	for _, p := range s {
 		if p.Zone != nil {
-			fmt.Println(p)
 			if *p.Zone > int64(len(*zones)) || *p.Zone < 0 {
 				http.Error(writer, "There is no such zone.", http.StatusBadRequest)
 				return
@@ -419,7 +463,7 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	statement, statementError := database.Prepare("Update plant SET shouldSendTweets=?, minTemperature=?, maxTemperature=?, minLight=?, maxLight=?, minMoisture=?, lastUpdate=? WHERE plant=?")
+	statement, statementError := database.Prepare("Update plant SET shouldSendTweets=?, minTemperature=?, maxTemperature=?, minLight=?, maxLight=?, minMoisture=?, bulbColor=?, bulbBrightness=?, lastUpdate=? WHERE plant=?")
 	updateStatement, updateStatError := database.Prepare("UPDATE zone SET plant=(SELECT id FROM plant WHERE plant=?) WHERE id=?")
 	if statementError != nil || updateStatError != nil {
 		fmt.Println(statementError)
@@ -429,7 +473,7 @@ func setPlantSetting(writer http.ResponseWriter, request *http.Request) {
 
 	for _, plant := range s {
 		var plantName = plant.Plant
-		_, err := statement.Exec(&plant.ShouldSendTweets, &plant.MinTemperature, &plant.MaxTemperature, &plant.MinLight, &plant.MaxLight, &plant.MinMoisture, &connTime, plantName)
+		_, err := statement.Exec(&plant.ShouldSendTweets, &plant.MinTemperature, &plant.MaxTemperature, &plant.MinLight, &plant.MaxLight, &plant.MinMoisture, &plant.BulbColor, &plant.BulbBrightness, &connTime, plantName)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(writer, "Database can't execute statement", http.StatusInternalServerError)
@@ -466,7 +510,7 @@ func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 
 	for {
 		var res []PlantSettings
-		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
+		rows, e := database.Query("SELECT zone.id, plant.plant, shouldSendTweets, minTemperature, maxTemperature, minLight,maxLight, minMoisture, bulbColor, bulbBrightness, lastUpdate FROM zone LEFT JOIN plant on zone.plant=plant.id WHERE lastUpdate > " + timeStr)
 		if e != nil {
 			fmt.Println(e)
 		}
@@ -474,7 +518,7 @@ func getPlantSettingWs(writer http.ResponseWriter, request *http.Request) {
 			var plantSettings PlantSettings
 			var zone sql.NullInt64
 
-			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture)
+			err := rows.Scan(&zone, &plantSettings.Plant, &plantSettings.ShouldSendTweets, &plantSettings.MinTemperature, &plantSettings.MaxTemperature, &plantSettings.MinLight, &plantSettings.MaxLight, &plantSettings.MinMoisture, &plantSettings.BulbColor, &plantSettings.BulbBrightness, &plantSettings.LastUpdate)
 			fmt.Println(res)
 			if err != nil {
 				fmt.Println(err)
@@ -562,4 +606,51 @@ func deletePlantSetting(writer http.ResponseWriter, request *http.Request) {
 	} else {
 		http.Error(writer, "There is no "+plantName+" plant.", http.StatusBadRequest)
 	}
+}
+
+func updatePlantHealth(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	// Get data from request
+	_ = request.ParseForm()
+	plant := getMuxVariable("plant", request)
+	now := time.Now().Unix()
+	soil := request.Form.Get("soil")
+	stem := request.Form.Get("stem")
+	leaf := request.Form.Get("leaf")
+
+	// Update database
+	statement, err := database.Prepare("UPDATE health SET time=?, soil=?, stem=?, leaf=? WHERE plant=?")
+	if err != nil {
+		http.Error(writer, "Database failed", http.StatusInternalServerError)
+		return
+	}
+	_, err = statement.Exec(now, soil, stem, leaf, plant)
+	if err != nil {
+		http.Error(writer, "Can't Execute SQL", http.StatusInternalServerError)
+		return
+	}
+
+	sendResponse(Message{"Success"}, writer)
+}
+
+func getPlantHealth(writer http.ResponseWriter, request *http.Request) {
+	printRequest(request)
+
+	// Fetch data from database
+	rows, err := database.Query("SELECT * FROM health")
+	if err != nil {
+		panic(err)
+	}
+
+	// Format data
+	var res []HealthData
+	for rows.Next() {
+		var data HealthData
+		_ = rows.Scan(&data.Id, &data.Plant, &data.Time, &data.Soil, &data.Stem, &data.Leaf)
+		res = append(res, data)
+	}
+	rows.Close()
+
+	sendResponse(res, writer)
 }

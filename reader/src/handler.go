@@ -5,46 +5,24 @@ import "fmt"
 func handleEnvironment(data string) {
 	formatted := formatEnvironmentData(data)
 	uploadLiveData(formatted)
-	checkEnvironmentTweet(formatted)
+	analyseEnvironmentData(formatted)
 }
 
 func handleLocation(data string) {
 	formatted := formatLocationData(data)
 	uploadLocationData(formatted)
-	checkLocationTweet(formatted)
+	analyseLocationData(formatted)
 }
 
 func handleWater(data string) {
 	formatted := formatWaterData(data)
 	uploadWaterData(formatted)
-	checkWaterTweet(formatted)
+	analyseWaterData(formatted)
 }
 
-func handleUserSetting(data Setting) {
-	fmt.Printf("Received new user setting of type %s with value of %s\n", data.Type, data.Value)
-
-	switch data.Type {
-	case "minTemperature":
-		minTemperature = toInt(data.Value)
-
-	case "minMoisture":
-		minMoisture = toInt(data.Value)
-
-	case "minLight":
-		minLight = toInt(data.Value)
-
-	case "maxTemperature":
-		maxTemperature = toInt(data.Value)
-
-	case "maxLight":
-		maxTemperature = toInt(data.Value)
-
-	case "shouldSendTweets":
-		if data.Value == "true" {
-			shouldSendTweets = true
-		} else if data.Value == "false" {
-			shouldSendTweets = false
-		}
-	case "trackObject":
-	}
+func handleSettingUpdate(setting ZoneSetting) {
+	fmt.Println("Changing hue settings")
+	zoneSettings[setting.Zone-1] = setting
+	changeColor(hueUserId, hueUrl, setting.BulbColor, setting.Zone)
+	changeBrightness(hueUserId, hueUrl, setting.BulbBrightness, setting.Zone)
 }

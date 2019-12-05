@@ -16,7 +16,6 @@ import (
 )
 
 var database *sql.DB
-
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -29,18 +28,116 @@ func main() {
 		port = "8080"
 	}
 
+	// Database setup
 	database, _ = sql.Open("sqlite3", "./database.db?_foreign_keys=on")
+	createTables()
+	setDefaultValues()
 
+	// Server routing
+	router := mux.NewRouter().StrictSlash(true)
+
+	// Historic handlers
+	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
+	router.HandleFunc("/api/historic/water", getWaterHistoricData).Methods("GET")
+	router.HandleFunc("/api/historic/{sensor}", getHistoricData).Methods("GET")
+
+	// Live handlers
+	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
+	router.HandleFunc("/api/live/{sensor}", getLiveData).Methods("GET")
+	router.HandleFunc("/api/location/upload", uploadLocationData).Methods("POST")
+	router.HandleFunc("/api/location/{type}", getLocationData).Methods("GET")
+	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
+	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
+
+	// Notification handlers
+	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
+	router.HandleFunc("/api/tweets", getTweets).Methods("GET")
+	router.HandleFunc("/api/tweet/question", postQuestionTweet).Methods("POST")
+	router.HandleFunc("/api/notifications", getNotificationsWs).Methods("GET")
+	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
+	router.HandleFunc("/api/notification/all", getAllNotifications).Methods("GET")
+
+	// Setting handlers
+	router.HandleFunc("/api/setting", setPlantSetting).Methods("POST")
+	router.HandleFunc("/api/setting/delete/{plantName}", deletePlantSetting).Methods("GET")
+	router.HandleFunc("/api/setting/create", createPlantSetting).Methods("POST")
+	router.HandleFunc("/api/setting", getPlantSettingWs).Methods("GET")
+	router.HandleFunc("/api/setting/all", getAllPlantsSettings).Methods("GET")
+
+	// Plant handlers
+	router.HandleFunc("/api/health/upload/{plant}", updatePlantHealth).Methods("POST")
+	router.HandleFunc("/api/health", getPlantHealth).Methods("GET")
+
+	// Misc handlers
+	router.HandleFunc("/api/docs", getDocumentation).Methods("GET")
+
+	log.Printf("Serving restful api on port %s...\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, router))
+}
+
+func setDefaultValues() {
+	// Clear the table from previous settings
+	_, _ = database.Exec("DELETE FROM zone")
+	statement, _ := database.Prepare("DELETE FROM plant")
+	_, _ = statement.Exec()
+
+	plants := []string{"Tomatoes", "Staff", "Cucumbers"}
+	values := []interface{}{"true", 18, 50, 20, 35, 225, "#fff", 254}
+	time := time.Now().Unix()
+
+	// Set each user setting
+	statement, _ = database.Prepare("INSERT INTO plant (plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, bulbColor, bulbBrightness, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	healthStatement, _ := database.Prepare("INSERT INTO health (id, plant, time, soil, stem, leaf) VALUES (?, ?, ?, ?, ?, ?)")
+	for i := range plants {
+		r, rErr := statement.Exec(plants[i], values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7], time)
+		if rErr != nil {
+			fmt.Println(rErr)
+		}
+		id, idErr := r.LastInsertId()
+		if idErr != nil {
+			fmt.Println(idErr)
+		}
+		st, stErr := database.Prepare("INSERT INTO zone(id,plant) VALUES (?, ?)")
+		if stErr != nil {
+			fmt.Println(stErr)
+		}
+		_, _ = st.Exec(i+1, id)
+
+		_, err := healthStatement.Exec(id, plants[i], time, "", "", "")
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+func printRequest(request *http.Request) {
+	log.Printf("Method: %s\n", request.Method)
+	log.Printf("URL: %s\n\n", request.URL)
+}
+
+func sendResponse(res interface{}, writer http.ResponseWriter) {
+	response, _ := json.Marshal(res)
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+	writer.Header().Set("Access-Control-Max-Age", "2592000")
+	_, err := writer.Write(response)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func createTables() {
 	// Create plant table in database
-	_, err := database.Exec("DROP TABLE plant")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT , plant TEXT UNIQUE, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER, lastUpdate REAL)")
-	_, err = statement.Exec()
+	_, _ = database.Exec("DROP TABLE plant")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS plant (id INTEGER PRIMARY KEY AUTOINCREMENT, plant TEXT UNIQUE, shouldSendTweets BOOLEAN, minTemperature INTEGER, minMoisture INTEGER, minLight INTEGER, maxTemperature INTEGER, maxLight INTEGER, bulbColor TEXT, bulbBrightness INTEGER, lastUpdate REAL)")
+	_, err := statement.Exec()
 	if err != nil {
 		panic(err)
 	}
 
 	// Create zones table in database
-	_, err = database.Exec("DROP TABLE zone")
+	_, _ = database.Exec("DROP TABLE zone")
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS zone (id INTEGER PRIMARY KEY, plant INTEGER REFERENCES plant(id) ON DELETE SET NULL)")
 	_, err = statement.Exec()
 	if err != nil {
@@ -62,7 +159,7 @@ func main() {
 	}
 
 	// Create location table in database
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS location (time REAL, zoneId INTEGER REFERENCES zone(id))")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS location (zoneId INTEGER REFERENCES zone(id), time REAL, xCoordinate, yCoordinate)")
 	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
@@ -89,73 +186,10 @@ func main() {
 		panic(err)
 	}
 
-	setDefault()
-
-	// Server routing
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/api/historic/upload", uploadHistoricData).Methods("POST")
-	router.HandleFunc("/api/historic/{sensor}", getHistoricData).Methods("GET")
-	router.HandleFunc("/api/live/upload", uploadLiveData).Methods("POST")
-	router.HandleFunc("/api/live/{sensor}", getLiveData).Methods("GET")
-	router.HandleFunc("/api/location/upload", uploadLocationData).Methods("POST")
-	router.HandleFunc("/api/location/{type}", getLocationData).Methods("GET")
-	router.HandleFunc("/api/tweet", postTweet).Methods("POST")
-	router.HandleFunc("/api/tweets", getTweets).Methods("GET")
-	router.HandleFunc("/api/tweet/question", postQuestionTweet).Methods("POST")
-	router.HandleFunc("/api/notifications", getNotificationsWs).Methods("GET")
-	router.HandleFunc("/api/notification", pushNotification).Methods("POST")
-	router.HandleFunc("/api/water/upload", uploadWaterData).Methods("POST")
-	router.HandleFunc("/api/water", getWaterWs).Methods("GET")
-	router.HandleFunc("/api/setting", setPlantSetting).Methods("POST")
-	router.HandleFunc("/api/setting/delete/{plantName}", deletePlantSetting).Methods("GET")
-	router.HandleFunc("/api/setting/create", createPlantSetting).Methods("POST")
-	router.HandleFunc("/api/setting", getPlantSettingWs).Methods("GET")
-	router.HandleFunc("/api/setting/all", getAllPlantsSettings).Methods("GET")
-
-	log.Printf("Serving restful on port %s...\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
-}
-
-func setDefault() {
-	// Clear the table from previous settings
-	database.Exec("DELETE FROM zone")
-	statement, _ := database.Prepare("DELETE FROM plant")
-	_, _ = statement.Exec()
-
-	plants := []string{"Tomatoes", "Staff", "Cucumbers"}
-	values := []interface{}{"true", 18, 50, 20, 35, 225}
-	time := time.Now().Unix()
-	// Set each user setting
-	statement, _ = database.Prepare("INSERT INTO plant ( plant, shouldSendTweets, minTemperature, minMoisture, minLight, maxTemperature, maxLight, lastUpdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-	for i := range plants {
-		r, rErr := statement.Exec(plants[i], values[0], values[1], values[2], values[3], values[4], values[5], time)
-		if rErr != nil {
-			fmt.Println(rErr)
-		}
-		id, idErr := r.LastInsertId()
-		if idErr != nil {
-			fmt.Println(idErr)
-		}
-		st, stErr := database.Prepare("INSERT INTO zone(id,plant) VALUES (?, ?)")
-		if stErr != nil {
-			fmt.Println(stErr)
-		}
-		st.Exec(i+1, id)
-	}
-}
-
-func printRequest(request *http.Request) {
-	log.Printf("Method: %s\n", request.Method)
-	log.Printf("URL: %s\n\n", request.URL)
-}
-
-func sendResponse(res interface{}, writer http.ResponseWriter) {
-	response, _ := json.Marshal(res)
-	writer.Header().Set("Content-Type", "application/json")
-	writer.Header().Set("Access-Control-Allow-Origin", "*")
-	writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
-	writer.Header().Set("Access-Control-Max-Age", "2592000")
-	_, err := writer.Write(response)
+	// Create health table in database
+	_, _ = database.Exec("DROP TABLE health")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS health (id INTEGER PRIMARY KEY, plant TEXT, time REAL, soil TEXT, stem TEXT, leaf TEXT)")
+	_, err = statement.Exec()
 	if err != nil {
 		panic(err)
 	}

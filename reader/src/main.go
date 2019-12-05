@@ -9,10 +9,14 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/tarm/serial"
 )
+
+var hueUserId string
+var hueUrl string
 
 func main() {
 	var err = godotenv.Load("../../.env")
@@ -26,9 +30,29 @@ func main() {
 
 	setDefaultSettings()
 
+	go attemptHueConnection()
 	go startReadingSerial(SERIAL_PORT_NAME, SERIAL_PORT_BAUD)
 	go listenUserSettings()
 	startScheduler()
+}
+
+func attemptHueConnection() {
+	ok := false
+	hueUrl = "localhost:9090"
+	hueUserId, ok = createHueId(hueUrl)
+	if !ok {
+		fmt.Println("Hue connection failed, re-attempting in 10 seconds")
+		time.Sleep(10 * time.Second)
+		attemptHueConnection()
+	}
+	fmt.Println("Success - connected to hue bridge")
+
+	// Set all lights to default
+	for i := 0; i < 3; i++ {
+		toggleLight(hueUserId, hueUrl, true, i+1)
+		changeColor(hueUserId, hueUrl, zoneSettings[i].BulbColor, i+1)
+		changeBrightness(hueUserId, hueUrl, i+1, zoneSettings[i].BulbBrightness)
+	}
 }
 
 func startReadingSerial(name, baud string) {
@@ -52,20 +76,19 @@ func startReadingSerial(name, baud string) {
 		data := listenToPort(sp)
 
 		if len(data) <= 0 {
-			log.Println("Unexpected data format read from serial port, skipping")
 			continue
 		}
-
 		// Check which handler should be used
 		if data[:1] == "R" {
 			logRawData(data, path)
 			handleEnvironment(data)
-		} else if data[:1] == "L" {
+		} else if data[:1] == "U" {
 			handleLocation(data)
 		} else if data[:1] == "W" {
 			handleWater(data)
 		} else {
-			log.Println("Unexpected data format read from serial port, skipping")
+			fmt.Println(data)
+			continue
 		}
 	}
 }
@@ -75,30 +98,19 @@ func setDefaultSettings() {
 	if err != nil {
 		log.Println("Failed to set default user settings")
 	}
-	defer res.Body.Close()
 
-	var settings []Setting
 	body, _ := ioutil.ReadAll(res.Body)
+	var settings []ZoneSetting
 	_ = json.Unmarshal(body, &settings)
+	res.Body.Close()
 
+	// Set settings only that have a zone
 	for _, s := range settings {
-		switch s.Type {
-		case "minTemperature":
-			minTemperature = toInt(s.Value)
-		case "minMoisture":
-			minMoisture = toInt(s.Value)
-		case "minLight":
-			minLight = toInt(s.Value)
-		case "maxTemperature":
-			maxTemperature = toInt(s.Value)
-		case "maxLight":
-			maxLight = toInt(s.Value)
-		case "shouldSendTweets":
-			shouldSendTweets = s.Value == "true"
+		if s.Zone != 0 {
+			zoneSettings = append(zoneSettings, s)
 		}
 	}
-
-	fmt.Println("Set default user settings to:", minTemperature, minMoisture, minLight, maxTemperature, maxLight, shouldSendTweets)
+	fmt.Println("Set default user settings to:", zoneSettings)
 }
 
 func listenToPort(sp *serial.Port) (b string) {
