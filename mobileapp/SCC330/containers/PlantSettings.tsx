@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Switch, StyleSheet, Text, ScrollView } from 'react-native';
-import { PlantSetting, GlobalState, PlantHealth } from '../types';
+import { PlantSetting, PlantHealth } from '../types';
 import theme from '../theme';
 import { Slider } from 'react-native-elements';
-import { useSelector } from 'react-redux';
 import { parseDate } from '../App';
 
 interface LabelledSliderProps {
@@ -78,9 +77,9 @@ const PlantSettings = ({ userSettings, lastUpdate, healthData, onSettingChange }
 
       {healthData && (healthData.soil || healthData.leaf || healthData.stem) ? (
         <View style={styles.healthContainer}>
-          {healthData.soil ? <Text style={styles.italicText}>{healthData.soil}</Text> : null}
-          {healthData.leaf ? <Text style={styles.italicText}>{healthData.leaf}</Text> : null}
-          {healthData.stem ? <Text style={styles.italicText}>{healthData.stem}</Text> : null}
+          {healthData.soil ? <Text style={styles.infoText}>{healthData.soil}</Text> : null}
+          {healthData.leaf ? <Text style={styles.infoText}>{healthData.leaf}</Text> : null}
+          {healthData.stem ? <Text style={styles.infoText}>{healthData.stem}</Text> : null}
         </View>
       ) : null}
 
@@ -163,7 +162,7 @@ const PlantSettings = ({ userSettings, lastUpdate, healthData, onSettingChange }
       />
 
       {lastUpdate ? (
-        <Text style={styles.italicText}>Last interacted with: {parseDate(new Date(lastUpdate * 1000), ', ')}</Text>
+        <Text style={{ ...styles.infoText, textAlign: 'left' }}>Last interacted with: {parseDate(new Date(lastUpdate * 1000), ', ')}</Text>
       ) : null}
 
     </ScrollView>
@@ -179,15 +178,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   healthContainer: {
-    paddingBottom: 5,
-    marginBottom: 5,
+    justifyContent: 'center',
+    paddingBottom: 7,
+    marginBottom: 7,
     borderBottomColor: 'grey',
     borderBottomWidth: 1,
   },
-  italicText: {
+  infoText: {
     fontStyle: 'italic',
     color: 'white',
     fontSize: 16,
+    textAlign: 'center',
   },
   sliderPairContainer: {
     flexDirection: 'row',

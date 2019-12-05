@@ -27,7 +27,7 @@ const MyPlants = () => {
   if (loading) {
     return (
       <>
-        <Text style={styles.loadingText}>Fetching latest plants from the server...</Text>
+        <Text style={styles.loadingText}>Fetching plants from the server...</Text>
         <Loader />
       </>
     );
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     color: theme.inactiveColor,
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 20,
   }
 });
 
