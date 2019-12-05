@@ -13,9 +13,12 @@ const TWEET_ENDPOINT = 'https://dowav-api.herokuapp.com/api/tweets';
 const mapDataToTweets = (data: Tweet[]) => {
   return data.map((tweet, i) => {
     const createdDate = new Date(tweet.created_at);
-    const text = tweet.text.split(' ').map(word => {
-      return <Text style={word.startsWith('#') ? styles.highlight : {}}>{word} </Text>;
-    });
+    const text = tweet.text.split(' ').map((word, i) => (
+      <Text
+        style={word.startsWith('#') ? styles.highlight : {}}
+        key={i}
+      >{word} </Text>
+    ));
 
     return (
       <View
@@ -44,7 +47,7 @@ const TwitterFeed = () => {
     if (data.length) {
       return (
         <>
-          <Text style={styles.title}>Last 20 tweets from <Text style={{ fontWeight: 'bold' }}>@dowavtech</Text></Text>
+          <Text style={styles.title}>Last 20 tweets from <Text style={{ fontWeight: 'bold' }}>@dowav1</Text></Text>
           <ScrollView style={styles.container}>
             {mapDataToTweets(data)}
           </ScrollView>
