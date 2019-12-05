@@ -126,7 +126,7 @@ func toggleLight(id, url string, state bool, bulbNum int) (status bool) {
 	return true
 }
 
-func changeBrightness(id, url string, bulbNum, brightness int) {
+func changeBrightness(id, url string, bulbNum, brightness int) (status bool) {
 
 	type Payload struct {
 		On  bool `json:"on"`  //true , false
@@ -136,24 +136,25 @@ func changeBrightness(id, url string, bulbNum, brightness int) {
 	data := Payload{true, brightness}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
-		return
+		return false
 	}
 	body := bytes.NewReader(payloadBytes)
 
 	req, err := http.NewRequest("PUT", "http://"+url+"/api/"+id+"/groups/"+toString(bulbNum)+"/state", body)
 	if err != nil {
-		return
+		return false
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return
+		return false
 	}
 	resp.Body.Close()
+	return true
 }
 
-func changeColor(id, url, hex string, bulbNum int) {
+func changeColor(id, url, hex string, bulbNum int) (status bool) {
 	h, s, v := hexToHsv(hex)
 	h = (h / 360) * 65535 // hue
 	s = s * 255           //saturation
@@ -172,21 +173,22 @@ func changeColor(id, url, hex string, bulbNum int) {
 	data := Payload{true, int(v), xy, int(h), int(s)}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
-		return
+		return false
 	}
 	body := bytes.NewReader(payloadBytes)
 
 	req, err := http.NewRequest("PUT", "http://"+url+"/api/"+id+"/lights/"+toString(bulbNum)+"/state", body)
 	if err != nil {
-		return
+		return false
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return
+		return false
 	}
 	resp.Body.Close()
+	return true
 }
 
 /*
