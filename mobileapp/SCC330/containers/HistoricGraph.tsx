@@ -23,6 +23,8 @@ const gridSvgStyle = {
 
 // Function which maps historic data to charts on a graph
 const mapDataToCharts = (data: HistoricData, zone: Zone) => {
+  let renderGrid = true;
+
   return data.map((zoneData: ZoneData | null, i) => {
     if (zoneData) {
       const chartData = zoneData.map(point => point.value);
@@ -31,19 +33,35 @@ const mapDataToCharts = (data: HistoricData, zone: Zone) => {
         strokeWidth: theme.graph.lineWidth,
       };
       
-      return (
-        <LineChart
-          data={chartData}
-          style={StyleSheet.absoluteFill}
-          svg={chartSvgStyle}
-          animate
-          yMin={Math.min(...chartData) - 0.2}
-          yMax={Math.max(...chartData) + 0.2}
-          key={i}
-        >
-          <Grid svg={gridSvgStyle} />
-        </LineChart>
-      );
+      if (chartData.length > 1 && renderGrid) {
+        renderGrid = false;
+
+        return (
+          <LineChart
+            data={chartData}
+            style={StyleSheet.absoluteFill}
+            svg={chartSvgStyle}
+            animate
+            yMin={Math.min(...chartData) - 0.2}
+            yMax={Math.max(...chartData) + 0.2}
+            key={i}
+          >
+            <Grid svg={gridSvgStyle} />
+          </LineChart>
+        );
+      } else {
+        return (
+          <LineChart
+            data={chartData}
+            style={StyleSheet.absoluteFill}
+            svg={chartSvgStyle}
+            animate
+            yMin={Math.min(...chartData) - 0.2}
+            yMax={Math.max(...chartData) + 0.2}
+            key={i}
+          />
+        );
+      }
     } else {
       return null;
     }
