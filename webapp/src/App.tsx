@@ -5,7 +5,7 @@ import NavigationContext from "./context/NavigationContext";
 import SettingsContext from "./context/SettingsContext";
 import { SettingsState } from "./types";
 import initialSettings, { cacheKey } from "./constants/SettingsContstants";
-import { SETTINGS } from "./constants/MenuOptionConstants";
+import { TEMPERATURE } from "./constants/MenuOptionConstants";
 
 function getSettings(): SettingsState {
   let cache = window.localStorage.getItem(cacheKey);
@@ -18,7 +18,7 @@ function getSettings(): SettingsState {
 }
 
 const App: React.FC = () => {
-  const [navigation, setNavigation] = useState(SETTINGS);
+  const [navigation, setNavigation] = useState(TEMPERATURE);
   const [settings, setSettings] = useState<SettingsState>(getSettings());
 
   return (

@@ -24,6 +24,7 @@ export type MultipleHistoryData = {
 export type HistoryData = IHistoryData[] | MultipleHistoryData;
 
 export type GraphConfiguration = {
+  yDomain?: [number, number];
   title?: string;
   name: string;
   id: string;
@@ -72,4 +73,16 @@ export type SettingsStateValue = {
 export type SettingsState = {
   [key: string]: SettingsStateValue;
   showNotifications: SettingsStateValue;
+};
+
+export type PlantSettings = {
+  [key: string]: any;
+  zone: number;
+  shouldSendTweets: boolean;
+  plant: string;
+  minTemperature: number;
+  maxTemperature: number;
+  minMoisture: number;
+  minLight: number;
+  maxLight: number;
 };

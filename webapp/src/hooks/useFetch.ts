@@ -25,6 +25,7 @@ type Options = {
   useCache: boolean;
   query: {
     endpoint: string;
+    host?: string;
     params?: Params;
   };
   refetch: number;
@@ -59,7 +60,7 @@ export default function useFetch(options: Options): UseFetchState {
       }, 10000);
       try {
         const response = await fetch(
-          `${FetchConstants.hostname}${
+          `${options.query.host || FetchConstants.hostname}${
             options.query.endpoint
           }${generateQueryString(options.query.params)}`
         );
