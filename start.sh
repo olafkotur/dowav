@@ -1,8 +1,9 @@
 #!/bin/bash
-cd server/
+cd server/src
 
 echo Creating Go binary
-go build
+go build -o ../
 
 echo Attempting to start the server
-./server
+cd ..
+./main
