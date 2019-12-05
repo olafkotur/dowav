@@ -3,6 +3,7 @@
 #include "math.h"
 
 MicroBit uBit;
+int userZone = 0;
 int zoneId = 0;
 int deviceID = 0;
 int userID = 0;
@@ -195,19 +196,21 @@ void onButtonEvent(MicroBitEvent e) {
   printzoneId();
 }
 
-void sendMessage(ManagedString msg, int messageIDInt, int print) {
-  ManagedString space(" ");
+//void sendMessage(ManagedString msg, int messageIDInt, int print) {
+void sendMessage(ManagedString msg) {
+  /*ManagedString space(" ");
   ManagedString myZone(zoneId);
   ManagedString messageID (messageIDInt);
   ManagedString colon(":");
-  ManagedString fullMessage = myZone + space + messageID + colon + msg;
-  if(zoneId != 1){
-    uBit.radio.datagram.send(fullMessage);
-  }
-  const char* temp = fullMessage.toCharArray();
-  if(print == 1){
+  ManagedString fullMessage = myZone + space + messageID + colon + msg;*/
+  //if(zoneId != 1){
+    uBit.radio.datagram.send(msg);
+  //}
+  //const char* temp = fullMessage.toCharArray();
+  const char* temp = msg.toCharArray();
+  //if(print == 1){
     uBit.serial.printf("%s\r\n", temp);
-  }
+  //}
   delete [] temp;
 }
 
@@ -219,11 +222,13 @@ void receiveMessage(MicroBitEvent) {
   for(int i=0;i<strlen(msg);i++){
     croppedMsg[i] = msg[i + 6];
   }
-  int origonialyFrom = ((int)msg[7] % 48);//https://stackoverflow.com/questions/5029840/convert-char-to-int-in-c-and-c
-  int recivedFrom = ((int)msg[0] % 48) - 3;
+  //int origonialyFrom = ((int)msg[7] % 48);//https://stackoverflow.com/questions/5029840/convert-char-to-int-in-c-and-c
+  //int recivedFrom = ((int)msg[0] % 48) - 3;
+  int origonialyFrom = ((int)msg[1] % 48);
+  int recivedFrom = ((int)msg[1] % 48);
 
   //Get message ID
-  char currentMessageIDChar[4];
+  /*char currentMessageIDChar[4];
   currentMessageIDChar[0] = msg[2];
   currentMessageIDChar[1] = msg[3];
   currentMessageIDChar[2] = msg[4];
@@ -237,21 +242,37 @@ void receiveMessage(MicroBitEvent) {
       seen = 1;
       break;
     }
-  }
-  if (seen == 0){
+  }*/
+  //if (seen == 0){
     if(zoneId == 2){//Is reciver
       uBit.serial.printf("%s\r\n", croppedMsg);
-    }
-    messegesSent[messagesSeenCounter] = currentMessageID;
+    } else if (zoneId == 1){
+      //Is user
+      if (msg[1] == userZone) {
+        signalStrength = uBit.radio.getRSSI();
+      }
+      if (uBit.radio.getRSSI() > signalStrength) {
+        signalStrength = uBit.radio.getRSSI();
+        userZone = recivedFrom;
+      }
+      ManagedString a("U2 ");
+      ManagedString b(msg[1]);
+      ManagedString toSend = a + b;
+      //ManagedString toSend(ManagedString("U2 ") + ManagedString(currentLocation));
+      //sendMessage(toSend,(rand() % 900) + 100,1);
+      sendMessage(toSend);
+
+    //}
+    /*messegesSent[messagesSeenCounter] = currentMessageID;
     messagesSeenCounter++;
     if(messagesSeenCounter == 10){
       messagesSeenCounter = 0;
-    }
+    }*/
   }
 
   // Receiver
   if(on == 1){
-    if (zoneId == 2) {
+    /*if (zoneId == 2) {
       // Change zone each time it changes
       if (msg[0] == 'U') {
         currentLocation = msg[7];
@@ -292,8 +313,8 @@ void receiveMessage(MicroBitEvent) {
                                                          ManagedString(currentY));
         sendMessage(toSend,(rand() % 900) + 100,1);
         }
-      }
-      int seenMessageBefore = 0;
+      }*/
+      /*int seenMessageBefore = 0;
       for (int i = 0;i < 10;i++){
         if(messagesSeen[i] == currentMessageID){
           seenMessageBefore = 1;
@@ -302,22 +323,22 @@ void receiveMessage(MicroBitEvent) {
       }
       if(seenMessageBefore == 0){
         //I have not seen this message before
+        //sendMessage(croppedMsg,currentMessageID,0);
+        sendMessage(croppedMsg);
         if (origonialyFrom != zoneId){
-        messagesSeen[messagesSeenCounter] = currentMessageID;
-        messagesSeenCounter++;
+          messagesSeen[messagesSeenCounter] = currentMessageID;
+          messagesSeenCounter++;
+        }
         if(messagesSeenCounter == 10){
           messagesSeenCounter = 0;
-        }
-          sendMessage(croppedMsg,currentMessageID,0);
         } else {
           //This message is for me
-          uBit.serial.print(msg);
-          }
-      } else {
+          uBit.serial.printf(msg);
+        }
       }
-    }
+    //}*/
   }
-  delete [] msg;
+  //delete [] msg;
 }
 
 int main() {
@@ -351,7 +372,8 @@ int main() {
                              ManagedString(moisture) + ManagedString(' ') +
                              ManagedString(light) + ManagedString(' ') +
                              ManagedString(waterLevel));
-        sendMessage(toSend,(rand() % 900) + 100,0);
+        //sendMessage(toSend,(rand() % 900) + 100,0);
+        sendMessage(toSend);
 
       //Reciver reading Serial data
       } else if (zoneId == 2){
@@ -373,7 +395,8 @@ int main() {
 
         ManagedString input = uBit.serial.readUntil(ManagedString("\r\n"),ASYNC);
         if(input.length()!=0){
-          sendMessage(input,(rand() % 900) + 100,1);
+          //sendMessage(input,(rand() % 900) + 100,1);
+          sendMessage(input);
           uBit.display.print(input);
         }
 
@@ -389,7 +412,8 @@ int main() {
                                                  ManagedString(accelerometerY) + ManagedString(' ') +
                                                  ManagedString(accelerometerZ) + ManagedString(' ') +
                                                  ManagedString(waterLevel));
-        sendMessage(toSend,(rand() % 900) + 100,0);
+        //sendMessage(toSend,(rand() % 900) + 100,0);
+        sendMessage(toSend);
       }
     }
     currentTime = currentTime + 1;
