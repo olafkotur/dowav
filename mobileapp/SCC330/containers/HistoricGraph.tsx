@@ -41,9 +41,7 @@ const mapDataToCharts = (data: HistoricData, zone: Zone) => {
           yMax={Math.max(...chartData) + 0.2}
           key={i}
         >
-          {i === 0 ? (
-            <Grid svg={gridSvgStyle} />
-          ) : null}
+          <Grid svg={gridSvgStyle} />
         </LineChart>
       );
     } else {
