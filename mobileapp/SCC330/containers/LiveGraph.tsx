@@ -26,24 +26,37 @@ const mapDataToCharts = (data: ZoneData[], zone: Zone) => {
     chartData[i] = data.map(zoneData => zoneData[zone ? (zone - 1) : i].value);
   }
 
+  let renderGrid = true;
   const charts = chartData.map((curData, i) => {
     const chartSvgStyle = {
       stroke: theme.graph.chartColors[zone ? (zone - 1) : i % 3],
       strokeWidth: theme.graph.lineWidth,
     };
 
-    return <LineChart
-      data={curData}
-      style={StyleSheet.absoluteFill}
-      svg={chartSvgStyle}
-      yMin={Math.min(...curData) - 1}
-      yMax={Math.max(...curData) + 1}
-      key={i}
-    >
-      {i === 0 ? (
+    if (curData.length > 1 && renderGrid) {
+      renderGrid = false;
+
+      return <LineChart
+        data={curData}
+        style={StyleSheet.absoluteFill}
+        svg={chartSvgStyle}
+        yMin={Math.min(...curData) - 1}
+        yMax={Math.max(...curData) + 1}
+        key={i}
+      >
         <Grid svg={gridSvgStyle} />
-      ) : null}
-    </LineChart>
+      </LineChart>
+    } else {
+      return <LineChart
+        data={curData}
+        style={StyleSheet.absoluteFill}
+        svg={chartSvgStyle}
+        yMin={Math.min(...curData) - 1}
+        yMax={Math.max(...curData) + 1}
+        key={i}
+      />
+    }
+    
   });
 
   return charts;
