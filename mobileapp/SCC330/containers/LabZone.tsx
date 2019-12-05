@@ -49,6 +49,7 @@ const updateGlobalSettings = (userSettings: PlantSetting[], plant: string, setLo
 
   if (newSetting[0]) {
     setLoading(true);
+    newSetting[0].bulbBrightness--;
 
     fetch(POST_SETTINGS_ENDPOINT, {
       method: 'POST',
