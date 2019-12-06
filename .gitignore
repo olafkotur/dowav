@@ -13,6 +13,8 @@ reader/logs/*
 
 restful/pkg
 restful/src/database.db
+restful/build
+restful/node_modules
 
 alexa/node_modules
 

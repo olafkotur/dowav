@@ -1,0 +1,19 @@
+{
+  "name": "restful",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "index.ts",
+  "scripts": {
+    "tsc": "tsc",
+    "start": "ts-node-dev --respawn --transpileOnly ./src/index.ts",
+    "build": "tsc && node ./build/index.js"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.2",
+    "express": "^4.17.1",
+    "typescript": "^3.7.3"
+  },
+  "devDependencies": {
+    "ts-node-dev": "^1.0.0-pre.44"
+  }
+}
