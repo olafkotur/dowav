@@ -42,13 +42,35 @@ export const MongoService = {
     });
   },
 
-  findAll: async (collection: string, query: any) => {
+  findMany: async (collection: string, query: any) => {
     return new Promise((resolve: any) => {
       database.collection(collection).find(query, (error: Error, res: any) => {
         if (error) {
           throw error;
         }
         resolve(res.toArray());
+      });
+    });
+  },
+
+  deleteOne: async (collection: string, query: any) => {
+    return new Promise((resolve: any) => {
+      database.collection(collection).deleteOne(query, (error: Error, res: any) => {
+        if (error) {
+          throw error;
+        }
+        resolve(res);
+      });
+    });
+  },
+
+  deleteMany: async (collection: string, query: any) => {
+    return new Promise((resolve: any) => {
+      database.collection(collection).deleteMany(query, (error: Error, res: any) => {
+        if (error) {
+          throw error;
+        }
+        resolve(res);
       });
     });
   },
