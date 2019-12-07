@@ -15,6 +15,7 @@ restful/pkg
 restful/src/database.db
 restful/build
 restful/node_modules
+restful/db
 
 alexa/node_modules
 
