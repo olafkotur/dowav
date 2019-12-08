@@ -4,6 +4,7 @@ const url = 'mongodb://localhost:27017/';
 let database: any = null;
 
 export const MongoService = {
+
   connect: () => new Promise((resolve: any) => {
     MongoClient.connect(url, { useUnifiedTopology: true }, async (error: Error, db: any) => {
       if (error) {

@@ -1,0 +1,1 @@
+export type LiveDataKeys = 'zoneId' | 'temperature' | 'moisture' | 'light';
