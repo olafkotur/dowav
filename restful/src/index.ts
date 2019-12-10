@@ -8,7 +8,7 @@ const app: express.Application = express();
 async function main() {
   await MongoService.connect();
 
-  // Live Handlers
+  // Live
   app.get('/api/live/:sensor', LiveHandler.getLiveSensor);
 
   app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

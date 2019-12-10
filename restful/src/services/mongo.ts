@@ -55,24 +55,18 @@ export const MongoService = {
   },
 
   deleteOne: async (collection: string, query: any) => {
-    return new Promise((resolve: any) => {
-      database.collection(collection).deleteOne(query, (error: Error, res: any) => {
-        if (error) {
-          throw error;
-        }
-        resolve(res);
-      });
+    database.collection(collection).deleteOne(query, (error: Error) => {
+      if (error) {
+        throw error;
+      }
     });
   },
 
   deleteMany: async (collection: string, query: any) => {
-    return new Promise((resolve: any) => {
-      database.collection(collection).deleteMany(query, (error: Error, res: any) => {
-        if (error) {
-          throw error;
-        }
-        resolve(res);
-      });
+    database.collection(collection).deleteMany(query, (error: Error) => {
+      if (error) {
+        throw error;
+      }
     });
   },
 }
